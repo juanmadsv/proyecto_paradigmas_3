@@ -1151,6 +1151,45 @@ main > section {
 }
 .banner .btn { margin-top: 1.7rem; }
 
+/* ============ SUMÁ TU COMPLEJO ============ */
+.join-panel {
+  max-width: 640px;
+  margin-inline: auto;
+  text-align: center;
+}
+.join-panel .eyebrow-line { justify-content: center; }
+.join-title {
+  margin-top: 1rem;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.1;
+  color: #fff;
+}
+.join-text {
+  margin: 1.1rem auto 0;
+  max-width: 52ch;
+  color: var(--page-fg-soft);
+}
+.join-perks {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 26px;
+  margin: 1.5rem 0 1.9rem;
+}
+.join-perks li {
+  position: relative;
+  padding-left: 1.4rem;
+  font-size: .92rem;
+  color: var(--page-fg);
+}
+.join-perks li::before {
+  content: "\2713";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
 /* ============ FOOTER ============ */
 .site-footer {
   background: linear-gradient(180deg, #0e1a14, #060d09);
