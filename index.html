@@ -1,0 +1,450 @@
+ <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CanchaYa · Reservá tu cancha en Posadas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="home.css">
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="images/logo-icon.png" alt="" aria-hidden="true">
+      <span class="logo-text">
+        <span class="logo-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        <small>Plataforma de reservas</small>
+      </span>
+    </a>
+    <nav class="site-nav" id="site-nav" aria-label="Navegación principal">
+      <a href="#" class="is-current">Inicio</a>
+      <a href="#complejos">Complejos</a>
+      <a href="#como-funciona">Cómo funciona</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#pagos">Pagos</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">
+      <span class="menu-icon"></span>
+    </button>
+  </header>
+
+  <main>
+
+    <!-- ============ HERO ============ -->
+    <section class="hero">
+      <p class="location-badge">
+        <span aria-hidden="true">📍</span> Posadas, Misiones · Plataforma de reservas
+      </p>
+
+      <h1 class="hero-title">
+        Encontrá y reservá tu <span class="hl">cancha de fútbol</span> en Posadas.
+      </h1>
+
+      <p class="hero-text">
+        Compará complejos, mirá horarios disponibles en tiempo real y confirmá tu
+        reserva con una seña online. Sin llamados, sin vueltas.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#buscar" class="btn btn-primary">Buscar cancha</a>
+        <a href="#complejos" class="btn btn-secondary">Ver complejos</a>
+      </div>
+
+    </section>
+
+
+
+    <!-- ============ BUSCADOR ============ -->
+    <section class="search-section" id="buscar">
+      <p class="badge">Disponibilidad online</p>
+      <h2 class="section-title">Elegí zona, tipo de cancha y horario.</h2>
+      <p class="section-text">
+        Filtrá los complejos de Posadas según lo que estás buscando. Si el horario
+        aparece libre, podés avanzar directo con la reserva.
+      </p>
+
+      <form class="search-form" id="form-buscar">
+
+        <div class="field">
+          <label for="zona">ZONA</label>
+          <select id="zona" name="zona">
+            <option value="">Toda la ciudad</option>
+            <option value="centro">Centro</option>
+            <option value="villa-sarita">Villa Sarita</option>
+            <option value="itaembe-mini">Itaembé Mini</option>
+            <option value="a3">A3 / Villa Cabello</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <span class="field-legend">TIPO DE CANCHA</span>
+          <div class="toggle-group" role="group" aria-label="Tipo de cancha">
+            <button type="button" class="toggle-option is-active" data-value="5">Fútbol 5</button>
+            <button type="button" class="toggle-option" data-value="7">Fútbol 7</button>
+            <button type="button" class="toggle-option" data-value="11">Fútbol 11</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="fecha">FECHA</label>
+          <input type="date" id="fecha" name="fecha" value="2026-08-30">
+        </div>
+
+        <div class="field">
+          <span class="field-legend">SERVICIOS (OPCIONAL)</span>
+          <div class="filter-chips" role="group" aria-label="Servicios">
+            <button type="button" class="filter-chip" data-serv="quincho">Quincho</button>
+            <button type="button" class="filter-chip" data-serv="parrilla">Parrilla</button>
+            <button type="button" class="filter-chip" data-serv="vestuarios">Vestuarios</button>
+            <button type="button" class="filter-chip" data-serv="estacionamiento">Estacionamiento</button>
+            <button type="button" class="filter-chip" data-uso="eventos">Para eventos</button>
+            <button type="button" class="filter-chip" data-uso="escuelita">Escuelita</button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+          <svg class="icon icon-search" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Buscar disponibilidad
+        </button>
+      </form>
+
+      <p class="search-status">
+        Mostrando complejos con <strong>Fútbol 5</strong> disponible para
+        <strong>domingo, 30 de agosto</strong>
+      </p>
+    </section>
+
+    <!-- ============ RESULTADOS: COMPLEJOS ============ -->
+    <section class="results-section" id="complejos">
+      <div class="results-header">
+        <h2 class="section-title">Complejos disponibles</h2>
+        <span class="badge badge-outline" id="results-count">6 complejos</span>
+      </div>
+      <p class="results-hint">Además de la cancha, algunos complejos ofrecen servicios como parrilla o quincho para sumar a tu reserva.</p>
+
+      <p class="no-results" id="no-results" hidden>
+        No hay complejos con esa combinación de zona y tipo de cancha. Probá cambiando los filtros.
+      </p>
+
+      <ul class="complex-list">
+
+        <li class="complex-card" data-zona="centro" data-tipo="5" data-servicios="parrilla quincho" data-usos="partido eventos">
+          <img class="complex-photo" src="images/terraza.jpg" alt="Logo de La Terraza">
+          <div class="complex-body">
+            <h3 class="complex-name">La Terraza</h3>
+            <p class="complex-meta">Fútbol 5</p>
+            <p class="complex-address">Av. Santa Catalina 4150
+            </p>
+            <div class="complex-services">
+              <span class="service-chip">Parrilla</span>
+              <span class="service-chip">Quincho</span>
+            </div>
+            <p class="complex-price">Desde $25.000 <span>la hora</span></p>
+            <span class="availability availability-open">2 horarios libres hoy</span>
+          </div>
+          <div class="complex-actions">
+            <a href="#" class="btn btn-primary btn-sm" data-action="horarios"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="12" r="2.6"/></svg> Reservar cancha</a>
+          </div>
+        </li>
+
+        <li class="complex-card" data-zona="a3" data-tipo="5" data-servicios="vestuarios" data-usos="partido">
+          <img class="complex-photo" src="images/rampla.jpg" alt="Logo de La Rampla">
+          <div class="complex-body">
+            <h3 class="complex-name">La Rampla</h3>
+            <p class="complex-meta">Fútbol 5</p>
+            <p class="complex-address">Pedro Morcillo 3326
+            </p>
+            <div class="complex-services">
+              <span class="service-chip">Vestuarios</span>
+            </div>
+            <p class="complex-price">Desde $27.000 <span>la hora</span></p>
+            <span class="availability availability-open">3 horarios libres hoy</span>
+          </div>
+          <a href="#" class="btn btn-primary btn-sm" data-action="horarios"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="12" r="2.6"/></svg> Reservar cancha</a>
+        </li>
+
+        <li class="complex-card" data-zona="itaembe-mini" data-tipo="5" data-servicios="parrilla estacionamiento" data-usos="partido">
+          <img class="complex-photo" src="images/napoles.jpg" alt="Logo de Nápoles">
+          <div class="complex-body">
+            <h3 class="complex-name">Nápoles</h3>
+            <p class="complex-meta">Fútbol 5</p>
+            <p class="complex-address">Av. Quaranta 2912
+            </p>
+            <div class="complex-services">
+              <span class="service-chip">Parrilla</span>
+              <span class="service-chip">Estacionamiento</span>
+            </div>
+            <p class="complex-price">Desde $28.000 <span>la hora</span></p>
+            <span class="availability availability-full">Sin horarios libres hoy</span>
+          </div>
+          <a href="#" class="btn btn-primary btn-sm" data-action="horarios"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="12" r="2.6"/></svg> Reservar cancha</a>
+        </li>
+
+        <li class="complex-card" data-zona="centro" data-tipo="5 7" data-servicios="quincho parrilla" data-usos="partido eventos escuelita">
+          <img class="complex-photo" src="images/establo.jpg" alt="Logo de El Establo Fútbol 5">
+          <div class="complex-body">
+            <h3 class="complex-name">El Establo Fútbol 5</h3>
+            <p class="complex-meta">Fútbol 5 · 7</p>
+            <p class="complex-address">Santa Cruz 3436
+            </p>
+            <div class="complex-services">
+              <span class="service-chip">Quincho</span>
+              <span class="service-chip">Parrilla</span>
+            </div>
+            <p class="complex-price">Desde $27.500 <span>la hora</span></p>
+            <span class="availability availability-open">2 horarios libres hoy</span>
+          </div>
+          <div class="complex-actions">
+            <a href="#" class="btn btn-primary btn-sm" data-action="horarios"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="12" r="2.6"/></svg> Reservar cancha</a>
+          </div>
+        </li>
+
+        <li class="complex-card" data-zona="itaembe-mini" data-tipo="5 7 11" data-servicios="estacionamiento" data-usos="partido escuelita torneos">
+          <img class="complex-photo" src="images/potrero.jpg" alt="Logo de El Potrero Fútbol 5">
+          <div class="complex-body">
+            <h3 class="complex-name">El Potrero Fútbol 5</h3>
+            <p class="complex-meta">Fútbol 5 · 7 · 11</p>
+            <p class="complex-address">3 de Febrero 2040
+            </p>
+            <div class="complex-services">
+              <span class="service-chip">Estacionamiento</span>
+            </div>
+            <p class="complex-price">Desde $25.000 <span>la hora</span></p>
+            <span class="availability availability-open">4 horarios libres hoy</span>
+          </div>
+          <a href="#" class="btn btn-primary btn-sm" data-action="horarios"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="12" r="2.6"/></svg> Reservar cancha</a>
+        </li>
+
+        <li class="complex-card" data-zona="villa-sarita" data-tipo="5" data-servicios="parrilla quincho vestuarios" data-usos="partido eventos">
+          <img class="complex-photo" src="images/olimpo.jpg" alt="Logo de El Olimpo Fútbol 5">
+          <div class="complex-body">
+            <h3 class="complex-name">El Olimpo Fútbol 5</h3>
+            <p class="complex-meta">Fútbol 5</p>
+            <p class="complex-address">Av. Tomás Guido 4025
+            </p>
+            <div class="complex-services">
+              <span class="service-chip">Parrilla</span>
+              <span class="service-chip">Quincho</span>
+              <span class="service-chip">Vestuarios</span>
+            </div>
+            <p class="complex-price">Desde $29.000 <span>la hora</span></p>
+            <span class="availability availability-full">Sin horarios libres hoy</span>
+          </div>
+          <div class="complex-actions">
+            <a href="#" class="btn btn-primary btn-sm" data-action="horarios"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="1"/><line x1="12" y1="5" x2="12" y2="19"/><circle cx="12" cy="12" r="2.6"/></svg> Reservar cancha</a>
+          </div>
+        </li>
+
+      </ul>
+    </section>
+
+    <!-- ============ CÓMO FUNCIONA ============ -->
+    <section class="howto-section" id="como-funciona">
+      <div class="howto-media" aria-hidden="true"></div>
+
+      <div class="howto-head">
+        <p class="eyebrow-line">Cómo funciona</p>
+        <h2 class="howto-title">Reservá tu cancha <span class="hl-lime">en 3 pasos.</span></h2>
+        <p class="howto-lead">Hacé tu reserva de forma rápida, fácil y segura desde cualquier dispositivo.</p>
+      </div>
+
+      <ol class="howto-steps">
+        <li class="howto-step">
+          <span class="howto-num">1</span>
+          <span class="howto-icon" aria-hidden="true">🔍</span>
+          <h3>Buscás</h3>
+          <p>Elegí zona, tipo de cancha y fecha. Ves los complejos con horarios libres.</p>
+        </li>
+        <li class="howto-step">
+          <span class="howto-num">2</span>
+          <span class="howto-icon" aria-hidden="true">📅</span>
+          <h3>Elegís turno y servicios</h3>
+          <p>Reservá el horario y sumá lo que necesites: parrilla, quincho, vestuarios.</p>
+        </li>
+        <li class="howto-step">
+          <span class="howto-num">3</span>
+          <span class="howto-icon" aria-hidden="true">✅</span>
+          <h3>Confirmás con una seña</h3>
+          <p>Pagás la seña online. El resto lo abonás en el complejo el día del partido.</p>
+        </li>
+      </ol>
+
+    </section>
+
+    <!-- ============ QUÉ MÁS PODÉS HACER (servicios) ============ -->
+    <section class="services-section" id="servicios">
+      <div class="services-intro">
+        <p class="eyebrow-line">Qué más podés hacer</p>
+        <h2 class="services-title">Además de la cancha, <span class="hl-lime">todo&nbsp;en&nbsp;un&nbsp;lugar.</span></h2>
+        <p class="services-lead">
+          Los mismos complejos sirven para festejar, entrenar o competir.
+          Lo agregás a tu reserva de cancha en el mismo paso.
+        </p>
+        <a href="#buscar" class="btn btn-lime">Buscar complejo <span class="arrow">→</span></a>
+      </div>
+
+      <ol class="services-steps">
+        <li class="step">
+          <span class="step-ico" aria-hidden="true">🎉</span>
+          <div class="step-body">
+            <h3>Eventos y cumpleaños</h3>
+            <p>Reservá la cancha y sumale quincho y parrilla para el festejo, en la misma reserva.</p>
+            <span class="step-rule"></span>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step-ico" aria-hidden="true">🏆</span>
+          <div class="step-body">
+            <h3>Torneos</h3>
+            <p>Competiciones organizadas para equipos que quieren jugar, competir y medirse.</p>
+            <span class="step-rule"></span>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step-ico" aria-hidden="true">⚽</span>
+          <div class="step-body">
+            <h3>Escuelita</h3>
+            <p>Entrenamientos y espacios formativos para aprender, mejorar y disfrutar el juego.</p>
+            <span class="step-rule"></span>
+          </div>
+        </li>
+
+        <li class="step">
+          <span class="step-ico" aria-hidden="true">🍖</span>
+          <div class="step-body">
+            <h3>Quincho y parrilla</h3>
+            <p>Servicios que ofrecen algunos complejos para quedarte después del partido.</p>
+            <span class="step-rule"></span>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- ============ MEDIOS DE PAGO ============ -->
+    <section class="pay-section" id="pagos">
+      <p class="badge">Medios de pago</p>
+      <h2 class="section-title">Pagá la seña online, el resto en el complejo.</h2>
+      <p class="section-text">
+        La seña asegura tu turno y se descuenta del total. El saldo lo abonás en el
+        lugar. Podés cancelar hasta 24 h antes y te devolvemos la seña.
+      </p>
+
+      <ul class="pay-methods">
+        <li class="pay-tile"><img class="pay-img" src="images/pago-mp.png" alt="Mercado Pago"></li>
+        <li class="pay-tile"><img class="pay-img" src="images/pago-tarjetas.png" alt="Visa y Mastercard, débito y crédito"></li>
+        <li class="pay-tile"><img class="pay-img" src="images/pago-transferencia.png" alt="Transferencia bancaria"></li>
+        <li class="pay-tile"><img class="pay-img" src="images/pago-efectivo.png" alt="Efectivo en el complejo"></li>
+      </ul>
+    </section>
+
+    <!-- ============ PREGUNTAS FRECUENTES ============ -->
+    <section class="faq-section" id="faq">
+      <p class="badge">Preguntas frecuentes</p>
+      <h2 class="section-title">Dudas comunes.</h2>
+
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>¿Cómo pago la reserva?</summary>
+          <p>Pagás una seña online con Mercado Pago, tarjeta o transferencia. El resto lo abonás en el complejo el día del partido.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿La seña se descuenta del total?</summary>
+          <p>Sí. La seña es parte del precio de la cancha, no un cargo extra.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Puedo cancelar?</summary>
+          <p>Sí, hasta 24 h antes del turno te reintegramos la seña. Pasado ese plazo no hay devolución.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Y si llueve?</summary>
+          <p>En canchas techadas se juega igual. En las descubiertas, si el complejo suspende, reprogramás sin costo o te devolvemos la seña.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Cómo sé que la reserva quedó confirmada?</summary>
+          <p>Apenas pagás la seña te llega una confirmación automática por WhatsApp y mail con el complejo, día, hora y servicios. El WhatsApp es solo para la confirmación, no hay atención por ese medio.</p>
+        </details>
+        <details class="faq-item">
+          <summary>¿Puedo reservar solo el quincho o la parrilla?</summary>
+          <p>Por ahora no. El quincho y la parrilla se agregan a una reserva de cancha, no se reservan por separado.</p>
+        </details>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer" id="contacto">
+    <div class="footer-inner">
+      <div class="footer-col footer-col--brand">
+        <a href="#" class="footer-brand-lockup">
+          <img class="footer-brand-icon" src="images/logo-icon.png" alt="" aria-hidden="true">
+          <span class="footer-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        </a>
+        <p class="footer-tagline">Reservá canchas de fútbol 5, 7 y 11 en los complejos de Posadas, Misiones.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="Instagram de CanchaYa"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>
+        </div>
+      </div>
+
+      <nav class="footer-col" aria-label="Navegación del pie de página">
+        <h3 class="footer-h">Navegación</h3>
+        <a href="#">Inicio</a>
+        <a href="#complejos">Complejos</a>
+        <a href="#como-funciona">Cómo funciona</a>
+        <a href="#servicios">Servicios</a>
+        <a href="#pagos">Pagos</a>
+        <a href="#faq">Preguntas frecuentes</a>
+      </nav>
+
+      <div class="footer-col">
+        <h3 class="footer-h">Contacto</h3>
+        <p><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> Posadas, Misiones</p>
+        <p><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"/><polyline points="22 6 12 13 2 6"/></svg> Mail: a confirmar</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 CanchaYa · Posadas, Misiones</p>
+    </div>
+  </footer>
+
+  <!-- ============ MODAL DE HORARIOS ============ -->
+  <dialog class="schedule-modal" id="modal-horarios" aria-labelledby="modal-title">
+    <div class="schedule-modal__inner">
+      <div class="schedule-modal__head">
+        <div>
+          <h3 class="schedule-modal__title" id="modal-title">Complejo</h3>
+          <p class="schedule-modal__sub" id="modal-sub">Fecha · Tipo</p>
+        </div>
+        <button type="button" class="schedule-modal__close" id="modal-close" aria-label="Cerrar">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="schedule-grid" id="modal-grid"></div>
+
+      <div class="schedule-extras" id="modal-extras" hidden>
+        <p class="schedule-extras__title" id="modal-extras-title">Sumá servicios</p>
+        <ul class="schedule-extras__list" id="modal-extras-list"></ul>
+      </div>
+
+      <div class="schedule-modal__foot">
+        <div>
+          <p class="schedule-modal__pick" id="modal-pick">Elegí un horario disponible</p>
+          <p class="schedule-total" id="modal-total"></p>
+        </div>
+        <button type="button" class="btn btn-primary" id="modal-reservar" disabled>Reservar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="home.js" defer></script>
+</body>
+</html>
