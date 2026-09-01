@@ -31,10 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("click", (e) => {
       if (!e.target.closest(".site-header")) setMenu(false);
     });
-
-    window.matchMedia("(min-width: 900px)").addEventListener("change", (ev) => {
-      if (ev.matches) setMenu(false);
-    });
   }
 
   /* ---------- Toggle: tipo de cancha ---------- */

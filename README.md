@@ -4,7 +4,7 @@ Plataforma web para reservar canchas de fútbol (5, 7 y 11) en los complejos de 
 Sitio estático: buscador de complejos, reserva de turno con seña online, servicios extra
 (parrilla, quincho, eventos, escuelita), medios de pago y preguntas frecuentes.
 
-## Estructura
+## Archivos
 
 | Archivo | Qué es |
 |---|---|
@@ -17,17 +17,19 @@ Sitio estático: buscador de complejos, reserva de turno con seña online, servi
 ## Cómo verlo
 
 No necesita servidor: abrí `index.html` en el navegador.
-Recomendado para desarrollar: extensión **Live Server** de VS Code (recarga sola al guardar).
-
+Para desarrollar: extensión **Live Server** de VS Code (recarga sola al guardar).
 Necesita internet para las tipografías (Google Fonts: Chakra Petch e Inter).
+
+Publicado con GitHub Pages en: https://angelinaalonso2006-collab.github.io/canchaya/
 
 ## Trabajar en equipo
 
 ```bash
-git clone <URL-del-repo>
-cd canchaYa
+git clone https://github.com/angelinaalonso2006-collab/canchaya.git
+cd canchaya
+git pull                       # traer lo ultimo antes de empezar
 # editar index.html / home.css / home.js
 git add -A
-git commit -m "descripción del cambio"
+git commit -m "que cambie"
 git push
 ```
