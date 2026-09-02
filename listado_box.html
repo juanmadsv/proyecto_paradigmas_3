@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CanchaYa · Complejos (tarjetas)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="estilos.css">
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="images/logo-icon.png" alt="" aria-hidden="true">
+      <span class="logo-text">
+        <span class="logo-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        <small>Plataforma de reservas</small>
+      </span>
+    </a>
+    <nav class="site-nav" id="site-nav" aria-label="Navegación principal">
+      <a href="index.html">Inicio</a>
+      <a href="listado_tabla.html">Tabla</a>
+      <a href="listado_box.html" class="is-current">Tarjetas</a>
+      <a href="detalle.html">Ficha de complejo</a>
+      <a href="comprar.html">Reservar</a>
+    </nav>
+    <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">
+      <span class="menu-icon"></span>
+    </button>
+  </header>
+
+  <main>
+
+    <section class="list-section">
+      <p class="badge">Listado</p>
+      <h2 class="section-title">Complejos en forma de tarjetas.</h2>
+      <p class="section-text">
+        Los mismos complejos que en la tabla, mostrados en tarjetas. Cada tarjeta
+        lleva a la ficha del complejo.
+      </p>
+
+      <ul class="complex-list">
+
+        <li class="complex-card">
+          <img class="complex-photo" src="images/terraza.jpg" alt="Logo de La Terraza">
+          <div class="complex-body">
+            <h3 class="complex-name">La Terraza</h3>
+            <p class="complex-meta">Fútbol 5</p>
+            <p class="complex-address">Av. Santa Catalina 4150</p>
+            <div class="complex-services">
+              <span class="service-chip">Parrilla</span>
+              <span class="service-chip">Quincho</span>
+            </div>
+            <p class="complex-price">Desde $25.000 <span>la hora</span></p>
+          </div>
+          <a href="detalle.html" class="btn btn-primary btn-sm">Ver ficha</a>
+        </li>
+
+        <li class="complex-card">
+          <img class="complex-photo" src="images/rampla.jpg" alt="Logo de La Rampla">
+          <div class="complex-body">
+            <h3 class="complex-name">La Rampla</h3>
+            <p class="complex-meta">Fútbol 5</p>
+            <p class="complex-address">Pedro Morcillo 3326</p>
+            <div class="complex-services">
+              <span class="service-chip">Vestuarios</span>
+            </div>
+            <p class="complex-price">Desde $27.000 <span>la hora</span></p>
+          </div>
+          <a href="detalle.html" class="btn btn-primary btn-sm">Ver ficha</a>
+        </li>
+
+        <li class="complex-card">
+          <img class="complex-photo" src="images/napoles.jpg" alt="Logo de Nápoles">
+          <div class="complex-body">
+            <h3 class="complex-name">Nápoles</h3>
+            <p class="complex-meta">Fútbol 5</p>
+            <p class="complex-address">Av. Quaranta 2912</p>
+            <div class="complex-services">
+              <span class="service-chip">Parrilla</span>
+              <span class="service-chip">Estacionamiento</span>
+            </div>
+            <p class="complex-price">Desde $28.000 <span>la hora</span></p>
+          </div>
+          <a href="detalle.html" class="btn btn-primary btn-sm">Ver ficha</a>
+        </li>
+
+        <li class="complex-card">
+          <img class="complex-photo" src="images/establo.jpg" alt="Logo de El Establo Fútbol 5">
+          <div class="complex-body">
+            <h3 class="complex-name">El Establo Fútbol 5</h3>
+            <p class="complex-meta">Fútbol 5 · 7</p>
+            <p class="complex-address">Santa Cruz 3436</p>
+            <div class="complex-services">
+              <span class="service-chip">Quincho</span>
+              <span class="service-chip">Parrilla</span>
+            </div>
+            <p class="complex-price">Desde $27.500 <span>la hora</span></p>
+          </div>
+          <a href="detalle.html" class="btn btn-primary btn-sm">Ver ficha</a>
+        </li>
+
+        <li class="complex-card">
+          <img class="complex-photo" src="images/potrero.jpg" alt="Logo de El Potrero Fútbol 5">
+          <div class="complex-body">
+            <h3 class="complex-name">El Potrero Fútbol 5</h3>
+            <p class="complex-meta">Fútbol 5 · 7 · 11</p>
+            <p class="complex-address">3 de Febrero 2040</p>
+            <div class="complex-services">
+              <span class="service-chip">Estacionamiento</span>
+            </div>
+            <p class="complex-price">Desde $25.000 <span>la hora</span></p>
+          </div>
+          <a href="detalle.html" class="btn btn-primary btn-sm">Ver ficha</a>
+        </li>
+
+        <li class="complex-card">
+          <img class="complex-photo" src="images/olimpo.jpg" alt="Logo de El Olimpo Fútbol 5">
+          <div class="complex-body">
+            <h3 class="complex-name">El Olimpo Fútbol 5</h3>
+            <p class="complex-meta">Fútbol 5</p>
+            <p class="complex-address">Av. Tomás Guido 4025</p>
+            <div class="complex-services">
+              <span class="service-chip">Parrilla</span>
+              <span class="service-chip">Quincho</span>
+              <span class="service-chip">Vestuarios</span>
+            </div>
+            <p class="complex-price">Desde $29.000 <span>la hora</span></p>
+          </div>
+          <a href="detalle.html" class="btn btn-primary btn-sm">Ver ficha</a>
+        </li>
+
+      </ul>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer" id="contacto">
+    <div class="footer-inner">
+      <div class="footer-col footer-col--brand">
+        <a href="index.html" class="footer-brand-lockup">
+          <img class="footer-brand-icon" src="images/logo-icon.png" alt="" aria-hidden="true">
+          <span class="footer-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        </a>
+        <p class="footer-tagline">Reservá canchas de fútbol 5, 7 y 11 en los complejos de Posadas, Misiones.</p>
+      </div>
+
+      <nav class="footer-col" aria-label="Navegación del pie de página">
+        <h3 class="footer-h">Navegación</h3>
+        <a href="index.html">Inicio</a>
+        <a href="listado_tabla.html">Tabla</a>
+        <a href="listado_box.html">Tarjetas</a>
+        <a href="detalle.html">Ficha de complejo</a>
+        <a href="comprar.html">Reservar</a>
+      </nav>
+
+      <div class="footer-col">
+        <h3 class="footer-h">Contacto</h3>
+        <p>Posadas, Misiones</p>
+        <p>Mail: a confirmar</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 CanchaYa · Posadas, Misiones</p>
+    </div>
+  </footer>
+
+</body>
+</html>

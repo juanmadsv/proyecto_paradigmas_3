@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CanchaYa · Reservar</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="estilos.css">
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="images/logo-icon.png" alt="" aria-hidden="true">
+      <span class="logo-text">
+        <span class="logo-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        <small>Plataforma de reservas</small>
+      </span>
+    </a>
+    <nav class="site-nav" id="site-nav" aria-label="Navegación principal">
+      <a href="index.html">Inicio</a>
+      <a href="listado_tabla.html">Tabla</a>
+      <a href="listado_box.html">Tarjetas</a>
+      <a href="detalle.html">Ficha de complejo</a>
+      <a href="comprar.html" class="is-current">Reservar</a>
+    </nav>
+    <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">
+      <span class="menu-icon"></span>
+    </button>
+  </header>
+
+  <main>
+
+    <section class="comprar-section">
+      <p class="badge">Reservar</p>
+      <h2 class="section-title" id="rv-titulo">Reservá tu cancha</h2>
+      <p class="section-text" id="rv-desc">
+        Elegí un complejo (o entrá desde "Complejos disponibles") y completá tus
+        datos. Podés sumar servicios y la seña se calcula sola.
+      </p>
+
+      <form class="form-compra" action="#" method="post">
+
+        <!-- 1. Qué complejo se reserva -->
+        <div class="field">
+          <label for="complejo">Complejo a reservar</label>
+          <select id="complejo" name="complejo">
+            <option value="terraza">La Terraza — Fútbol 5 — $25.000</option>
+            <option value="rampla">La Rampla — Fútbol 5 — $27.000</option>
+            <option value="napoles">Nápoles — Fútbol 5 — $28.000</option>
+            <option value="establo">El Establo Fútbol 5 — Fútbol 5 y 7 — $27.500</option>
+            <option value="potrero">El Potrero Fútbol 5 — Fútbol 5, 7 y 11 — $25.000</option>
+            <option value="olimpo">El Olimpo Fútbol 5 — Fútbol 5 — $29.000</option>
+          </select>
+        </div>
+
+        <!-- Servicios del complejo elegido (los completa main.js) -->
+        <div class="field" id="rv-serv-box" hidden>
+          <span class="field-legend">Servicios para agregar</span>
+          <ul class="check-list" id="rv-serv"></ul>
+        </div>
+
+        <!-- 2. Datos del cliente -->
+        <div class="field">
+          <label for="nombre">Nombre del cliente</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Nombre y apellido">
+        </div>
+
+        <div class="field">
+          <label for="telefono">Teléfono</label>
+          <input type="tel" id="telefono" name="telefono" placeholder="376 000000">
+        </div>
+
+        <div class="field">
+          <label for="email">Gmail</label>
+          <input type="email" id="email" name="email" placeholder="nombre@gmail.com">
+        </div>
+
+        <div class="field">
+          <label for="direccion">Dirección</label>
+          <input type="text" id="direccion" name="direccion" placeholder="Calle y número">
+        </div>
+
+        <!-- 3. Pago -->
+        <div class="field">
+          <label for="pago">Tipo de pago</label>
+          <select id="pago" name="pago">
+            <option value="debito">Tarjeta de débito</option>
+            <option value="credito">Tarjeta de crédito</option>
+            <option value="mercadopago">Mercado Pago</option>
+            <option value="personalpay">Personal Pay</option>
+            <option value="naranjax">Naranja X</option>
+            <option value="uala">Ualá</option>
+          </select>
+        </div>
+
+        <p class="rv-total" id="rv-total"></p>
+
+        <button type="submit" class="btn btn-primary btn-block">Confirmar reserva</button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer" id="contacto">
+    <div class="footer-inner">
+      <div class="footer-col footer-col--brand">
+        <a href="index.html" class="footer-brand-lockup">
+          <img class="footer-brand-icon" src="images/logo-icon.png" alt="" aria-hidden="true">
+          <span class="footer-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        </a>
+        <p class="footer-tagline">Reservá canchas de fútbol 5, 7 y 11 en los complejos de Posadas, Misiones.</p>
+      </div>
+
+      <nav class="footer-col" aria-label="Navegación del pie de página">
+        <h3 class="footer-h">Navegación</h3>
+        <a href="index.html">Inicio</a>
+        <a href="listado_tabla.html">Tabla</a>
+        <a href="listado_box.html">Tarjetas</a>
+        <a href="detalle.html">Ficha de complejo</a>
+        <a href="comprar.html">Reservar</a>
+      </nav>
+
+      <div class="footer-col">
+        <h3 class="footer-h">Contacto</h3>
+        <p>Posadas, Misiones</p>
+        <p>Mail: a confirmar</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 CanchaYa · Posadas, Misiones</p>
+    </div>
+  </footer>
+
+</body>
+</html>

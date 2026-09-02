@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CanchaYa · Complejos (tabla)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="estilos.css">
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="images/logo-icon.png" alt="" aria-hidden="true">
+      <span class="logo-text">
+        <span class="logo-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        <small>Plataforma de reservas</small>
+      </span>
+    </a>
+    <nav class="site-nav" id="site-nav" aria-label="Navegación principal">
+      <a href="index.html">Inicio</a>
+      <a href="listado_tabla.html" class="is-current">Tabla</a>
+      <a href="listado_box.html">Tarjetas</a>
+      <a href="detalle.html">Ficha de complejo</a>
+      <a href="comprar.html">Reservar</a>
+    </nav>
+    <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">
+      <span class="menu-icon"></span>
+    </button>
+  </header>
+
+  <main>
+
+    <section class="list-section">
+      <p class="badge">Listado</p>
+      <h2 class="section-title">Complejos en forma de tabla.</h2>
+      <p class="section-text">
+        Todos los complejos de Posadas con su zona, tipo de cancha, servicios y
+        precio. Tocá "Ver ficha" para abrir el detalle de un complejo.
+      </p>
+
+      <div class="tabla-wrap">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Complejo</th>
+            <th>Zona</th>
+            <th>Cancha</th>
+            <th>Servicios</th>
+            <th>Precio por hora</th>
+            <th>Ficha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>La Terraza</td>
+            <td>Centro</td>
+            <td>Fútbol 5</td>
+            <td>Parrilla, Quincho</td>
+            <td>$25.000</td>
+            <td><a href="detalle.html">Ver ficha</a></td>
+          </tr>
+          <tr>
+            <td>La Rampla</td>
+            <td>Villa Cabello</td>
+            <td>Fútbol 5</td>
+            <td>Vestuarios</td>
+            <td>$27.000</td>
+            <td><a href="detalle.html">Ver ficha</a></td>
+          </tr>
+          <tr>
+            <td>Nápoles</td>
+            <td>Itaembé Miní</td>
+            <td>Fútbol 5</td>
+            <td>Parrilla, Estacionamiento</td>
+            <td>$28.000</td>
+            <td><a href="detalle.html">Ver ficha</a></td>
+          </tr>
+          <tr>
+            <td>El Establo Fútbol 5</td>
+            <td>Centro</td>
+            <td>Fútbol 5 · 7</td>
+            <td>Quincho, Parrilla</td>
+            <td>$27.500</td>
+            <td><a href="detalle.html">Ver ficha</a></td>
+          </tr>
+          <tr>
+            <td>El Potrero Fútbol 5</td>
+            <td>Itaembé Miní</td>
+            <td>Fútbol 5 · 7 · 11</td>
+            <td>Estacionamiento</td>
+            <td>$25.000</td>
+            <td><a href="detalle.html">Ver ficha</a></td>
+          </tr>
+          <tr>
+            <td>El Olimpo Fútbol 5</td>
+            <td>Villa Sarita</td>
+            <td>Fútbol 5</td>
+            <td>Parrilla, Quincho, Vestuarios</td>
+            <td>$29.000</td>
+            <td><a href="detalle.html">Ver ficha</a></td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer" id="contacto">
+    <div class="footer-inner">
+      <div class="footer-col footer-col--brand">
+        <a href="index.html" class="footer-brand-lockup">
+          <img class="footer-brand-icon" src="images/logo-icon.png" alt="" aria-hidden="true">
+          <span class="footer-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        </a>
+        <p class="footer-tagline">Reservá canchas de fútbol 5, 7 y 11 en los complejos de Posadas, Misiones.</p>
+      </div>
+
+      <nav class="footer-col" aria-label="Navegación del pie de página">
+        <h3 class="footer-h">Navegación</h3>
+        <a href="index.html">Inicio</a>
+        <a href="listado_tabla.html">Tabla</a>
+        <a href="listado_box.html">Tarjetas</a>
+        <a href="detalle.html">Ficha de complejo</a>
+        <a href="comprar.html">Reservar</a>
+      </nav>
+
+      <div class="footer-col">
+        <h3 class="footer-h">Contacto</h3>
+        <p>Posadas, Misiones</p>
+        <p>Mail: a confirmar</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 CanchaYa · Posadas, Misiones</p>
+    </div>
+  </footer>
+
+</body>
+</html>

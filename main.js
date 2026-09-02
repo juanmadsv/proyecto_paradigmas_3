@@ -1,6 +1,6 @@
 /* =========================================================
-   CanchaYa · home.js
-   Interacciones de la home: menú, tipo de cancha, buscador y horarios
+   CanchaYa · main.js
+   Interacciones: menu, buscador y formulario de reserva
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -178,143 +178,73 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ---------- Modal de reserva (horarios + servicios) ---------- */
-  const modal       = document.getElementById("modal-horarios");
-  const modalTitle  = document.getElementById("modal-title");
-  const modalSub    = document.getElementById("modal-sub");
-  const modalGrid   = document.getElementById("modal-grid");
-  const modalPick   = document.getElementById("modal-pick");
-  const modalReserv = document.getElementById("modal-reservar");
-  const modalClose  = document.getElementById("modal-close");
-  const extrasBox   = document.getElementById("modal-extras");
-  const extrasTitle = document.getElementById("modal-extras-title");
-  const extrasList  = document.getElementById("modal-extras-list");
-  const totalEl     = document.getElementById("modal-total");
+  /* ---------- Formulario de reserva (comprar.html) ----------
+     Desde "Complejos disponibles" el botón lleva a comprar.html?c=terraza.
+     Muestra solo ese complejo, su descripcion, sus servicios y el total. */
+  const selComplejo = document.getElementById("complejo");
 
-  const HORARIOS = ["18:00", "19:00", "20:00", "21:00", "22:00", "23:00"];
+  if (selComplejo) {
+    const DATOS = {
+      terraza: { nombre: "La Terraza", precio: 25000, servicios: ["parrilla", "quincho"],
+        desc: "La Terraza — Fútbol 5, Av. Santa Catalina 4150. Cancha de césped sintético con iluminación para jugar de noche. Tiene parrilla y quincho para quedarse después del partido." },
+      rampla: { nombre: "La Rampla", precio: 27000, servicios: ["vestuarios"],
+        desc: "La Rampla — Fútbol 5, Pedro Morcillo 3326. Cancha techada con vestuarios. Ideal para partidos entre amigos sin depender del clima." },
+      napoles: { nombre: "Nápoles", precio: 28000, servicios: ["parrilla", "estacionamiento"],
+        desc: "Nápoles — Fútbol 5, Av. Quaranta 2912. Cancha con parrilla y estacionamiento propio. Fácil de llegar." },
+      establo: { nombre: "El Establo Fútbol 5", precio: 27500, servicios: ["quincho", "parrilla"],
+        desc: "El Establo — Fútbol 5 y 7, Santa Cruz 3436. Complejo con quincho y parrilla. Sirve para partidos y para festejar cumpleaños." },
+      potrero: { nombre: "El Potrero Fútbol 5", precio: 25000, servicios: ["estacionamiento"],
+        desc: "El Potrero — Fútbol 5, 7 y 11, 3 de Febrero 2040. Complejo grande con estacionamiento. Se usa también para escuelita y torneos." },
+      olimpo: { nombre: "El Olimpo Fútbol 5", precio: 29000, servicios: ["parrilla", "quincho", "vestuarios"],
+        desc: "El Olimpo — Fútbol 5, Av. Tomás Guido 4025. Cancha con parrilla, quincho y vestuarios. El combo completo para el after." }
+    };
+    const PRECIO_SERV = { parrilla: 3000, quincho: 8000, vestuarios: 0, estacionamiento: 0 };
+    const NOMBRE_SERV = { parrilla: "Parrilla", quincho: "Quincho", vestuarios: "Vestuarios", estacionamiento: "Estacionamiento" };
+    const pesos = (n) => "$" + n.toLocaleString("es-AR");
 
-  const PRECIO_SERVICIO = { parrilla: 3000, quincho: 8000, vestuarios: 0, estacionamiento: 0 };
-  const LABEL_SERVICIO  = { parrilla: "Parrilla", quincho: "Quincho", vestuarios: "Vestuarios", estacionamiento: "Estacionamiento" };
-  const pesos = (n) => "$" + n.toLocaleString("es-AR");
+    const descEl  = document.getElementById("rv-desc");
+    const tituloEl = document.getElementById("rv-titulo");
+    const servBox = document.getElementById("rv-serv-box");
+    const servList = document.getElementById("rv-serv");
+    const totalEl = document.getElementById("rv-total");
 
-  const hash = (str) => {
-    let h = 0;
-    for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) >>> 0;
-    return h;
-  };
+    const calcularTotal = (base) => {
+      let extra = 0;
+      servList.querySelectorAll("input:checked").forEach((c) => { extra += Number(c.dataset.precio); });
+      totalEl.textContent = extra
+        ? `Total: ${pesos(base + extra)}  (${pesos(base)} cancha + ${pesos(extra)} servicios)`
+        : `Total: ${pesos(base)}  la hora`;
+    };
 
-  const horariosDe = (card) => {
-    const badge = card.querySelector(".availability");
-    const lleno = badge?.classList.contains("availability-full");
-    const n = badge?.textContent.match(/\d+/);
-    let libres = lleno ? 0 : (n ? Number(n[0]) : 2);
-    libres = Math.min(libres, HORARIOS.length);
-    const inicio = hash(card.querySelector(".complex-name").textContent.trim()) % HORARIOS.length;
-    const setLibres = new Set();
-    for (let k = 0; k < libres; k++) setLibres.add((inicio + k * 2) % HORARIOS.length);
-    return HORARIOS.map((hora, i) => ({ hora, libre: setLibres.has(i) }));
-  };
+    const mostrarComplejo = (clave) => {
+      const c = DATOS[clave];
+      if (!c) return;
+      tituloEl.textContent = "Reservar " + c.nombre;
+      descEl.textContent = c.desc;
 
-  let turnoElegido = null;
-  let precioBase = 0;
+      servList.innerHTML = "";
+      if (c.servicios.length) {
+        servBox.hidden = false;
+        c.servicios.forEach((s) => {
+          const p = PRECIO_SERV[s] || 0;
+          const li = document.createElement("li");
+          li.innerHTML = `<label><input type="checkbox" name="servicio" value="${s}" data-precio="${p}"> ` +
+            `${NOMBRE_SERV[s]} — ${p ? "+" + pesos(p) : "incluido"}</label>`;
+          li.querySelector("input").addEventListener("change", () => calcularTotal(c.precio));
+          servList.appendChild(li);
+        });
+      } else {
+        servBox.hidden = true;
+      }
+      calcularTotal(c.precio);
+    };
 
-  const extrasSeleccionados = () => [...extrasList.querySelectorAll("input:checked")];
-  const totalExtra = () => extrasSeleccionados().reduce((s, c) => s + Number(c.dataset.precio), 0);
+    // Si viene ?c=terraza, dejar ese elegido
+    const desdeUrl = new URLSearchParams(window.location.search).get("c");
+    if (desdeUrl && DATOS[desdeUrl]) selComplejo.value = desdeUrl;
 
-  const actualizarTotal = () => {
-    const extra = totalExtra();
-    const total = precioBase + extra;
-    totalEl.innerHTML = extra
-      ? `Total: <strong>${pesos(total)}</strong> <span>(${pesos(precioBase)} cancha + ${pesos(extra)} servicios)</span>`
-      : `Total: <strong>${pesos(total)}</strong> <span>la hora</span>`;
-  };
-
-  const abrirModal = (card) => {
-    const nombre    = card.querySelector(".complex-name").textContent.trim();
-    const fecha     = document.getElementById("fecha").value;
-    const servicios = (card.dataset.servicios || "").split(" ").filter(Boolean);
-    precioBase = parseInt((card.querySelector(".complex-price")?.textContent || "0").replace(/[^\d]/g, ""), 10) || 0;
-
-    modalTitle.textContent = nombre;
-    modalSub.textContent   = `${formatearFecha(fecha)} · ${nombreTipo(tipoCancha)}`;
-
-    turnoElegido = null;
-    modalReserv.disabled = true;
-    modalPick.classList.remove("is-ok");
-    modalGrid.innerHTML = "";
-
-    // Turnos
-    const lista = horariosDe(card);
-    lista.forEach(({ hora, libre }) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "slot";
-      b.textContent = hora;
-      b.disabled = !libre;
-      b.addEventListener("click", () => {
-        modalGrid.querySelectorAll(".slot").forEach((x) => x.classList.remove("is-selected"));
-        b.classList.add("is-selected");
-        turnoElegido = hora;
-        modalPick.classList.remove("is-ok");
-        modalPick.textContent = `Turno elegido: ${hora}`;
-        modalReserv.disabled = false;
-      });
-      modalGrid.appendChild(b);
-    });
-    modalPick.textContent = lista.some((s) => s.libre)
-      ? "Elegí un horario disponible"
-      : "No hay horarios libres para esta fecha";
-
-    // Servicios para sumar
-    extrasList.innerHTML = "";
-    if (servicios.length) {
-      extrasBox.hidden = false;
-      extrasTitle.textContent = `Sumá servicios de ${nombre}`;
-      servicios.forEach((s) => {
-        const precio = PRECIO_SERVICIO[s] ?? 0;
-        const li = document.createElement("li");
-        li.innerHTML =
-          `<label><input type="checkbox" data-precio="${precio}">` +
-          `<span>${LABEL_SERVICIO[s] || s}</span>` +
-          `<em>${precio ? "+" + pesos(precio) : "incluido"}</em></label>`;
-        li.querySelector("input").addEventListener("change", actualizarTotal);
-        extrasList.appendChild(li);
-      });
-    } else {
-      extrasBox.hidden = true;
-    }
-    actualizarTotal();
-
-    if (typeof modal.showModal === "function") modal.showModal();
-    else modal.setAttribute("open", "");
-  };
-
-  if (modal) {
-    modalClose.addEventListener("click", () => modal.close());
-    modal.addEventListener("click", (e) => { if (e.target === modal) modal.close(); });
-
-    modalReserv.addEventListener("click", () => {
-      if (!turnoElegido) return;
-      const elegidos = extrasSeleccionados().map((c) => c.closest("label").querySelector("span").textContent);
-      const total = precioBase + totalExtra();
-      const conServicios = elegidos.length ? ` con ${elegidos.join(", ")}` : "";
-      modalPick.classList.add("is-ok");
-      modalPick.textContent =
-        `¡Listo! Reservaste ${modalTitle.textContent} a las ${turnoElegido}${conServicios}. ` +
-        `Total ${pesos(total)}. Pagá la seña y te llega la confirmación automática por WhatsApp.`;
-      modalReserv.disabled = true;
-      modalGrid.querySelectorAll(".slot").forEach((x) => (x.disabled = true));
-      extrasList.querySelectorAll("input").forEach((x) => (x.disabled = true));
-    });
+    selComplejo.addEventListener("change", () => mostrarComplejo(selComplejo.value));
+    mostrarComplejo(selComplejo.value);
   }
-
-  /* ---------- Abrir el modal de reserva desde la tarjeta ---------- */
-  document.querySelector(".complex-list")?.addEventListener("click", (e) => {
-    const boton = e.target.closest('[data-action="horarios"]');
-    const card  = boton && boton.closest(".complex-card");
-    if (!card) return;
-    e.preventDefault();
-    abrirModal(card);
-  });
 
 });
