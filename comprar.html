@@ -47,13 +47,14 @@
         <div class="field">
           <label for="complejo">Complejo a reservar</label>
           <select id="complejo" name="complejo">
-            <option value="terraza">La Terraza — Fútbol 5 — $25.000</option>
-            <option value="rampla">La Rampla — Fútbol 5 — $27.000</option>
-            <option value="napoles">Nápoles — Fútbol 5 — $28.000</option>
-            <option value="establo">El Establo Fútbol 5 — Fútbol 5 y 7 — $27.500</option>
-            <option value="potrero">El Potrero Fútbol 5 — Fútbol 5, 7 y 11 — $25.000</option>
-            <option value="olimpo">El Olimpo Fútbol 5 — Fútbol 5 — $29.000</option>
+            <!-- Las opciones las arma main.js con los datos de COMPLEJOS -->
           </select>
+        </div>
+
+        <!-- Tipo de cancha: las opciones dependen del complejo (las arma main.js) -->
+        <div class="field">
+          <label for="rv-tipo">Tipo de cancha</label>
+          <select id="rv-tipo" name="tipo"></select>
         </div>
 
         <!-- Servicios del complejo elegido (los completa main.js) -->

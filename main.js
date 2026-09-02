@@ -1,6 +1,6 @@
 /* =========================================================
    CanchaYa · main.js
-   Interacciones: menu, buscador y formulario de reserva
+   Interacciones: menu, buscador, ficha de complejo y formulario de reserva
    ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -84,6 +84,41 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const nombreTipo = (v) => ({ "5": "Fútbol 5", "7": "Fútbol 7", "11": "Fútbol 11" }[v] || "Fútbol 5");
 
+  const pesos = (n) => "$" + n.toLocaleString("es-AR");
+  const NOMBRE_SERV = { parrilla: "Parrilla", quincho: "Quincho", vestuarios: "Vestuarios", estacionamiento: "Estacionamiento" };
+
+  /* ---------- Datos de los complejos ----------
+     Fuente unica: la usan la portada, la tabla, las tarjetas, la ficha y la reserva.
+     zonaSlug / tipos / usos son los valores que filtra el buscador de la portada. */
+  const COMPLEJOS = {
+    terraza: { nombre: "La Terraza", zona: "Centro", zonaSlug: "centro", dir: "Av. Santa Catalina 4150",
+      tipo: "Fútbol 5", tipos: "5", precio: 25000, servicios: ["parrilla", "quincho"], usos: "partido eventos",
+      disp: { texto: "2 horarios libres hoy", estado: "open" },
+      resumen: "Cancha de césped sintético con iluminación para jugar de noche. Tiene parrilla y quincho para quedarse después del partido." },
+    rampla: { nombre: "La Rampla", zona: "Villa Cabello", zonaSlug: "a3", dir: "Pedro Morcillo 3326",
+      tipo: "Fútbol 5", tipos: "5", precio: 27000, servicios: ["vestuarios"], usos: "partido",
+      disp: { texto: "3 horarios libres hoy", estado: "open" },
+      resumen: "Cancha techada con vestuarios. Ideal para partidos entre amigos sin depender del clima." },
+    napoles: { nombre: "Nápoles", zona: "Itaembé Miní", zonaSlug: "itaembe-mini", dir: "Av. Quaranta 2912",
+      tipo: "Fútbol 5", tipos: "5", precio: 28000, servicios: ["parrilla", "estacionamiento"], usos: "partido",
+      disp: { texto: "Sin horarios libres hoy", estado: "full" },
+      resumen: "Cancha con parrilla y estacionamiento propio. Fácil de llegar." },
+    establo: { nombre: "El Establo Fútbol 5", zona: "Centro", zonaSlug: "centro", dir: "Santa Cruz 3436",
+      tipo: "Fútbol 5 · 7", tipos: "5 7", precio: 27500, servicios: ["quincho", "parrilla"], usos: "partido eventos escuelita",
+      disp: { texto: "2 horarios libres hoy", estado: "open" },
+      resumen: "Complejo con quincho y parrilla. Sirve para partidos y para festejar cumpleaños." },
+    potrero: { nombre: "El Potrero Fútbol 5", zona: "Itaembé Miní", zonaSlug: "itaembe-mini", dir: "3 de Febrero 2040",
+      tipo: "Fútbol 5 · 7 · 11", tipos: "5 7 11", precio: 25000, servicios: ["estacionamiento"], usos: "partido escuelita torneos",
+      disp: { texto: "4 horarios libres hoy", estado: "open" },
+      resumen: "Complejo grande con estacionamiento. Se usa también para escuelita y torneos." },
+    olimpo: { nombre: "El Olimpo Fútbol 5", zona: "Villa Sarita", zonaSlug: "villa-sarita", dir: "Av. Tomás Guido 4025",
+      tipo: "Fútbol 5", tipos: "5", precio: 29000, servicios: ["parrilla", "quincho", "vestuarios"], usos: "partido eventos",
+      disp: { texto: "Sin horarios libres hoy", estado: "full" },
+      resumen: "Cancha con parrilla, quincho y vestuarios. El combo completo para el after." }
+  };
+
+  const claveComplejo = (valor) => (COMPLEJOS[valor] ? valor : "terraza");
+
   /* ---------- Placeholder circular para logos que todavía no existen ---------- */
   const iniciales = (nombre) => {
     const stop = new Set(["el", "la", "los", "las", "de", "del", "complejo", "deportivo"]);
@@ -105,6 +140,58 @@ document.addEventListener("DOMContentLoaded", () => {
       </svg>`;
     return "data:image/svg+xml," + encodeURIComponent(svg.trim());
   };
+
+  /* ---------- Listados armados desde COMPLEJOS ---------- */
+  const chipsServicios = (arr) => arr.map((s) => `<span class="service-chip">${NOMBRE_SERV[s]}</span>`).join("");
+
+  const tablaComplejos = document.getElementById("tabla-complejos");
+  if (tablaComplejos) {
+    tablaComplejos.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
+      <tr>
+        <td>${c.nombre}</td>
+        <td>${c.zona}</td>
+        <td>${c.tipo}</td>
+        <td>${c.servicios.map((s) => NOMBRE_SERV[s]).join(", ")}</td>
+        <td>${pesos(c.precio)}</td>
+        <td><a href="detalle.html?c=${clave}">Ver ficha</a></td>
+      </tr>`).join("");
+  }
+
+  const cardsComplejos = document.getElementById("cards-complejos");
+  if (cardsComplejos) {
+    cardsComplejos.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
+      <li class="complex-card">
+        <img class="complex-photo" src="images/${clave}.jpg" alt="Logo de ${c.nombre}">
+        <div class="complex-body">
+          <h3 class="complex-name">${c.nombre}</h3>
+          <p class="complex-meta">${c.tipo}</p>
+          <p class="complex-address">${c.dir}</p>
+          <div class="complex-services">${chipsServicios(c.servicios)}</div>
+          <p class="complex-price">Desde ${pesos(c.precio)} <span>la hora</span></p>
+        </div>
+        <a href="detalle.html?c=${clave}" class="btn btn-primary btn-sm">Ver ficha</a>
+      </li>`).join("");
+  }
+
+  const portadaComplejos = document.getElementById("complejos-lista");
+  if (portadaComplejos) {
+    portadaComplejos.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
+      <li class="complex-card" data-zona="${c.zonaSlug}" data-tipo="${c.tipos}" data-servicios="${c.servicios.join(" ")}" data-usos="${c.usos}">
+        <img class="complex-photo" src="images/${clave}.jpg" alt="Logo de ${c.nombre}">
+        <div class="complex-body">
+          <h3 class="complex-name">${c.nombre}</h3>
+          <p class="complex-meta">${c.tipo}</p>
+          <p class="complex-address">${c.dir}</p>
+          <div class="complex-services">${chipsServicios(c.servicios)}</div>
+          <p class="complex-price">Desde ${pesos(c.precio)} <span>la hora</span></p>
+          <span class="availability availability-${c.disp.estado}">${c.disp.texto}</span>
+        </div>
+        <a href="comprar.html?c=${clave}" class="btn btn-primary btn-sm">Reservar cancha</a>
+      </li>`).join("");
+
+    const badge = document.getElementById("results-count");
+    if (badge) badge.textContent = Object.keys(COMPLEJOS).length + " complejos";
+  }
 
   document.querySelectorAll(".complex-photo").forEach((img) => {
     img.addEventListener("error", () => {
@@ -178,49 +265,90 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /* ---------- Ficha de complejo (detalle.html) ----------
+     Arma la ficha de TODOS los complejos, una abajo de la otra.
+     Si se llega con ?c=olimpo (botón "Ver ficha"), baja hasta ese complejo. */
+  const fichasLista = document.getElementById("fichas-lista");
+
+  if (fichasLista) {
+    fichasLista.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
+      <article class="ficha-item" id="c-${clave}">
+        <h3 class="ficha-nombre">${c.nombre}</h3>
+        <div class="ficha">
+          <img class="ficha-foto" src="images/${clave}.jpg" alt="Logo de ${c.nombre}" data-nombre="${c.nombre}">
+          <div class="ficha-datos">
+            <p class="ficha-dato"><strong>Dirección:</strong> ${c.dir}</p>
+            <p class="ficha-dato"><strong>Zona:</strong> ${c.zona}</p>
+            <p class="ficha-dato"><strong>Tipo de cancha:</strong> ${c.tipo}</p>
+            <p class="ficha-dato"><strong>Precio:</strong> Desde ${pesos(c.precio)} la hora</p>
+            <div class="complex-services">${chipsServicios(c.servicios)}</div>
+            <a href="comprar.html?c=${clave}" class="btn btn-primary">Reservar <span class="arrow">→</span></a>
+          </div>
+        </div>
+        <p class="section-text ficha-desc">${c.resumen}</p>
+      </article>`).join("");
+
+    fichasLista.querySelectorAll(".ficha-foto").forEach((img) => {
+      img.addEventListener("error", () => { img.src = placeholder(img.dataset.nombre); }, { once: true });
+      if (img.complete && img.naturalWidth === 0) img.dispatchEvent(new Event("error"));
+    });
+
+    const foco = document.getElementById("c-" + claveComplejo(new URLSearchParams(location.search).get("c")));
+    if (location.search && foco) foco.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   /* ---------- Formulario de reserva (comprar.html) ----------
      Desde "Complejos disponibles" el botón lleva a comprar.html?c=terraza.
      Muestra solo ese complejo, su descripcion, sus servicios y el total. */
   const selComplejo = document.getElementById("complejo");
 
   if (selComplejo) {
-    const DATOS = {
-      terraza: { nombre: "La Terraza", precio: 25000, servicios: ["parrilla", "quincho"],
-        desc: "La Terraza — Fútbol 5, Av. Santa Catalina 4150. Cancha de césped sintético con iluminación para jugar de noche. Tiene parrilla y quincho para quedarse después del partido." },
-      rampla: { nombre: "La Rampla", precio: 27000, servicios: ["vestuarios"],
-        desc: "La Rampla — Fútbol 5, Pedro Morcillo 3326. Cancha techada con vestuarios. Ideal para partidos entre amigos sin depender del clima." },
-      napoles: { nombre: "Nápoles", precio: 28000, servicios: ["parrilla", "estacionamiento"],
-        desc: "Nápoles — Fútbol 5, Av. Quaranta 2912. Cancha con parrilla y estacionamiento propio. Fácil de llegar." },
-      establo: { nombre: "El Establo Fútbol 5", precio: 27500, servicios: ["quincho", "parrilla"],
-        desc: "El Establo — Fútbol 5 y 7, Santa Cruz 3436. Complejo con quincho y parrilla. Sirve para partidos y para festejar cumpleaños." },
-      potrero: { nombre: "El Potrero Fútbol 5", precio: 25000, servicios: ["estacionamiento"],
-        desc: "El Potrero — Fútbol 5, 7 y 11, 3 de Febrero 2040. Complejo grande con estacionamiento. Se usa también para escuelita y torneos." },
-      olimpo: { nombre: "El Olimpo Fútbol 5", precio: 29000, servicios: ["parrilla", "quincho", "vestuarios"],
-        desc: "El Olimpo — Fútbol 5, Av. Tomás Guido 4025. Cancha con parrilla, quincho y vestuarios. El combo completo para el after." }
-    };
+    const DATOS = COMPLEJOS;
     const PRECIO_SERV = { parrilla: 3000, quincho: 8000, vestuarios: 0, estacionamiento: 0 };
-    const NOMBRE_SERV = { parrilla: "Parrilla", quincho: "Quincho", vestuarios: "Vestuarios", estacionamiento: "Estacionamiento" };
-    const pesos = (n) => "$" + n.toLocaleString("es-AR");
+    const descComplejo = (c) => `${c.nombre} — ${c.tipo}, ${c.dir}. ${c.resumen}`;
+
+    selComplejo.innerHTML = Object.entries(COMPLEJOS)
+      .map(([clave, c]) => `<option value="${clave}">${c.nombre} — ${c.tipo} — ${pesos(c.precio)}</option>`)
+      .join("");
 
     const descEl  = document.getElementById("rv-desc");
     const tituloEl = document.getElementById("rv-titulo");
+    const tipoSel = document.getElementById("rv-tipo");
     const servBox = document.getElementById("rv-serv-box");
     const servList = document.getElementById("rv-serv");
     const totalEl = document.getElementById("rv-total");
 
+    // "Reservar La Terraza · Fútbol 7" segun complejo + tipo de cancha elegido
+    const refrescarTitulo = () => {
+      const c = DATOS[selComplejo.value];
+      tituloEl.textContent = `Reservar ${c.nombre} · ${nombreTipo(tipoSel.value)}`;
+    };
+    tipoSel.addEventListener("change", refrescarTitulo);
+
+    const SENA_PCT = 0.5;   // seña que se paga ahora para dejar reservado (la mitad)
+
     const calcularTotal = (base) => {
       let extra = 0;
       servList.querySelectorAll("input:checked").forEach((c) => { extra += Number(c.dataset.precio); });
-      totalEl.textContent = extra
-        ? `Total: ${pesos(base + extra)}  (${pesos(base)} cancha + ${pesos(extra)} servicios)`
-        : `Total: ${pesos(base)}  la hora`;
+      const total = base + extra;
+      const sena = Math.round(total * SENA_PCT);
+      const desglose = extra ? ` (${pesos(base)} cancha + ${pesos(extra)} servicios)` : " la hora";
+      totalEl.innerHTML =
+        `Total: ${pesos(total)}${desglose}` +
+        `<span class="rv-sena">Seña para reservar (${Math.round(SENA_PCT * 100)}%): ${pesos(sena)}` +
+        `<small>El resto (${pesos(total - sena)}) se paga en el complejo.</small></span>`;
     };
 
     const mostrarComplejo = (clave) => {
       const c = DATOS[clave];
       if (!c) return;
-      tituloEl.textContent = "Reservar " + c.nombre;
-      descEl.textContent = c.desc;
+      descEl.textContent = descComplejo(c);
+
+      // opciones de tipo de cancha segun lo que ofrece este complejo (5 / 7 / 11)
+      tipoSel.innerHTML = c.tipos.split(" ")
+        .map((t) => `<option value="${t}">${nombreTipo(t)}</option>`)
+        .join("");
+      refrescarTitulo();
 
       servList.innerHTML = "";
       if (c.servicios.length) {

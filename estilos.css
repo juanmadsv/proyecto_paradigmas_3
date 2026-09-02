@@ -1,9 +1,4 @@
-/* =========================================================
-   CanchaYa · estilos.css
-   Estilo: verde deportivo, moderno
-   ========================================================= */
 
-/* ============ TOKENS ============ */
 :root {
   /* Marca */
   --brand:        #12a150;
@@ -957,12 +952,27 @@ main > section {
 }
 
 /* ============ FICHA DE COMPLEJO (detalle.html) ============ */
+.fichas-lista {
+  margin-top: 2.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(36px, 6vw, 64px);
+}
+.ficha-item + .ficha-item {
+  padding-top: clamp(36px, 6vw, 64px);
+  border-top: 1px solid var(--page-border);
+}
+.ficha-nombre {
+  font-size: clamp(1.5rem, 3.5vw, 2.1rem);
+  color: var(--accent);
+}
+
 .ficha {
   display: grid;
   grid-template-columns: 220px 1fr;
   gap: clamp(24px, 5vw, 48px);
   align-items: start;
-  margin-top: 2rem;
+  margin-top: 1.4rem;
 }
 .ficha-foto {
   width: 100%;
@@ -974,11 +984,7 @@ main > section {
 .ficha-dato strong { color: var(--page-fg); }
 .ficha-datos .complex-services { justify-content: flex-start; margin-top: .3rem; }
 .ficha-datos .btn { align-self: flex-start; margin-top: 1rem; }
-.ficha-subtitulo {
-  margin-top: 2.4rem;
-  font-size: 1.3rem;
-  color: #fff;
-}
+.ficha-desc { margin-top: 1.4rem; }
 
 @media (max-width: 640px) {
   .ficha { grid-template-columns: 1fr; }
@@ -1011,6 +1017,14 @@ main > section {
   font-weight: 800;
   color: #fff;
 }
+.rv-sena {
+  display: block;
+  margin-top: .5rem;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.rv-sena small { display: block; font-weight: 400; color: var(--page-fg-soft); }
 
 /* ============ SUMÁ TU COMPLEJO ============ */
 .join-section {
