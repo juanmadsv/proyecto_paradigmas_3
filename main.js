@@ -367,6 +367,25 @@ document.addEventListener("DOMContentLoaded", () => {
       calcularTotal(c.precio);
     };
 
+
+        function validarCupon() {
+      const codigo = document.getElementById("codigo-cupon").value.trim().toUpperCase();
+      const mensaje = document.getElementById("mensaje-cupon");
+
+      if (codigo === "") {
+        mensaje.textContent = "Por favor, ingrese un código";
+        mensaje.className = "mensaje-error";
+      } else if (codigo === "UCP10") {
+        mensaje.textContent = "¡Cupón aplicado! Tenés un 10% de descuento";
+        mensaje.className = "mensaje-exito";
+      } else {
+        mensaje.textContent = "Código inválido o vencido";
+        mensaje.className = "mensaje-error";
+      }
+    }
+
+    document.getElementById("aplicar-cupon").addEventListener("click", validarCupon);
+
     // Si viene ?c=terraza, dejar ese elegido
     const desdeUrl = new URLSearchParams(window.location.search).get("c");
     if (desdeUrl && DATOS[desdeUrl]) selComplejo.value = desdeUrl;
