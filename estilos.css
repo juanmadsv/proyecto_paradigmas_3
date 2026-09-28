@@ -387,8 +387,8 @@ main > section {
   margin-top: 1.8rem;
   align-items: end;
 }
-/* fila 1: ZONA | FECHA · fila 2: TIPO · fila 3: SERVICIOS · fila 4: botón */
-.search-form .field:nth-of-type(2),
+/* fila 1: TEXTO | ZONA · fila 2: TIPO · fila 3: SERVICIOS · fila 4: botón */
+.search-form .field:nth-of-type(3),
 .search-form .field:nth-of-type(4) { grid-column: 1 / -1; }
 
 .filter-chips {

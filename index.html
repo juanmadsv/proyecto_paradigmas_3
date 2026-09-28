@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="estilos.css">
   <script src="main.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
 
@@ -44,8 +45,8 @@
       </h1>
 
       <p class="hero-text">
-        Compará complejos, mirá horarios disponibles en tiempo real y confirmá tu
-        reserva con una seña online. Sin llamados, sin vueltas.
+        Compará complejos, tipos de cancha, servicios y precios en un solo lugar.
+        Encontrá la opción que buscás y avanzá a la pantalla de reserva.
       </p>
 
       <div class="hero-actions">
@@ -57,17 +58,17 @@
 
 
 
-    <!-- ============ BUSCADOR ============ -->
+    <!-- ============ BUSCADOR DE CATÁLOGO: AE2, OPCIÓN 3 ============ -->
     <section class="search-section" id="buscar">
-      <p class="badge">Disponibilidad online</p>
-      <h2 class="section-title">Elegí zona, tipo de cancha y horario.</h2>
-      <p class="section-text">
-        Filtrá los complejos de Posadas según lo que estás buscando. Si el horario
-        aparece libre, podés avanzar directo con la reserva.
-      </p>
+      <p class="badge">Catálogo de complejos</p>
+      <h2 class="section-title">Encontrá una cancha a tu medida.</h2>
+      <p class="section-text">Buscá por nombre o dirección y combiná filtros de zona, tipo de cancha y servicios.</p>
 
       <form class="search-form" id="form-buscar">
-
+        <div class="field">
+          <label for="buscar-texto">NOMBRE O DIRECCIÓN</label>
+          <input type="search" id="buscar-texto" name="buscar-texto" placeholder="Ej.: La Terraza o Santa Catalina" autocomplete="off">
+        </div>
         <div class="field">
           <label for="zona">ZONA</label>
           <select id="zona" name="zona">
@@ -78,60 +79,38 @@
             <option value="a3">A3 / Villa Cabello</option>
           </select>
         </div>
-
         <div class="field">
           <span class="field-legend">TIPO DE CANCHA</span>
           <div class="toggle-group" role="group" aria-label="Tipo de cancha">
-            <button type="button" class="toggle-option is-active" data-value="5">Fútbol 5</button>
-            <button type="button" class="toggle-option" data-value="7">Fútbol 7</button>
-            <button type="button" class="toggle-option" data-value="11">Fútbol 11</button>
+            <button type="button" class="toggle-option is-active" data-value="5" aria-pressed="true">Fútbol 5</button>
+            <button type="button" class="toggle-option" data-value="7" aria-pressed="false">Fútbol 7</button>
+            <button type="button" class="toggle-option" data-value="11" aria-pressed="false">Fútbol 11</button>
           </div>
         </div>
-
-        <div class="field">
-          <label for="fecha">FECHA</label>
-          <input type="date" id="fecha" name="fecha" value="2026-08-30">
-        </div>
-
         <div class="field">
           <span class="field-legend">SERVICIOS (OPCIONAL)</span>
           <div class="filter-chips" role="group" aria-label="Servicios">
-            <button type="button" class="filter-chip" data-serv="quincho">Quincho</button>
-            <button type="button" class="filter-chip" data-serv="parrilla">Parrilla</button>
-            <button type="button" class="filter-chip" data-serv="vestuarios">Vestuarios</button>
-            <button type="button" class="filter-chip" data-serv="estacionamiento">Estacionamiento</button>
-            <button type="button" class="filter-chip" data-uso="eventos">Para eventos</button>
-            <button type="button" class="filter-chip" data-uso="escuelita">Escuelita</button>
+            <button type="button" class="filter-chip" data-serv="quincho" aria-pressed="false">Quincho</button>
+            <button type="button" class="filter-chip" data-serv="parrilla" aria-pressed="false">Parrilla</button>
+            <button type="button" class="filter-chip" data-serv="vestuarios" aria-pressed="false">Vestuarios</button>
+            <button type="button" class="filter-chip" data-serv="estacionamiento" aria-pressed="false">Estacionamiento</button>
+            <button type="button" class="filter-chip" data-uso="eventos" aria-pressed="false">Para eventos</button>
+            <button type="button" class="filter-chip" data-uso="escuelita" aria-pressed="false">Escuelita</button>
           </div>
         </div>
-
-        <button type="submit" class="btn btn-primary btn-block">
-          <svg class="icon icon-search" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Buscar disponibilidad
-        </button>
+        <button type="submit" class="btn btn-primary btn-block">Ver resultados</button>
       </form>
-
-      <p class="search-status">
-        Mostrando complejos con <strong>Fútbol 5</strong> disponible para
-        <strong>domingo, 30 de agosto</strong>
-      </p>
+      <p class="search-status" role="status" aria-live="polite">Cargando catálogo...</p>
     </section>
 
-    <!-- ============ RESULTADOS: COMPLEJOS ============ -->
     <section class="results-section" id="complejos">
       <div class="results-header">
-        <h2 class="section-title">Complejos disponibles</h2>
-        <span class="badge badge-outline" id="results-count">6 complejos</span>
+        <h2 class="section-title">Complejos encontrados</h2>
+        <span class="badge badge-outline" id="results-count">Cargando...</span>
       </div>
-      <p class="results-hint">Además de la cancha, algunos complejos ofrecen servicios como parrilla o quincho para sumar a tu reserva.</p>
-
-      <p class="no-results" id="no-results" hidden>
-        No hay complejos con esa combinación de zona y tipo de cancha. Probá cambiando los filtros.
-      </p>
-
-      <ul class="complex-list" id="complejos-lista">
-        <!-- Las tarjetas las arma main.js con los datos de COMPLEJOS -->
-      </ul>
+      <p class="results-hint">Elegí un complejo para consultar su ficha o avanzar a la reserva.</p>
+      <p class="no-results" id="no-results" hidden>No hay complejos con esos filtros. Probá con otra búsqueda.</p>
+      <ul class="complex-list" id="complejos-lista"></ul>
     </section>
 
     <!-- ============ CÓMO FUNCIONA ============ -->
@@ -148,7 +127,7 @@
         <li class="howto-step">
           <span class="howto-num">1</span>
           <h3>Buscás</h3>
-          <p>Elegí zona, tipo de cancha y fecha. Ves los complejos con horarios libres.</p>
+          <p>Buscá por nombre, zona, tipo de cancha y servicios. Compará los complejos encontrados.</p>
         </li>
         <li class="howto-step">
           <span class="howto-num">2</span>
