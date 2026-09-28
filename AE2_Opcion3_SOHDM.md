@@ -30,7 +30,19 @@ Para este módulo se toma un **escenario de exploración y búsqueda**: la perso
 5. **Alternativa sin coincidencias:** se muestra un mensaje y puede cambiar los criterios sin recargar.
 6. **Alternativa de error HTTP:** se muestra un aviso y no se presentan resultados inventados.
 
-**Mapa navegacional:** Inicio → resultados filtrados en la misma pantalla → ficha del complejo (`detalle.html?c=id`) o reserva (`comprar.html?c=id`). Desde la ficha se puede ir a la reserva. Los criterios de búsqueda son controles de la vista, mientras que los registros de `data/complejos.json` representan los complejos del dominio.
+**Mapa navegacional del escenario de búsqueda:**
+
+```mermaid
+flowchart TD
+    A["Inicio: búsqueda"] --> B["Resultados filtrados"]
+    B -->|Sin coincidencias| C["Aviso sin resultados"]
+    C -->|Ajustar filtros| B
+    B -->|Ver ficha| D["Ficha del complejo"]
+    B -->|Reservar| E["Pantalla de reserva"]
+    D -->|Reservar| E
+```
+
+El filtrado y el aviso ocurren en la pantalla de inicio, sin navegación ni recarga. Los criterios de búsqueda son controles de la vista; los registros de `data/complejos.json` representan los complejos del dominio. `detalle.html?c=id` y `comprar.html?c=id` son los destinos navegacionales para el complejo elegido.
 
 Esta aplicación del enfoque por escenarios explica cómo las acciones de búsqueda guían la navegación. No constituye por sí sola el desarrollo completo de todas las etapas de SOHDM.
 
