@@ -1,9 +1,9 @@
 /* =========================================================
    CanchaYa · main.js
-   Interacciones: menu, buscador, ficha de complejo y formulario de reserva
+   Interacciones compartidas, ficha de complejo y formulario de reserva
    ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
   /* ---------- Menú (botón hamburguesa + nav) ---------- */
   const menuBtn = document.querySelector(".menu-btn");
@@ -33,89 +33,29 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  /* ---------- Toggle: tipo de cancha ---------- */
-  const toggleGroup = document.querySelector(".toggle-group");
-  let tipoCancha = toggleGroup?.querySelector(".toggle-option.is-active")?.dataset.value || "5";
-
-  if (toggleGroup) {
-    toggleGroup.addEventListener("click", (e) => {
-      const opcion = e.target.closest(".toggle-option");
-      if (!opcion) return;
-
-      toggleGroup.querySelectorAll(".toggle-option").forEach((b) => {
-        b.classList.toggle("is-active", b === opcion);
-        b.setAttribute("aria-pressed", String(b === opcion));
-      });
-
-      tipoCancha = opcion.dataset.value;
-    });
-  }
-
-  /* ---------- Chips de servicios (multi-selección) ---------- */
-  const chipsWrap = document.querySelector(".filter-chips");
-  if (chipsWrap) {
-    chipsWrap.addEventListener("click", (e) => {
-      const chip = e.target.closest(".filter-chip");
-      if (!chip) return;
-      const activo = chip.classList.toggle("is-active");
-      chip.setAttribute("aria-pressed", String(activo));
-    });
-  }
-  const chipsActivos = () => {
-    const serv = [], usos = [];
-    chipsWrap?.querySelectorAll(".filter-chip.is-active").forEach((c) => {
-      if (c.dataset.serv) serv.push(c.dataset.serv);
-      if (c.dataset.uso) usos.push(c.dataset.uso);
-    });
-    return { serv, usos };
-  };
-
   /* ---------- Helpers compartidos ---------- */
-  // "2026-08-30" -> "domingo, 30 de agosto"
-  const formatearFecha = (valor) => {
-    if (!valor) return "la fecha elegida";
-    const [a, m, d] = valor.split("-").map(Number);
-    return new Date(a, m - 1, d).toLocaleDateString("es-AR", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-    });
-  };
-
   const nombreTipo = (v) => ({ "5": "Fútbol 5", "7": "Fútbol 7", "11": "Fútbol 11" }[v] || "Fútbol 5");
 
   const pesos = (n) => "$" + n.toLocaleString("es-AR");
   const NOMBRE_SERV = { parrilla: "Parrilla", quincho: "Quincho", vestuarios: "Vestuarios", estacionamiento: "Estacionamiento" };
 
-  /* ---------- Datos de los complejos ----------
-     Fuente unica: la usan la portada, la tabla, las tarjetas, la ficha y la reserva.
-     zonaSlug / tipos / usos son los valores que filtra el buscador de la portada. */
-  const COMPLEJOS = {
-    terraza: { nombre: "La Terraza", zona: "Centro", zonaSlug: "centro", dir: "Av. Santa Catalina 4150",
-      tipo: "Fútbol 5", tipos: "5", precio: 25000, servicios: ["parrilla", "quincho"], usos: "partido eventos",
-      disp: { texto: "2 horarios libres hoy", estado: "open" },
-      resumen: "Cancha de césped sintético con iluminación para jugar de noche. Tiene parrilla y quincho para quedarse después del partido." },
-    rampla: { nombre: "La Rampla", zona: "Villa Cabello", zonaSlug: "a3", dir: "Pedro Morcillo 3326",
-      tipo: "Fútbol 5", tipos: "5", precio: 27000, servicios: ["vestuarios"], usos: "partido",
-      disp: { texto: "3 horarios libres hoy", estado: "open" },
-      resumen: "Cancha techada con vestuarios. Ideal para partidos entre amigos sin depender del clima." },
-    napoles: { nombre: "Nápoles", zona: "Itaembé Miní", zonaSlug: "itaembe-mini", dir: "Av. Quaranta 2912",
-      tipo: "Fútbol 5", tipos: "5", precio: 28000, servicios: ["parrilla", "estacionamiento"], usos: "partido",
-      disp: { texto: "Sin horarios libres hoy", estado: "full" },
-      resumen: "Cancha con parrilla y estacionamiento propio. Fácil de llegar." },
-    establo: { nombre: "El Establo Fútbol 5", zona: "Centro", zonaSlug: "centro", dir: "Santa Cruz 3436",
-      tipo: "Fútbol 5 · 7", tipos: "5 7", precio: 27500, servicios: ["quincho", "parrilla"], usos: "partido eventos escuelita",
-      disp: { texto: "2 horarios libres hoy", estado: "open" },
-      resumen: "Complejo con quincho y parrilla. Sirve para partidos y para festejar cumpleaños." },
-    potrero: { nombre: "El Potrero Fútbol 5", zona: "Itaembé Miní", zonaSlug: "itaembe-mini", dir: "3 de Febrero 2040",
-      tipo: "Fútbol 5 · 7 · 11", tipos: "5 7 11", precio: 25000, servicios: ["estacionamiento"], usos: "partido escuelita torneos",
-      disp: { texto: "4 horarios libres hoy", estado: "open" },
-      resumen: "Complejo grande con estacionamiento. Se usa también para escuelita y torneos." },
-    olimpo: { nombre: "El Olimpo Fútbol 5", zona: "Villa Sarita", zonaSlug: "villa-sarita", dir: "Av. Tomás Guido 4025",
-      tipo: "Fútbol 5", tipos: "5", precio: 29000, servicios: ["parrilla", "quincho", "vestuarios"], usos: "partido eventos",
-      disp: { texto: "Sin horarios libres hoy", estado: "full" },
-      resumen: "Cancha con parrilla, quincho y vestuarios. El combo completo para el after." }
-  };
+  /* Los listados, fichas y reservas usan el mismo JSON que el buscador. */
+  if (!document.querySelector("#tabla-complejos, #cards-complejos, #fichas-lista, #complejo")) return;
+  let COMPLEJOS;
+  try {
+    const respuesta = await fetch("data/complejos.json");
+    if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+    COMPLEJOS = await respuesta.json();
+    if (!COMPLEJOS || typeof COMPLEJOS !== "object" || Array.isArray(COMPLEJOS)) throw new Error("JSON inválido");
+  } catch (error) {
+    const aviso = document.createElement("p");
+    aviso.className = "no-results";
+    aviso.setAttribute("role", "alert");
+    aviso.textContent = "No se pudo cargar el catálogo. Abrí el sitio con Apache de XAMPP y volvé a intentar.";
+    document.querySelector("main")?.prepend(aviso);
+    console.error("Error al cargar el catálogo:", error);
+    return;
+  }
 
   const claveComplejo = (valor) => (COMPLEJOS[valor] ? valor : "terraza");
 
@@ -171,98 +111,6 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
         <a href="detalle.html?c=${clave}" class="btn btn-primary btn-sm">Ver ficha</a>
       </li>`).join("");
-  }
-
-  const portadaComplejos = document.getElementById("complejos-lista");
-  if (portadaComplejos) {
-    portadaComplejos.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
-      <li class="complex-card" data-zona="${c.zonaSlug}" data-tipo="${c.tipos}" data-servicios="${c.servicios.join(" ")}" data-usos="${c.usos}">
-        <img class="complex-photo" src="images/${clave}.jpg" alt="Logo de ${c.nombre}">
-        <div class="complex-body">
-          <h3 class="complex-name">${c.nombre}</h3>
-          <p class="complex-meta">${c.tipo}</p>
-          <p class="complex-address">${c.dir}</p>
-          <div class="complex-services">${chipsServicios(c.servicios)}</div>
-          <p class="complex-price">Desde ${pesos(c.precio)} <span>la hora</span></p>
-          <span class="availability availability-${c.disp.estado}">${c.disp.texto}</span>
-        </div>
-        <a href="comprar.html?c=${clave}" class="btn btn-primary btn-sm">Reservar cancha</a>
-      </li>`).join("");
-
-    const badge = document.getElementById("results-count");
-    if (badge) badge.textContent = Object.keys(COMPLEJOS).length + " complejos";
-  }
-
-  document.querySelectorAll(".complex-photo").forEach((img) => {
-    img.addEventListener("error", () => {
-      const nombre = img.closest(".complex-card")?.querySelector(".complex-name")?.textContent || "CanchaYa";
-      img.src = placeholder(nombre);
-    }, { once: true });
-    if (img.complete && img.naturalWidth === 0) img.dispatchEvent(new Event("error"));
-  });
-
-  /* ---------- Buscador ---------- */
-  const form       = document.getElementById("form-buscar");
-  const status     = document.querySelector(".search-status");
-  const resultados = document.getElementById("complejos");
-  const cards      = Array.from(document.querySelectorAll(".complex-card"));
-  const noResults  = document.getElementById("no-results");
-  const countBadge = document.getElementById("results-count");
-
-  const tiene = (attr, valores) => {
-    const lista = (attr || "").split(" ");
-    return valores.every((v) => lista.includes(v));
-  };
-
-  const filtrar = ({ zona, tipo, serv, usos }) => {
-    let visibles = 0;
-
-    cards.forEach((card) => {
-      const zonaOk = !zona || card.dataset.zona === zona;
-      const tipoOk = (card.dataset.tipo || "5").split(" ").includes(tipo);
-      const servOk = tiene(card.dataset.servicios, serv);
-      const usosOk = tiene(card.dataset.usos, usos);
-      const mostrar = zonaOk && tipoOk && servOk && usosOk;
-      card.hidden = !mostrar;
-      if (mostrar) visibles++;
-    });
-
-    if (noResults) noResults.hidden = visibles > 0;
-    if (countBadge) {
-      countBadge.textContent = visibles === 1
-        ? "1 complejo"
-        : `${visibles} complejos`;
-    }
-    return visibles;
-  };
-
-  const nombreServicio = (s) => ({
-    quincho: "quincho", parrilla: "parrilla", vestuarios: "vestuarios",
-    estacionamiento: "estacionamiento", eventos: "eventos", escuelita: "escuelita",
-  }[s] || s);
-
-  if (form) {
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const zonaSelect = document.getElementById("zona");
-      const zona       = zonaSelect.value;
-      const zonaTexto  = zonaSelect.options[zonaSelect.selectedIndex].text;
-      const fecha      = document.getElementById("fecha").value;
-      const { serv, usos } = chipsActivos();
-
-      filtrar({ zona, tipo: tipoCancha, serv, usos });
-
-      if (status) {
-        const extras = [...serv, ...usos].map(nombreServicio);
-        const conServicios = extras.length ? ` con <strong>${extras.join(" + ")}</strong>` : "";
-        status.innerHTML =
-          `Mostrando complejos de <strong>${nombreTipo(tipoCancha)}</strong>${conServicios} ` +
-          `en <strong>${zonaTexto}</strong> para <strong>${formatearFecha(fecha)}</strong>`;
-      }
-
-      resultados?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
   }
 
   /* ---------- Ficha de complejo (detalle.html) ----------
@@ -326,18 +174,52 @@ document.addEventListener("DOMContentLoaded", () => {
     tipoSel.addEventListener("change", refrescarTitulo);
 
     const SENA_PCT = 0.5;   // seña que se paga ahora para dejar reservado (la mitad)
+    const cuponInput = document.getElementById("codigo-cupon");
+    const mensajeCupon = document.getElementById("mensaje-cupon");
+    let cuponActivo = false;
 
     const calcularTotal = (base) => {
       let extra = 0;
       servList.querySelectorAll("input:checked").forEach((c) => { extra += Number(c.dataset.precio); });
-      const total = base + extra;
+      const subtotal = base + extra;
+      const descuento = cuponActivo ? Math.round(subtotal * 0.10) : 0;
+      const total = subtotal - descuento;
       const sena = Math.round(total * SENA_PCT);
       const desglose = extra ? ` (${pesos(base)} cancha + ${pesos(extra)} servicios)` : " la hora";
       totalEl.innerHTML =
-        `Total: ${pesos(total)}${desglose}` +
+        (cuponActivo
+          ? `<span class="rv-subtotal">Subtotal: ${pesos(subtotal)}${desglose}</span>` +
+            `<span class="rv-descuento">Cupón UCP10 (10%): -${pesos(descuento)}</span>`
+          : "") +
+        `Total: ${pesos(total)}${cuponActivo ? "" : desglose}` +
         `<span class="rv-sena">Seña para reservar (${Math.round(SENA_PCT * 100)}%): ${pesos(sena)}` +
         `<small>El resto (${pesos(total - sena)}) se paga en el complejo.</small></span>`;
     };
+
+    document.getElementById("aplicar-cupon").addEventListener("click", () => {
+      const codigo = cuponInput.value.trim().toUpperCase();
+      cuponActivo = codigo === "UCP10";
+      if (!codigo) {
+        mensajeCupon.textContent = "Por favor, ingresá un código.";
+        mensajeCupon.className = "coupon-feedback mensaje-error";
+      } else if (cuponActivo) {
+        mensajeCupon.textContent = "¡Cupón aplicado! Tenés un 10% de descuento.";
+        mensajeCupon.className = "coupon-feedback mensaje-exito";
+      } else {
+        mensajeCupon.textContent = "Código inválido o vencido.";
+        mensajeCupon.className = "coupon-feedback mensaje-error";
+      }
+      calcularTotal(DATOS[selComplejo.value].precio);
+    });
+
+    cuponInput.addEventListener("input", () => {
+      if (cuponActivo) {
+        cuponActivo = false;
+        calcularTotal(DATOS[selComplejo.value].precio);
+      }
+      mensajeCupon.textContent = "";
+      mensajeCupon.className = "coupon-feedback";
+    });
 
     const mostrarComplejo = (clave) => {
       const c = DATOS[clave];
@@ -366,25 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
       calcularTotal(c.precio);
     };
-
-
-        function validarCupon() {
-      const codigo = document.getElementById("codigo-cupon").value.trim().toUpperCase();
-      const mensaje = document.getElementById("mensaje-cupon");
-
-      if (codigo === "") {
-        mensaje.textContent = "Por favor, ingrese un código";
-        mensaje.className = "mensaje-error";
-      } else if (codigo === "UCP10") {
-        mensaje.textContent = "¡Cupón aplicado! Tenés un 10% de descuento";
-        mensaje.className = "mensaje-exito";
-      } else {
-        mensaje.textContent = "Código inválido o vencido";
-        mensaje.className = "mensaje-error";
-      }
-    }
-
-    document.getElementById("aplicar-cupon").addEventListener("click", validarCupon);
 
     // Si viene ?c=terraza, dejar ese elegido
     const desdeUrl = new URLSearchParams(window.location.search).get("c");

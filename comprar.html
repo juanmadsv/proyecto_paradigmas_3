@@ -99,9 +99,9 @@
 
         <div class="field">
           <label for="codigo-cupon">Código de descuento</label>
-          <input type="text" id="codigo-cupon" name="codigo-cupon">
+          <input type="text" id="codigo-cupon" name="codigo-cupon" autocomplete="off" placeholder="Ej.: UCP10">
           <button type="button" id="aplicar-cupon" class="btn btn-secondary">Aplicar cupón</button>
-          <p id="mensaje-cupon" aria-live="polite"></p>
+          <p id="mensaje-cupon" class="coupon-feedback" role="status" aria-live="polite"></p>
         </div>
 
         <p class="rv-total" id="rv-total"></p>

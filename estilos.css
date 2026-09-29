@@ -387,8 +387,8 @@ main > section {
   margin-top: 1.8rem;
   align-items: end;
 }
-/* fila 1: ZONA | FECHA · fila 2: TIPO · fila 3: SERVICIOS · fila 4: botón */
-.search-form .field:nth-of-type(2),
+/* fila 1: TEXTO | ZONA · fila 2: TIPO · fila 3: SERVICIOS · fila 4: botón */
+.search-form .field:nth-of-type(3),
 .search-form .field:nth-of-type(4) { grid-column: 1 / -1; }
 
 .filter-chips {
@@ -1009,14 +1009,6 @@ main > section {
 }
 .check-list input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
 
-.mensaje-error {
-  color: #ff8080;
-}
-
-.mensaje-exito {
-  color: #4ade80;
-}
-
 .rv-total {
   margin: .4rem 0 0;
   padding-top: 1rem;
@@ -1033,6 +1025,11 @@ main > section {
   color: var(--accent);
 }
 .rv-sena small { display: block; font-weight: 400; color: var(--page-fg-soft); }
+.coupon-feedback { min-height: 1.2em; margin: 0; font-size: .85rem; }
+.mensaje-error { color: #ff8080; }
+.mensaje-exito, .rv-descuento { color: #4ade80; }
+.rv-subtotal, .rv-descuento { display: block; font-size: .9rem; font-weight: 600; margin-bottom: .4rem; }
+.rv-subtotal { color: var(--page-fg-soft); }
 
 /* ============ SUMÁ TU COMPLEJO ============ */
 .join-section {
