@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CanchaYa · Complejos (tabla)</title>
+  <title>CanchaYa · Cotizar</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="estilos.css?v=20260929-cotizar">
   <script src="main.js?v=20260929-cotizar" defer></script>
+  <script src="app.js?v=20260929-cotizar" defer></script>
 </head>
 <body>
 
@@ -21,11 +22,11 @@
     </a>
     <nav class="site-nav" id="site-nav" aria-label="Navegación principal">
       <a href="index.html">Inicio</a>
-      <a href="listado_tabla.html" class="is-current">Tabla</a>
+      <a href="listado_tabla.html">Tabla</a>
       <a href="listado_box.html">Tarjetas</a>
       <a href="detalle.html">Ficha de complejo</a>
       <a href="comprar.html">Reservar</a>
-      <a href="cotizar.html">Cotizar</a>
+      <a href="cotizar.html" class="is-current" aria-current="page">Cotizar</a>
     </nav>
     <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">
       <span class="menu-icon"></span>
@@ -34,31 +35,42 @@
 
   <main>
 
-    <section class="list-section">
-      <p class="badge">Listado</p>
-      <h2 class="section-title">Complejos en forma de tabla.</h2>
+    <!-- ============ CALCULADORA DE PRESUPUESTO ============
+         Módulo independiente: tarifas y descuentos se cargan desde tarifas.json
+         vía fetch() y el total se recalcula en cada 'change' (app.js). -->
+    <section class="comprar-section" id="calculadora">
+      <p class="badge">Cotizar</p>
+      <h2 class="section-title">Calculá tu presupuesto</h2>
       <p class="section-text">
-        Todos los complejos de Posadas con su zona, tipo de cancha, servicios y
-        precio. Tocá "Ver ficha" para abrir el detalle de un complejo.
+        Elegí el tipo de cancha, la cantidad de horas y los servicios que
+        quieras sumar. El presupuesto se arma solo, con los descuentos por
+        cantidad de horas y por combo de servicios.
       </p>
 
-      <div class="tabla-wrap">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Complejo</th>
-            <th>Zona</th>
-            <th>Cancha</th>
-            <th>Servicios</th>
-            <th>Precio por hora</th>
-            <th>Ficha</th>
-          </tr>
-        </thead>
-        <tbody id="tabla-complejos">
-          <!-- Las filas las arma main.js con los datos de COMPLEJOS -->
-        </tbody>
-      </table>
-      </div>
+      <form class="form-compra" id="form-calculadora">
+
+        <div class="field">
+          <label for="calc-tipo">Tipo de cancha</label>
+          <select id="calc-tipo" name="calc-tipo"></select>
+        </div>
+
+        <div class="field">
+          <label for="calc-horas">Cantidad de horas</label>
+          <select id="calc-horas" name="calc-horas">
+            <option value="1">1 hora</option>
+            <option value="2">2 horas</option>
+            <option value="3">3 horas</option>
+            <option value="4">4 horas</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <span class="field-legend">Servicios para agregar</span>
+          <ul class="check-list" id="calc-servicios"></ul>
+        </div>
+
+        <p class="rv-total" id="calc-total" aria-live="polite">Cargando tarifas…</p>
+      </form>
     </section>
 
   </main>

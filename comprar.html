@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CanchaYa · Reservar</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="estilos.css?v=20260929-integracion">
-  <script src="main.js?v=20260929-integracion" defer></script>
-  <script src="app.js?v=20260929-integracion" defer></script>
+  <link rel="stylesheet" href="estilos.css?v=20260929-cotizar">
+  <script src="main.js?v=20260929-cotizar" defer></script>
+  <script src="app.js?v=20260929-cotizar" defer></script>
 </head>
 <body>
 
@@ -26,6 +26,7 @@
       <a href="listado_box.html">Tarjetas</a>
       <a href="detalle.html">Ficha de complejo</a>
       <a href="comprar.html" class="is-current">Reservar</a>
+      <a href="cotizar.html">Cotizar</a>
     </nav>
     <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">
       <span class="menu-icon"></span>
@@ -89,11 +90,6 @@
           <input type="email" id="email" name="email" placeholder="nombre@gmail.com">
         </div>
 
-        <div class="field">
-          <label for="direccion">Dirección</label>
-          <input type="text" id="direccion" name="direccion" placeholder="Calle y número">
-        </div>
-
         <!-- 3. Pago -->
         <div class="field">
           <label for="pago">Tipo de pago</label>
@@ -122,44 +118,6 @@
       <div class="rv-confirm" id="rv-confirm" aria-live="polite" hidden></div>
     </section>
 
-    <!-- ============ CALCULADORA DE PRESUPUESTO ============
-         Módulo independiente: tarifas y descuentos se cargan desde tarifas.json
-         vía fetch() y el total se recalcula en cada 'change' (app.js). -->
-    <section class="comprar-section" id="calculadora">
-      <p class="badge">Presupuesto</p>
-      <h2 class="section-title">Calculá tu presupuesto</h2>
-      <p class="section-text">
-        Elegí el tipo de cancha, la cantidad de horas y los servicios que
-        quieras sumar. Es una estimación independiente de la reserva seleccionada. El presupuesto se arma solo, con los descuentos por
-        cantidad de horas y por combo de servicios.
-      </p>
-
-      <form class="form-compra" id="form-calculadora">
-
-        <div class="field">
-          <label for="calc-tipo">Tipo de cancha</label>
-          <select id="calc-tipo" name="calc-tipo"></select>
-        </div>
-
-        <div class="field">
-          <label for="calc-horas">Cantidad de horas</label>
-          <select id="calc-horas" name="calc-horas">
-            <option value="1">1 hora</option>
-            <option value="2">2 horas</option>
-            <option value="3">3 horas</option>
-            <option value="4">4 horas</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <span class="field-legend">Servicios para agregar</span>
-          <ul class="check-list" id="calc-servicios"></ul>
-        </div>
-
-        <p class="rv-total" id="calc-total" aria-live="polite">Cargando tarifas…</p>
-      </form>
-    </section>
-
   </main>
 
   <!-- ============ FOOTER ============ -->
@@ -180,6 +138,7 @@
         <a href="listado_box.html">Tarjetas</a>
         <a href="detalle.html">Ficha de complejo</a>
         <a href="comprar.html">Reservar</a>
+        <a href="cotizar.html">Cotizar</a>
       </nav>
 
       <div class="footer-col">

@@ -12,9 +12,12 @@ Colocar el proyecto en `htdocs/canchaYaFrontend`, iniciar Apache y abrir
 | Opción | Funcionalidad | Archivos |
 | --- | --- | --- |
 | 3 | Catálogo JSON y búsqueda en vivo | `app.js`, `data/complejos.json` |
-| 5 | Calculadora de presupuesto, descuentos por horas y servicios | `app.js`, `tarifas.json`, `comprar.html` |
+| 5 | Calculadora de presupuesto, descuentos por horas y servicios | `app.js`, `tarifas.json`, `cotizar.html` |
 | 10 | Horarios libres/ocupados y confirmación simulada | `app.js`, `data/turnos.json`, `data/reserva-respuesta.json` |
 | Cupón | UCP10: 10 % sobre cancha y servicios de la reserva | `main.js`, `comprar.html` |
+
+El menú hamburguesa incluye **Cotizar**, que abre `cotizar.html`.
+El formulario de reserva no solicita la dirección del cliente.
 
 La calculadora es una estimación independiente. Sus tarifas y descuentos no
 modifican la reserva. El cupón se aplica al formulario de reserva y su resumen.

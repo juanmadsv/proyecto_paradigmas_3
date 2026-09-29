@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 /* Opción 5: calculadora independiente de presupuestos. */
 /* =========================================================
    CanchaYa · app.js
-   Calculadora de tarifas, presupuestos y descuentos (comprar.html).
+   Calculadora de tarifas, presupuestos y descuentos (cotizar.html).
    Reto: fetch() + async/await para traer la tabla de precios/descuentos
    desde tarifas.json, y addEventListener('change', ...) para recalcular
    el presupuesto sin usar atributos onclick/onsubmit en el HTML.
