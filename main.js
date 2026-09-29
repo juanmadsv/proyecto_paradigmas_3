@@ -185,6 +185,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       const descuento = cuponActivo ? Math.round(subtotal * 0.10) : 0;
       const total = subtotal - descuento;
       const sena = Math.round(total * SENA_PCT);
+      totalEl.dataset.total = total;
+      totalEl.dataset.sena = sena;
       const desglose = extra ? ` (${pesos(base)} cancha + ${pesos(extra)} servicios)` : " la hora";
       totalEl.innerHTML =
         (cuponActivo
@@ -194,6 +196,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         `Total: ${pesos(total)}${cuponActivo ? "" : desglose}` +
         `<span class="rv-sena">Seña para reservar (${Math.round(SENA_PCT * 100)}%): ${pesos(sena)}` +
         `<small>El resto (${pesos(total - sena)}) se paga en el complejo.</small></span>`;
+      return { total, sena };
     };
 
     document.getElementById("aplicar-cupon").addEventListener("click", () => {
@@ -255,6 +258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     selComplejo.addEventListener("change", () => mostrarComplejo(selComplejo.value));
     mostrarComplejo(selComplejo.value);
+    iniciarReservaHorarios({selComplejo, DATOS, tituloEl, tipoSel, calcularTotal, nombreTipo, pesos});
   }
 
 });

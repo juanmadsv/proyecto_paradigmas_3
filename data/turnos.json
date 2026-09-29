@@ -1,0 +1,53 @@
+{
+  "fecha": "hoy",
+  "turnos": {
+    "terraza": [
+      { "hora": "18:00", "libre": false },
+      { "hora": "19:00", "libre": false },
+      { "hora": "20:00", "libre": true },
+      { "hora": "21:00", "libre": false },
+      { "hora": "22:00", "libre": true },
+      { "hora": "23:00", "libre": false }
+    ],
+    "rampla": [
+      { "hora": "18:00", "libre": true },
+      { "hora": "19:00", "libre": false },
+      { "hora": "20:00", "libre": false },
+      { "hora": "21:00", "libre": true },
+      { "hora": "22:00", "libre": false },
+      { "hora": "23:00", "libre": true }
+    ],
+    "napoles": [
+      { "hora": "18:00", "libre": false },
+      { "hora": "19:00", "libre": false },
+      { "hora": "20:00", "libre": false },
+      { "hora": "21:00", "libre": false },
+      { "hora": "22:00", "libre": false },
+      { "hora": "23:00", "libre": false }
+    ],
+    "establo": [
+      { "hora": "18:00", "libre": false },
+      { "hora": "19:00", "libre": true },
+      { "hora": "20:00", "libre": false },
+      { "hora": "21:00", "libre": false },
+      { "hora": "22:00", "libre": false },
+      { "hora": "23:00", "libre": true }
+    ],
+    "potrero": [
+      { "hora": "18:00", "libre": true },
+      { "hora": "19:00", "libre": true },
+      { "hora": "20:00", "libre": false },
+      { "hora": "21:00", "libre": true },
+      { "hora": "22:00", "libre": false },
+      { "hora": "23:00", "libre": true }
+    ],
+    "olimpo": [
+      { "hora": "18:00", "libre": false },
+      { "hora": "19:00", "libre": false },
+      { "hora": "20:00", "libre": false },
+      { "hora": "21:00", "libre": false },
+      { "hora": "22:00", "libre": false },
+      { "hora": "23:00", "libre": false }
+    ]
+  }
+}

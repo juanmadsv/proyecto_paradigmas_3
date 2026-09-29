@@ -1,0 +1,24 @@
+{
+  "precioBaseHora": 25000,
+  "senaPorc": 0.5,
+  "tiposCancha": [
+    { "valor": "5",  "nombre": "Fútbol 5",  "recargo": 0 },
+    { "valor": "7",  "nombre": "Fútbol 7",  "recargo": 4000 },
+    { "valor": "11", "nombre": "Fútbol 11", "recargo": 9000 }
+  ],
+  "servicios": [
+    { "valor": "parrilla",         "nombre": "Parrilla",         "precio": 3000 },
+    { "valor": "quincho",          "nombre": "Quincho",          "precio": 8000 },
+    { "valor": "vestuarios",       "nombre": "Vestuarios",       "precio": 1500 },
+    { "valor": "estacionamiento",  "nombre": "Estacionamiento",  "precio": 1000 }
+  ],
+  "descuentosPorHoras": [
+    { "minHoras": 4, "descuento": 0.20, "etiqueta": "20% por reservar 4 horas o más" },
+    { "minHoras": 3, "descuento": 0.12, "etiqueta": "12% por reservar 3 horas" },
+    { "minHoras": 2, "descuento": 0.05, "etiqueta": "5% por reservar 2 horas" }
+  ],
+  "descuentosPorServicios": [
+    { "minServicios": 3, "descuento": 0.15, "etiqueta": "15% en servicios por sumar 3 o más" },
+    { "minServicios": 2, "descuento": 0.08, "etiqueta": "8% en servicios por combo de 2" }
+  ]
+}

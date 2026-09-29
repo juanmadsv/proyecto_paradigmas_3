@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CanchaYa · Reservar</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap">
-  <link rel="stylesheet" href="estilos.css">
-  <script src="main.js" defer></script>
+  <link rel="stylesheet" href="estilos.css?v=20260929-cotizar">
+  <script src="main.js?v=20260929-cotizar" defer></script>
+  <script src="app.js?v=20260929-cotizar" defer></script>
 </head>
 <body>
 
@@ -25,6 +26,7 @@
       <a href="listado_box.html">Tarjetas</a>
       <a href="detalle.html">Ficha de complejo</a>
       <a href="comprar.html" class="is-current">Reservar</a>
+      <a href="cotizar.html">Cotizar</a>
     </nav>
     <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">
       <span class="menu-icon"></span>
@@ -41,7 +43,7 @@
         datos. Podés sumar servicios y la seña se calcula sola.
       </p>
 
-      <form class="form-compra" action="#" method="post">
+      <form class="form-compra" id="form-reserva" action="#" method="post" novalidate>
 
         <!-- 1. Qué complejo se reserva -->
         <div class="field">
@@ -55,6 +57,15 @@
         <div class="field">
           <label for="rv-tipo">Tipo de cancha</label>
           <select id="rv-tipo" name="tipo"></select>
+        </div>
+
+        <!-- Horario: los turnos libres se cargan con fetch() desde data/turnos.json -->
+        <div class="field">
+          <label for="rv-horario">Horario (hoy)</label>
+          <select id="rv-horario" name="horario">
+            <option value="">Cargando horarios...</option>
+          </select>
+          <p class="rv-estado" id="rv-estado" aria-live="polite"></p>
         </div>
 
         <!-- Servicios del complejo elegido (los completa main.js) -->
@@ -77,11 +88,6 @@
         <div class="field">
           <label for="email">Gmail</label>
           <input type="email" id="email" name="email" placeholder="nombre@gmail.com">
-        </div>
-
-        <div class="field">
-          <label for="direccion">Dirección</label>
-          <input type="text" id="direccion" name="direccion" placeholder="Calle y número">
         </div>
 
         <!-- 3. Pago -->
@@ -108,6 +114,8 @@
 
         <button type="submit" class="btn btn-primary btn-block">Confirmar reserva</button>
       </form>
+      <p class="section-text">Demostración: la reserva se simula y los turnos se restablecen al recargar. No se envían correos.</p>
+      <div class="rv-confirm" id="rv-confirm" aria-live="polite" hidden></div>
     </section>
 
   </main>
@@ -130,6 +138,7 @@
         <a href="listado_box.html">Tarjetas</a>
         <a href="detalle.html">Ficha de complejo</a>
         <a href="comprar.html">Reservar</a>
+        <a href="cotizar.html">Cotizar</a>
       </nav>
 
       <div class="footer-col">
