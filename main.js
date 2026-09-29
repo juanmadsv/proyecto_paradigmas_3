@@ -174,18 +174,52 @@ document.addEventListener("DOMContentLoaded", async () => {
     tipoSel.addEventListener("change", refrescarTitulo);
 
     const SENA_PCT = 0.5;   // seña que se paga ahora para dejar reservado (la mitad)
+    const cuponInput = document.getElementById("codigo-cupon");
+    const mensajeCupon = document.getElementById("mensaje-cupon");
+    let cuponActivo = false;
 
     const calcularTotal = (base) => {
       let extra = 0;
       servList.querySelectorAll("input:checked").forEach((c) => { extra += Number(c.dataset.precio); });
-      const total = base + extra;
+      const subtotal = base + extra;
+      const descuento = cuponActivo ? Math.round(subtotal * 0.10) : 0;
+      const total = subtotal - descuento;
       const sena = Math.round(total * SENA_PCT);
       const desglose = extra ? ` (${pesos(base)} cancha + ${pesos(extra)} servicios)` : " la hora";
       totalEl.innerHTML =
-        `Total: ${pesos(total)}${desglose}` +
+        (cuponActivo
+          ? `<span class="rv-subtotal">Subtotal: ${pesos(subtotal)}${desglose}</span>` +
+            `<span class="rv-descuento">Cupón UCP10 (10%): -${pesos(descuento)}</span>`
+          : "") +
+        `Total: ${pesos(total)}${cuponActivo ? "" : desglose}` +
         `<span class="rv-sena">Seña para reservar (${Math.round(SENA_PCT * 100)}%): ${pesos(sena)}` +
         `<small>El resto (${pesos(total - sena)}) se paga en el complejo.</small></span>`;
     };
+
+    document.getElementById("aplicar-cupon").addEventListener("click", () => {
+      const codigo = cuponInput.value.trim().toUpperCase();
+      cuponActivo = codigo === "UCP10";
+      if (!codigo) {
+        mensajeCupon.textContent = "Por favor, ingresá un código.";
+        mensajeCupon.className = "coupon-feedback mensaje-error";
+      } else if (cuponActivo) {
+        mensajeCupon.textContent = "¡Cupón aplicado! Tenés un 10% de descuento.";
+        mensajeCupon.className = "coupon-feedback mensaje-exito";
+      } else {
+        mensajeCupon.textContent = "Código inválido o vencido.";
+        mensajeCupon.className = "coupon-feedback mensaje-error";
+      }
+      calcularTotal(DATOS[selComplejo.value].precio);
+    });
+
+    cuponInput.addEventListener("input", () => {
+      if (cuponActivo) {
+        cuponActivo = false;
+        calcularTotal(DATOS[selComplejo.value].precio);
+      }
+      mensajeCupon.textContent = "";
+      mensajeCupon.className = "coupon-feedback";
+    });
 
     const mostrarComplejo = (clave) => {
       const c = DATOS[clave];

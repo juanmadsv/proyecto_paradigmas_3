@@ -1025,6 +1025,11 @@ main > section {
   color: var(--accent);
 }
 .rv-sena small { display: block; font-weight: 400; color: var(--page-fg-soft); }
+.coupon-feedback { min-height: 1.2em; margin: 0; font-size: .85rem; }
+.mensaje-error { color: #ff8080; }
+.mensaje-exito, .rv-descuento { color: #4ade80; }
+.rv-subtotal, .rv-descuento { display: block; font-size: .9rem; font-weight: 600; margin-bottom: .4rem; }
+.rv-subtotal { color: var(--page-fg-soft); }
 
 /* ============ SUMÁ TU COMPLEJO ============ */
 .join-section {
