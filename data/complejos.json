@@ -1,0 +1,91 @@
+{
+  "terraza": {
+    "nombre": "La Terraza",
+    "zona": "Centro",
+    "zonaSlug": "centro",
+    "dir": "Av. Santa Catalina 4150",
+    "tipo": "Fútbol 5",
+    "tipos": "5",
+    "precio": 25000,
+    "servicios": [
+      "parrilla",
+      "quincho"
+    ],
+    "usos": "partido eventos",
+    "resumen": "Cancha de césped sintético con iluminación para jugar de noche. Tiene parrilla y quincho para quedarse después del partido."
+  },
+  "rampla": {
+    "nombre": "La Rampla",
+    "zona": "Villa Cabello",
+    "zonaSlug": "a3",
+    "dir": "Pedro Morcillo 3326",
+    "tipo": "Fútbol 5",
+    "tipos": "5",
+    "precio": 27000,
+    "servicios": [
+      "vestuarios"
+    ],
+    "usos": "partido",
+    "resumen": "Cancha techada con vestuarios. Ideal para partidos entre amigos sin depender del clima."
+  },
+  "napoles": {
+    "nombre": "Nápoles",
+    "zona": "Itaembé Miní",
+    "zonaSlug": "itaembe-mini",
+    "dir": "Av. Quaranta 2912",
+    "tipo": "Fútbol 5",
+    "tipos": "5",
+    "precio": 28000,
+    "servicios": [
+      "parrilla",
+      "estacionamiento"
+    ],
+    "usos": "partido",
+    "resumen": "Cancha con parrilla y estacionamiento propio. Fácil de llegar."
+  },
+  "establo": {
+    "nombre": "El Establo Fútbol 5",
+    "zona": "Centro",
+    "zonaSlug": "centro",
+    "dir": "Santa Cruz 3436",
+    "tipo": "Fútbol 5 · 7",
+    "tipos": "5 7",
+    "precio": 27500,
+    "servicios": [
+      "quincho",
+      "parrilla"
+    ],
+    "usos": "partido eventos escuelita",
+    "resumen": "Complejo con quincho y parrilla. Sirve para partidos y para festejar cumpleaños."
+  },
+  "potrero": {
+    "nombre": "El Potrero Fútbol 5",
+    "zona": "Itaembé Miní",
+    "zonaSlug": "itaembe-mini",
+    "dir": "3 de Febrero 2040",
+    "tipo": "Fútbol 5 · 7 · 11",
+    "tipos": "5 7 11",
+    "precio": 25000,
+    "servicios": [
+      "estacionamiento"
+    ],
+    "usos": "partido escuelita torneos",
+    "resumen": "Complejo grande con estacionamiento. Se usa también para escuelita y torneos."
+  },
+  "olimpo": {
+    "nombre": "El Olimpo Fútbol 5",
+    "zona": "Villa Sarita",
+    "zonaSlug": "villa-sarita",
+    "dir": "Av. Tomás Guido 4025",
+    "tipo": "Fútbol 5",
+    "tipos": "5",
+    "precio": 29000,
+    "servicios": [
+      "parrilla",
+      "quincho",
+      "vestuarios"
+    ],
+    "usos": "partido eventos",
+    "resumen": "Cancha con parrilla, quincho y vestuarios. El combo completo para el after."
+  }
+}
