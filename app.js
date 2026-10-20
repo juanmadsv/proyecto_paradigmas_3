@@ -1,15 +1,15 @@
 /* CanchaYa AE2 — Opción 3: catálogo asincrónico y filtro en vivo. */
 document.addEventListener("DOMContentLoaded", async () => {
-  const form = document.getElementById("form-buscar");
+  const form = document.querySelector("#form-buscar");
   if (!form) return;
-  const texto = document.getElementById("buscar-texto");
-  const zona = document.getElementById("zona");
+  const texto = document.querySelector("#buscar-texto");
+  const zona = document.querySelector("#zona");
   const tipos = document.querySelector(".toggle-group");
   const chips = document.querySelector(".filter-chips");
-  const lista = document.getElementById("complejos-lista");
+  const lista = document.querySelector("#complejos-lista");
   const estado = document.querySelector(".search-status");
-  const vacio = document.getElementById("no-results");
-  const total = document.getElementById("results-count");
+  const vacio = document.querySelector("#no-results");
+  const total = document.querySelector("#results-count");
   let catalogo;
   try {
     const respuesta = await fetch("data/complejos.json");
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     actualizar();
-    document.getElementById("complejos").scrollIntoView({ behavior: "smooth", block: "start" });
+    document.querySelector("#complejos").scrollIntoView({ behavior: "smooth", block: "start" });
   });
   actualizar();
 });
@@ -104,13 +104,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  const form     = document.getElementById("form-calculadora");
+  const form     = document.querySelector("#form-calculadora");
   if (!form) return; // esta página no tiene la calculadora
 
-  const tipoSel  = document.getElementById("calc-tipo");
-  const horasSel = document.getElementById("calc-horas");
-  const servList = document.getElementById("calc-servicios");
-  const totalEl  = document.getElementById("calc-total");
+  const tipoSel  = document.querySelector("#calc-tipo");
+  const horasSel = document.querySelector("#calc-horas");
+  const servList = document.querySelector("#calc-servicios");
+  const totalEl  = document.querySelector("#calc-total");
 
   const pesos = (n) => "$" + Math.round(n).toLocaleString("es-AR");
 
@@ -251,10 +251,10 @@ class ServicioReservas extends ServicioJSON {
 
 function iniciarReservaHorarios({selComplejo, DATOS, tituloEl, tipoSel, calcularTotal, nombreTipo, pesos}) {
     let pendiente = false;
-    const horaSel   = document.getElementById("rv-horario");
-    const estadoEl  = document.getElementById("rv-estado");
-    const confirmEl = document.getElementById("rv-confirm");
-    const formRes   = document.getElementById("form-reserva");
+    const horaSel   = document.querySelector("#rv-horario");
+    const estadoEl  = document.querySelector("#rv-estado");
+    const confirmEl = document.querySelector("#rv-confirm");
+    const formRes   = document.querySelector("#form-reserva");
 
     // "Reservar La Terraza · Fútbol 7 · 20:00 h" segun complejo + tipo + horario
     const refrescarTitulo = () => {
@@ -354,8 +354,8 @@ function iniciarReservaHorarios({selComplejo, DATOS, tituloEl, tipoSel, calcular
       // 1. Leer los datos (.trim() saca los espacios de los costados)
       const complejo = selComplejo.value;
       const hora     = horaSel.value;
-      const nombre   = conMayusculas(document.getElementById("nombre").value.trim());
-      const telefono = document.getElementById("telefono").value.trim();
+      const nombre   = conMayusculas(document.querySelector("#nombre").value.trim());
+      const telefono = document.querySelector("#telefono").value.trim();
 
       if (pendiente) return;
       // 2. Validar
