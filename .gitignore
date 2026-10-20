@@ -1,0 +1,6 @@
+config/database.local.php
+.env
+node_modules/
+*.log
+__pycache__/
+*.py[cod]

@@ -191,228 +191,226 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-/* Opción 10: servicios con herencia y reserva simulada. */
-class ServicioJSON {
-  constructor(url) {
-    this.url = url;
-  }
-
-  // Pide el archivo al servidor y devuelve los datos ya convertidos
-  async pedir() {
-    const respuesta = await fetch(this.url);
+/* Sesión y API: la cookie HttpOnly viaja con fetch, nunca se guarda en localStorage. */
+const sesionCanchaYa = {
+  usuario: null,
+  csrf: null,
+  lista: [],
+  listaPreparada: null,
+  async solicitar(ruta, opciones = {}) {
+    const respuesta = await fetch(`api/${ruta}`, { credentials: "same-origin", cache: "no-store", ...opciones });
+    let datos;
+    try { datos = await respuesta.json(); }
+    catch { throw new Error("No se pudo leer la API. Abrí el sitio con Apache de XAMPP."); }
     if (!respuesta.ok) {
-      throw new Error("Error HTTP " + respuesta.status);
+      if (respuesta.status === 401 && ruta !== "login.php") this.actualizar(null, []);
+      const error = new Error(datos.error || "No se pudo completar la operación.");
+      error.status = respuesta.status;
+      throw error;
     }
-    return await respuesta.json();
-  }
-}
-
-// Horarios de cada complejo (hereda "pedir" de ServicioJSON)
-class ServicioTurnos extends ServicioJSON {
-  constructor() {
-    super("data/turnos.json");   // le pasa la url a la clase madre
-    this.turnos = null;          // acá se guardan después del primer pedido
-  }
-
-  // Devuelve los horarios de un complejo. El archivo se pide una sola vez.
-  async horariosDe(complejo) {
-    if (this.turnos === null) {
-      this.carga ||= this.pedir();
-      const datos = await this.carga;
-      this.turnos = datos.turnos;
+    return datos;
+  },
+  actualizar(usuario, reservas) {
+    this.usuario = usuario;
+    this.lista = reservas;
+    document.querySelectorAll('[data-sesion="privada"]').forEach((el) => { el.hidden = !usuario; });
+    document.querySelectorAll('[data-sesion="publica"]').forEach((el) => { el.hidden = Boolean(usuario); });
+    document.querySelectorAll("[data-nombre-usuario]").forEach((el) => { el.textContent = usuario?.nombre || ""; });
+    document.querySelectorAll("[data-email-usuario]").forEach((el) => { el.textContent = usuario?.email || ""; });
+    const campos = document.querySelector("#datos-reserva");
+    if (campos) campos.disabled = !usuario;
+    document.querySelector("#rv-confirm")?.replaceChildren();
+    document.dispatchEvent(new CustomEvent("sesion-actualizada"));
+  },
+  async verificar() {
+    try {
+      // Endpoint privado: una respuesta 401 significa visitante, no un error de MySQL.
+      const datos = await this.solicitar("mis_reservas.php");
+      this.csrf = datos.csrf_token;
+      this.actualizar(datos.usuario, datos.reservas);
+    } catch (error) {
+      if (error.status !== 401) throw error;
+      this.actualizar(null, []);
+      this.csrf = null;
     }
-    return this.turnos[complejo] || [];
-  }
-
-  // Cuando alguien reserva, ese horario deja de estar libre
-  marcarOcupado(complejo, hora) {
-    const turno = this.turnos[complejo].find((t) => t.hora === hora);
-    turno.libre = false;
-  }
-}
-
-// Confirmación de reservas (también hereda "pedir" de ServicioJSON)
-class ServicioReservas extends ServicioJSON {
-  constructor() {
-    super("data/reserva-respuesta.json");
-  }
-
-  // Con un servidor real acá se enviarían los datos (POST).
-  // Como es un sitio estático, el .json hace de respuesta del servidor.
-  async confirmar() {
-    const respuesta = await this.pedir();
-    if (!respuesta.ok) {
-      throw new Error(respuesta.mensaje);
-    }
-    return respuesta.mensaje;
-  }
-}
-
-
-function iniciarReservaHorarios({selComplejo, DATOS, tituloEl, tipoSel, calcularTotal, nombreTipo, pesos}) {
-    let pendiente = false;
-    const horaSel   = document.querySelector("#rv-horario");
-    const estadoEl  = document.querySelector("#rv-estado");
-    const confirmEl = document.querySelector("#rv-confirm");
-    const formRes   = document.querySelector("#form-reserva");
-
-    // "Reservar La Terraza · Fútbol 7 · 20:00 h" segun complejo + tipo + horario
-    const refrescarTitulo = () => {
-      const c = DATOS[selComplejo.value];
-      const hora = horaSel.value ? ` · ${horaSel.value} h` : "";
-      tituloEl.textContent = `Reservar ${c.nombre} · ${nombreTipo(tipoSel.value)}${hora}`;
-    };
-    tipoSel.addEventListener("change", refrescarTitulo);
-    horaSel.addEventListener("change", refrescarTitulo);
-
-    /* ---------- Horarios disponibles ---------- */
-    const servicioTurnos   = new ServicioTurnos();
-    const servicioReservas = new ServicioReservas();
-
-    // Texto chico debajo del select: "2 de 6 horarios libres hoy"
-    const mostrarEstado = (texto, tipo) => {
-      estadoEl.textContent = texto;
-      estadoEl.className = "rv-estado is-" + tipo;
-    };
-
-    // Arma el <select> de horarios: los ocupados quedan deshabilitados
-    const llenarSelectHorarios = (horarios) => {
-      let opciones = `<option value="">Elegí un horario</option>`;
-      horarios.forEach((turno) => {
-        if (turno.libre) {
-          opciones += `<option value="${turno.hora}">${turno.hora} h — libre</option>`;
-        } else {
-          opciones += `<option value="${turno.hora}" disabled>${turno.hora} h — ocupado</option>`;
-        }
-      });
-      horaSel.innerHTML = opciones;
-    };
-
-    const mostrarHorarios = async (complejo) => {
-      horaSel.innerHTML = `<option value="">Cargando horarios...</option>`;
-      horaSel.disabled = true;
-
-      let horarios;
-      try {
-        horarios = await servicioTurnos.horariosDe(complejo);
-      } catch (error) {
-        if (selComplejo.value !== complejo) return;
-        horaSel.innerHTML = `<option value="">No disponible</option>`;
-        mostrarEstado("No se pudieron cargar los horarios. Abrí el sitio con Apache de XAMPP.", "error");
-        return;
-      }
-
-      // Si mientras esperábamos el usuario cambió de complejo, no mostramos esto
-      if (selComplejo.value !== complejo) return;
-
-      const libres = horarios.filter((turno) => turno.libre);
-
-      if (libres.length === 0) {
-        horaSel.innerHTML = `<option value="">Sin horarios libres hoy</option>`;
-        mostrarEstado("Sin horarios libres hoy. Probá con otro complejo.", "full");
-      } else {
-        llenarSelectHorarios(horarios);
-        horaSel.disabled = false;
-        mostrarEstado(`${libres.length} de ${horarios.length} horarios libres hoy`, "ok");
-      }
-      refrescarTitulo();
-    };
-
-    /* ---------- Confirmar reserva ---------- */
-
-    // Evita que un nombre con "<" o ">" se interprete como HTML
-    const sinHtml = (texto) => texto.replace(/[&<>"']/g, (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-
-    // "luis sanches" -> "Luis Sanches"
-    const conMayusculas = (texto) => texto
-      .split(" ")
-      .filter((palabra) => palabra !== "")
-      .map((palabra) => palabra[0].toUpperCase() + palabra.slice(1).toLowerCase())
-      .join(" ");
-
-    // Muestra la tarjeta de abajo del formulario (verde si salió bien, roja si no)
-    const mostrarMensaje = (html, tipo) => {
-      confirmEl.innerHTML = html;
-      confirmEl.className = "rv-confirm is-" + tipo;
-      confirmEl.hidden = false;
-      confirmEl.scrollIntoView({ behavior: "smooth", block: "center" });
-    };
-
-    // Devuelve la lista de lo que falta completar (vacía si está todo)
-    const camposFaltantes = (hora, nombre, telefono) => {
-      const faltan = [];
-      if (hora === "") faltan.push("un horario");
-      if (nombre === "") faltan.push("tu nombre");
-      if (telefono === "") faltan.push("un teléfono");
-      return faltan;
-    };
-
-    formRes.addEventListener("submit", async (e) => {
-      e.preventDefault();   // que no se recargue la página
-
-      // 1. Leer los datos (.trim() saca los espacios de los costados)
-      const complejo = selComplejo.value;
-      const hora     = horaSel.value;
-      const nombre   = conMayusculas(document.querySelector("#nombre").value.trim());
-      const telefono = document.querySelector("#telefono").value.trim();
-
-      if (pendiente) return;
-      // 2. Validar
-      const faltan = camposFaltantes(hora, nombre, telefono);
-      if (faltan.length > 0) {
-        mostrarMensaje(`<p>Para reservar falta completar: <strong>${faltan.join(", ")}</strong>.</p>`, "error");
-        return;
-      }
-
-      const turno = servicioTurnos.turnos?.[complejo]?.find((t) => t.hora === hora);
-      if (!turno?.libre) {
-        mostrarMensaje("<p>Elegí un horario disponible.</p>", "error");
-        return;
-      }
-      pendiente = true;
-      const boton = formRes.querySelector("button[type=submit]");
-      boton.disabled = true;
-      boton.textContent = "Confirmando...";
-      const controles = [...formRes.elements].map((el) => [el, el.disabled]);
-      controles.forEach(([el]) => { el.disabled = true; });
-
-      try {
-        // 3. "Enviar" la reserva al servidor
-        const mensaje = await servicioReservas.confirmar();
-
-        // 4. Ese horario ya no está libre
-        servicioTurnos.marcarOcupado(complejo, hora);
-
-        // 5. Mostrar el resumen
-        const c = DATOS[complejo];
-        const { total, sena } = calcularTotal(c.precio);
-        const codigo = "CY-" + Math.floor(1000 + Math.random() * 9000);
-
-        mostrarMensaje(`
-          <h3>¡Listo, ${sinHtml(nombre)}! Tu cancha está reservada</h3>
-          <p>${sinHtml(mensaje)}</p>
-          <dl>
-            <dt>Código</dt>   <dd>${codigo}</dd>
-            <dt>Complejo</dt> <dd>${c.nombre} · ${c.dir}</dd>
-            <dt>Cancha</dt>   <dd>${nombreTipo(tipoSel.value)}</dd>
-            <dt>Horario</dt>  <dd>Hoy, ${hora} h</dd>
-            <dt>Total</dt>    <dd>${pesos(total)} (seña ${pesos(sena)})</dd>
-          </dl>`, "ok");
-
-        // 6. Volver a dibujar los horarios (el reservado ahora sale "ocupado")
-        await mostrarHorarios(complejo);
-      } catch (error) {
-        mostrarMensaje("<p>No pudimos confirmar la reserva. Probá de nuevo en unos minutos.</p>", "error");
-      } finally {
-        pendiente = false;
-        controles.forEach(([el, disabled]) => { el.disabled = disabled; });
-        boton.disabled = false;
-        boton.textContent = "Confirmar reserva";
-      }
+  },
+  async enviar(ruta, datos = {}) {
+    if (!this.csrf) this.csrf = (await this.solicitar("csrf.php")).csrf_token;
+    return this.solicitar(ruta, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRF-Token": this.csrf },
+      body: JSON.stringify(datos),
     });
+  },
+};
 
+// Datos recibidos de usuarios: siempre nodos de texto, nunca HTML interpolado.
+function nodoTexto(etiqueta, contenido, clase) {
+  const nodo = document.createElement(etiqueta);
+  nodo.textContent = contenido;
+  if (clase) nodo.className = clase;
+  return nodo;
+}
 
-    selComplejo.addEventListener("change", () => mostrarHorarios(selComplejo.value));
-    mostrarHorarios(selComplejo.value);
+document.addEventListener("DOMContentLoaded", () => {
+  const estado = document.querySelector("#estado-sesion");
+  const mensaje = document.querySelector("#mensaje-cuenta");
+  const lista = document.querySelector("#mis-reservas-lista");
+  const avisar = (texto, error = false) => {
+    if (!mensaje) return;
+    mensaje.textContent = texto;
+    mensaje.className = error ? "mensaje-error" : "mensaje-exito";
+  };
+  document.addEventListener("sesion-actualizada", () => {
+    if (estado) estado.textContent = sesionCanchaYa.usuario ? "Sesión iniciada" : "Iniciá sesión para reservar y consultar tus reservas.";
+    if (!lista) return;
+    lista.replaceChildren();
+    if (!sesionCanchaYa.usuario) return;
+    if (!sesionCanchaYa.lista.length) lista.append(nodoTexto("li", "Todavía no tenés reservas."));
+    sesionCanchaYa.lista.forEach((reserva) => {
+      const item = document.createElement("li");
+      item.append(nodoTexto("h3", `Reserva CY-${reserva.id}`));
+      item.append(nodoTexto("p", `${reserva.complejo} · Fútbol ${reserva.tipo} · ${reserva.fecha} a las ${reserva.horario}`));
+      item.append(nodoTexto("p", `Total: $${Number(reserva.total).toLocaleString("es-AR")} · Seña: $${Number(reserva.sena).toLocaleString("es-AR")}`));
+      lista.append(item);
+    });
+  });
+  sesionCanchaYa.listaPreparada = sesionCanchaYa.verificar().catch((error) => {
+    sesionCanchaYa.actualizar(null, []);
+    if (estado) estado.textContent = error.message;
+    avisar(error.message, true);
+  });
+  document.querySelectorAll("[data-form-auth]").forEach((form) => {
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      if (form.dataset.enviando === "si") return;
+      const boton = form.querySelector('button[type="submit"]');
+      form.dataset.enviando = "si";
+      boton.disabled = true;
+      try {
+        await sesionCanchaYa.listaPreparada;
+        const datos = Object.fromEntries(new FormData(form));
+        const registro = form.dataset.formAuth === "registro";
+        const respuesta = await sesionCanchaYa.enviar(registro ? "registro.php" : "login.php", datos);
+        form.reset();
+        if (registro) {
+          avisar(respuesta.mensaje);
+          document.querySelector('#form-login input[name="email"]').value = datos.email;
+          document.querySelector('#form-login input[name="password"]').focus();
+        } else {
+          sesionCanchaYa.csrf = respuesta.csrf_token;
+          await sesionCanchaYa.verificar();
+          avisar("Sesión iniciada. Ya podés reservar.");
+        }
+      } catch (error) { avisar(error.message, true); }
+      finally { form.dataset.enviando = "no"; boton.disabled = false; }
+    });
+  });
+  document.querySelectorAll("[data-cerrar-sesion]").forEach((boton) => {
+    boton.addEventListener("click", async () => {
+      boton.disabled = true;
+      try {
+        await sesionCanchaYa.enviar("logout.php");
+        sesionCanchaYa.csrf = null;
+        sesionCanchaYa.actualizar(null, []);
+        avisar("Sesión cerrada.");
+      } catch (error) { avisar(error.message, true); }
+      finally { boton.disabled = false; }
+    });
+  });
+  // Sincroniza el DOM si otra pestaña inicia o cierra sesión.
+  window.addEventListener("focus", () => sesionCanchaYa.verificar().catch((error) => {
+    sesionCanchaYa.actualizar(null, []);
+    if (estado) estado.textContent = error.message;
+  }));
+});
+
+/* Opción 10: horarios desde PHP y reservas persistidas para el usuario de sesión. */
+function iniciarReservaHorarios({selComplejo, DATOS, tituloEl, tipoSel, nombreTipo, pesos}) {
+  const horaSel = document.querySelector("#rv-horario");
+  const estadoEl = document.querySelector("#rv-estado");
+  const confirmEl = document.querySelector("#rv-confirm");
+  const form = document.querySelector("#form-reserva");
+  const campos = document.querySelector("#datos-reserva");
+  let pendiente = false;
+  let solicitud = 0;
+  const titulo = () => {
+    tituloEl.textContent = `Reservar ${DATOS[selComplejo.value].nombre} · ${nombreTipo(tipoSel.value)}${horaSel.value ? ` · ${horaSel.value} h` : ""}`;
+  };
+  async function horarios() {
+    const actual = ++solicitud;
+    const complejo = selComplejo.value;
+    horaSel.disabled = true;
+    horaSel.replaceChildren(nodoTexto("option", "Cargando horarios..."));
+    try {
+      const datos = await sesionCanchaYa.solicitar("turnos.php");
+      if (actual !== solicitud) return;
+      const turnos = datos.turnos[complejo] || [];
+      const libres = turnos.filter((t) => t.libre).length;
+      const vacio = nodoTexto("option", libres ? "Elegí un horario" : "Sin horarios libres hoy");
+      vacio.value = "";
+      horaSel.replaceChildren(vacio);
+      turnos.forEach((turno) => {
+        const opcion = nodoTexto("option", `${turno.hora} h — ${turno.libre ? "libre" : "ocupado"}`);
+        opcion.value = turno.hora;
+        opcion.disabled = !turno.libre;
+        horaSel.append(opcion);
+      });
+      horaSel.disabled = libres === 0;
+      estadoEl.textContent = `${libres} de ${turnos.length} horarios libres hoy`;
+      titulo();
+    } catch (error) {
+      if (actual !== solicitud) return;
+      horaSel.replaceChildren(nodoTexto("option", "No disponible"));
+      estadoEl.textContent = error.message;
+    }
+  }
+  selComplejo.addEventListener("change", horarios);
+  tipoSel.addEventListener("change", titulo);
+  horaSel.addEventListener("change", titulo);
+  form.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    if (pendiente) return;
+    confirmEl.hidden = false;
+    confirmEl.replaceChildren();
+    if (!sesionCanchaYa.usuario) {
+      confirmEl.append(nodoTexto("p", "Iniciá sesión para confirmar la reserva."));
+      return;
+    }
+    const datos = {
+      complejo: selComplejo.value, tipo: tipoSel.value, horario: horaSel.value,
+      telefono: form.querySelector('[name="telefono"]').value.trim(),
+      pago: form.querySelector('[name="pago"]').value,
+      servicios: [...form.querySelectorAll('[name="servicio"]:checked')].map((el) => el.value),
+      cupon: document.querySelector("#mensaje-cupon").classList.contains("mensaje-exito") ? "UCP10" : "",
+    };
+    if (!datos.horario || !datos.telefono) {
+      confirmEl.append(nodoTexto("p", "Elegí un horario y completá tu teléfono."));
+      return;
+    }
+    pendiente = true;
+    campos.disabled = true;
+    try {
+      const respuesta = await sesionCanchaYa.enviar("mis_reservas.php", datos);
+      const reserva = respuesta.reserva;
+      // verificar() limpia resúmenes viejos; dibujar el nuevo sólo después.
+      await sesionCanchaYa.verificar();
+      confirmEl.className = "rv-confirm is-ok";
+      confirmEl.append(nodoTexto("h3", "¡Tu reserva quedó guardada!"));
+      confirmEl.append(nodoTexto("p", `CY-${reserva.id} · ${DATOS[reserva.complejo].nombre} · ${reserva.fecha} · ${reserva.horario} h`));
+      confirmEl.append(nodoTexto("p", `Total: ${pesos(Number(reserva.total))} · Seña: ${pesos(Number(reserva.sena))}`));
+      const enlace = document.createElement("a");
+      enlace.href = "cuenta.html";
+      enlace.textContent = "Ver mis reservas";
+      confirmEl.append(enlace);
+    } catch (error) {
+      confirmEl.className = "rv-confirm is-error";
+      confirmEl.append(nodoTexto("p", error.message));
+    } finally {
+      pendiente = false;
+      campos.disabled = !sesionCanchaYa.usuario;
+      await horarios();
+    }
+  });
+  horarios();
 }
