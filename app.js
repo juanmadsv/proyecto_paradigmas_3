@@ -334,6 +334,13 @@ function iniciarReservaHorarios({selComplejo, DATOS, tituloEl, tipoSel, nombreTi
   const campos = document.querySelector("#datos-reserva");
   let pendiente = false;
   let solicitud = 0;
+  const mostrarAcceso = () => {
+    const acceso = nodoTexto("a", "Iniciar sesión o crear cuenta", "btn btn-primary");
+    acceso.href = "cuenta.html";
+    confirmEl.className = "rv-confirm";
+    confirmEl.hidden = false;
+    confirmEl.replaceChildren(acceso);
+  };
   const titulo = () => {
     tituloEl.textContent = `Reservar ${DATOS[selComplejo.value].nombre} · ${nombreTipo(tipoSel.value)}${horaSel.value ? ` · ${horaSel.value} h` : ""}`;
   };
@@ -374,7 +381,7 @@ function iniciarReservaHorarios({selComplejo, DATOS, tituloEl, tipoSel, nombreTi
     confirmEl.hidden = false;
     confirmEl.replaceChildren();
     if (!sesionCanchaYa.usuario) {
-      confirmEl.append(nodoTexto("p", "Iniciá sesión para confirmar la reserva."));
+      mostrarAcceso();
       return;
     }
     const datos = {
@@ -404,8 +411,12 @@ function iniciarReservaHorarios({selComplejo, DATOS, tituloEl, tipoSel, nombreTi
       enlace.textContent = "Ver mis reservas";
       confirmEl.append(enlace);
     } catch (error) {
-      confirmEl.className = "rv-confirm is-error";
-      confirmEl.append(nodoTexto("p", error.message));
+      if (error.status === 401) {
+        mostrarAcceso();
+      } else {
+        confirmEl.className = "rv-confirm is-error";
+        confirmEl.append(nodoTexto("p", error.message));
+      }
     } finally {
       pendiente = false;
       campos.disabled = !sesionCanchaYa.usuario;
