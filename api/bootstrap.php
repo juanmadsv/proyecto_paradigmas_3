@@ -19,26 +19,29 @@ set_exception_handler(function (Throwable $error): void {
     responder(500, ['error' => 'No se pudo completar la operación. Revisá la configuración del servidor.']);
 });
 
-ini_set('session.use_strict_mode', '1');
-ini_set('session.use_only_cookies', '1');
-ini_set('session.use_trans_sid', '0');
-session_name('CANCHAYA_SESSID');
-$seguro = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
-$ruta = rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME']))), '/') . '/';
-session_set_cookie_params([
-    'lifetime' => 0, 'path' => $ruta,
-    'secure' => $seguro, 'httponly' => true, 'samesite' => 'Lax',
-]);
-session_cache_limiter(''); // Conservar el encabezado no-store definido arriba.
-session_start();
+if (PHP_SAPI !== 'cli') {
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
+    ini_set('session.use_trans_sid', '0');
+    session_name('CANCHAYA_SESSID');
+    $seguro = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+    $ruta = rtrim(str_replace('\\', '/', dirname(dirname($_SERVER['SCRIPT_NAME']))), '/') . '/';
+    session_set_cookie_params([
+        'lifetime' => 0, 'path' => $ruta,
+        'secure' => $seguro, 'httponly' => true, 'samesite' => 'Lax',
+    ]);
+    session_cache_limiter(''); // Conservar el encabezado no-store definido arriba.
+    session_start();
 
-// Una sesión autenticada vence luego de 30 minutos sin actividad.
-if (isset($_SESSION['usuario_id'], $_SESSION['ultima_actividad']) && time() - $_SESSION['ultima_actividad'] > 1800) {
-    $_SESSION = [];
-    session_regenerate_id(true);
-}
-if (isset($_SESSION['usuario_id'])) {
-    $_SESSION['ultima_actividad'] = time();
+    // Una sesión autenticada vence luego de 30 minutos sin actividad.
+    if (isset($_SESSION['usuario_id'], $_SESSION['ultima_actividad']) && time() - $_SESSION['ultima_actividad'] > 1800) {
+        $_SESSION = [];
+        session_regenerate_id(true);
+    }
+    if (isset($_SESSION['usuario_id'])) {
+        $_SESSION['ultima_actividad'] = time();
+    }
+
 }
 
 function metodo(string $esperado): void {
@@ -109,14 +112,15 @@ function exigirUsuario(): array {
     if (!isset($_SESSION['usuario_id'])) {
         responder(401, ['error' => 'Iniciá sesión para continuar.']);
     }
-    $consulta = db()->prepare('SELECT id, nombre, email FROM usuarios WHERE id = :id');
+    $consulta = db()->prepare('SELECT id, nombre, email, version_sesion FROM usuarios WHERE id = :id');
     $consulta->execute(['id' => $_SESSION['usuario_id']]);
     $usuario = $consulta->fetch();
-    if (!$usuario) {
+    if (!$usuario || (int) ($usuario['version_sesion'] ?? 0) !== (int) ($_SESSION['version_sesion'] ?? 0)) {
         $_SESSION = [];
         session_regenerate_id(true);
         responder(401, ['error' => 'La sesión ya no es válida.']);
     }
+    unset($usuario['version_sesion']);
     $usuario['id'] = (int) $usuario['id'];
     return $usuario;
 }

@@ -119,3 +119,11 @@ Referencias: [password_hash](https://www.php.net/manual/es/function.password-has
 [password_verify](https://www.php.net/manual/es/function.password-verify.php),
 [sesiones](https://www.php.net/manual/es/book.session.php),
 [PDO prepare](https://www.php.net/manual/es/pdo.prepare.php).
+
+## Recuperación de contraseña
+
+Mi cuenta incluye **Olvidé mi contraseña**. Consultar [RECUPERACION.md](RECUPERACION.md)
+para importar la migración adicional, instalar PHPMailer, configurar Gmail y ejecutar
+el proceso de envío. La recuperación no enviará correos hasta completar esos pasos.
+No se necesitan cambios de configuración para el registro/login habitual después
+de importar la migración y volver a iniciar sesión.

@@ -425,3 +425,57 @@ function iniciarReservaHorarios({selComplejo, DATOS, tituloEl, tipoSel, nombreTi
   });
   horarios();
 }
+
+/* Recuperación de contraseña. El token del fragmento sólo se conserva en memoria. */
+document.addEventListener("DOMContentLoaded", () => {
+  const pedir = document.querySelector("#form-recuperar");
+  const cambiar = document.querySelector("#form-restablecer");
+  if (!pedir || !cambiar) return;
+  const estado = document.querySelector("#mensaje-recuperacion");
+  let token = new URLSearchParams(location.hash.slice(1)).get("token") || "";
+  // Quitar el secreto de la barra/historial sin enviarlo al servidor.
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+  if (token) {
+    pedir.hidden = true;
+    cambiar.hidden = false;
+    if (!/^[a-f0-9]{64}$/.test(token)) {
+      cambiar.hidden = true;
+      estado.textContent = "El enlace no es válido. Solicitá uno nuevo.";
+      token = "";
+    }
+  }
+  for (const form of [pedir, cambiar]) {
+    form.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      const boton = form.querySelector('button[type="submit"]');
+      if (boton.disabled) return;
+      const datos = Object.fromEntries(new FormData(form));
+      const restablecer = form === cambiar;
+      if (restablecer && datos.password !== datos.password_confirmation) {
+        estado.textContent = "Las contraseñas no coinciden.";
+        return;
+      }
+      boton.disabled = true;
+      estado.textContent = restablecer ? "Guardando contraseña..." : "Procesando solicitud...";
+      try {
+        await sesionCanchaYa.listaPreparada;
+        const respuesta = await sesionCanchaYa.enviar(
+          restablecer ? "restablecer_password.php" : "recuperar_password.php",
+          restablecer ? { ...datos, token } : datos
+        );
+        estado.textContent = respuesta.mensaje;
+        form.reset();
+        if (restablecer) {
+          token = "";
+          cambiar.hidden = true;
+          sesionCanchaYa.csrf = respuesta.csrf_token;
+          sesionCanchaYa.actualizar(null, []);
+        }
+      } catch (error) {
+        estado.textContent = error.message;
+      } finally {
+        boton.disabled = false;
+      }
+    });
+  }
+});
