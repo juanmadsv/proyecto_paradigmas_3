@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   /* ---------- Menú (botón hamburguesa + nav) ---------- */
   const menuBtn = document.querySelector(".menu-btn");
-  const siteNav = document.getElementById("site-nav");
+  const siteNav = document.querySelector("#site-nav");
 
   const setMenu = (abierto) => {
     menuBtn.setAttribute("aria-expanded", String(abierto));
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ---------- Listados armados desde COMPLEJOS ---------- */
   const chipsServicios = (arr) => arr.map((s) => `<span class="service-chip">${NOMBRE_SERV[s]}</span>`).join("");
 
-  const tablaComplejos = document.getElementById("tabla-complejos");
+  const tablaComplejos = document.querySelector("#tabla-complejos");
   if (tablaComplejos) {
     tablaComplejos.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
       <tr>
@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       </tr>`).join("");
   }
 
-  const cardsComplejos = document.getElementById("cards-complejos");
+  const cardsComplejos = document.querySelector("#cards-complejos");
   if (cardsComplejos) {
     cardsComplejos.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
       <li class="complex-card">
@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* ---------- Ficha de complejo (detalle.html) ----------
      Arma la ficha de TODOS los complejos, una abajo de la otra.
      Si se llega con ?c=olimpo (botón "Ver ficha"), baja hasta ese complejo. */
-  const fichasLista = document.getElementById("fichas-lista");
+  const fichasLista = document.querySelector("#fichas-lista");
 
   if (fichasLista) {
     fichasLista.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
@@ -141,14 +141,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (img.complete && img.naturalWidth === 0) img.dispatchEvent(new Event("error"));
     });
 
-    const foco = document.getElementById("c-" + claveComplejo(new URLSearchParams(location.search).get("c")));
+    const foco = document.querySelector("#c-" + claveComplejo(new URLSearchParams(location.search).get("c")));
     if (location.search && foco) foco.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   /* ---------- Formulario de reserva (comprar.html) ----------
      Desde "Complejos disponibles" el botón lleva a comprar.html?c=terraza.
      Muestra solo ese complejo, su descripcion, sus servicios y el total. */
-  const selComplejo = document.getElementById("complejo");
+  const selComplejo = document.querySelector("#complejo");
 
   if (selComplejo) {
     const DATOS = COMPLEJOS;
@@ -159,12 +159,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       .map(([clave, c]) => `<option value="${clave}">${c.nombre} — ${c.tipo} — ${pesos(c.precio)}</option>`)
       .join("");
 
-    const descEl  = document.getElementById("rv-desc");
-    const tituloEl = document.getElementById("rv-titulo");
-    const tipoSel = document.getElementById("rv-tipo");
-    const servBox = document.getElementById("rv-serv-box");
-    const servList = document.getElementById("rv-serv");
-    const totalEl = document.getElementById("rv-total");
+    const descEl  = document.querySelector("#rv-desc");
+    const tituloEl = document.querySelector("#rv-titulo");
+    const tipoSel = document.querySelector("#rv-tipo");
+    const servBox = document.querySelector("#rv-serv-box");
+    const servList = document.querySelector("#rv-serv");
+    const totalEl = document.querySelector("#rv-total");
 
     // "Reservar La Terraza · Fútbol 7" segun complejo + tipo de cancha elegido
     const refrescarTitulo = () => {
@@ -174,8 +174,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     tipoSel.addEventListener("change", refrescarTitulo);
 
     const SENA_PCT = 0.5;   // seña que se paga ahora para dejar reservado (la mitad)
-    const cuponInput = document.getElementById("codigo-cupon");
-    const mensajeCupon = document.getElementById("mensaje-cupon");
+    const cuponInput = document.querySelector("#codigo-cupon");
+    const mensajeCupon = document.querySelector("#mensaje-cupon");
     let cuponActivo = false;
 
     const calcularTotal = (base) => {
@@ -199,7 +199,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return { total, sena };
     };
 
-    document.getElementById("aplicar-cupon").addEventListener("click", () => {
+    document.querySelector("#aplicar-cupon").addEventListener("click", () => {
       const codigo = cuponInput.value.trim().toUpperCase();
       cuponActivo = codigo === "UCP10";
       if (!codigo) {
