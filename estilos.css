@@ -1275,3 +1275,15 @@ main > section {
 
 .rv-total > small { display: block; margin-top: .3rem; font-size: .85rem; font-weight: 500; color: var(--page-fg-soft); }
 .rv-total > small.calc-desc { color: var(--accent); }
+
+
+/* Autenticación: hidden tiene prioridad sobre las reglas flex/grid. */
+[hidden] { display: none !important; }
+.auth-forms { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 2rem; margin-top: 2rem; }
+.auth-forms .form-compra { width: 100%; max-width: none; }
+#datos-reserva { border: 0; padding: 0; margin: 0; min-width: 0; }
+#datos-reserva legend { margin-bottom: 1rem; font-weight: 700; }
+.reservas-lista { display: grid; gap: 1rem; padding: 0; list-style: none; margin: 1rem 0; }
+.reservas-lista li { border: 1px solid var(--page-border); border-radius: 12px; padding: 1rem; overflow-wrap: anywhere; }
+.cuenta-section [data-sesion="privada"] > h2 { margin: 1.5rem 0 .5rem; }
+.site-nav [data-nombre-usuario] { overflow-wrap: anywhere; }

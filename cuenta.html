@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CanchaYa · Mi cuenta</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,600;0,700;1,700&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="estilos.css?v=20261020-auth">
+  <script src="main.js?v=20261020-auth" defer></script>
+  <script src="app.js?v=20261020-recuperacion" defer></script>
+</head>
+<body>
+
+  <!-- ============ HEADER ============ -->
+  <header class="site-header">
+    <a href="index.html" class="logo">
+      <img class="logo-mark" src="images/logo-icon.png" alt="" aria-hidden="true">
+      <span class="logo-text">
+        <span class="logo-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        <small>Plataforma de reservas</small>
+      </span>
+    </a>
+    <nav class="site-nav" id="site-nav" aria-label="Navegación principal">
+      <a href="index.html">Inicio</a>
+      <a href="listado_tabla.html">Tabla</a>
+      <a href="listado_box.html">Tarjetas</a>
+      <a href="detalle.html">Ficha de complejo</a>
+      <a href="comprar.html">Reservar</a>
+      <a href="cotizar.html">Cotizar</a>
+      <a href="cuenta.html" class="is-current" aria-current="page">Mi cuenta</a>
+      <span data-sesion="privada" hidden>Hola, <span data-nombre-usuario></span></span>
+    </nav>
+    <button class="menu-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="site-nav">
+      <span class="menu-icon"></span>
+    </button>
+  </header>
+
+  <main>
+    <section class="comprar-section cuenta-section">
+      <p class="badge">Mi cuenta</p>
+      <h1 class="section-title">Tu cuenta CanchaYa</h1>
+      <p id="estado-sesion" class="section-text" role="status">Comprobando sesión...</p>
+      <p id="mensaje-cuenta" role="status" aria-live="polite"></p>
+      <div data-sesion="publica" hidden class="auth-forms">
+        <form id="form-login" data-form-auth="login" class="form-compra" method="post">
+          <h2>Iniciar sesión</h2>
+          <div class="field"><label for="login-email">Email</label><input id="login-email" name="email" type="email" autocomplete="username" maxlength="190" required></div>
+          <div class="field"><label for="login-password">Contraseña (mínimo 8 caracteres)</label><input id="login-password" name="password" type="password" autocomplete="current-password" required></div>
+          <button class="btn btn-primary" type="submit">Ingresar</button>
+          <a href="recuperar.html">Olvidé mi contraseña</a>
+        </form>
+        <form id="form-registro" data-form-auth="registro" class="form-compra" method="post">
+          <h2>Crear cuenta</h2>
+          <div class="field"><label for="registro-nombre">Nombre</label><input id="registro-nombre" name="nombre" autocomplete="name" maxlength="100" required></div>
+          <div class="field"><label for="registro-email">Email</label><input id="registro-email" name="email" type="email" autocomplete="email" maxlength="190" required></div>
+          <div class="field"><label for="registro-password">Contraseña (mínimo 8 caracteres)</label><input id="registro-password" name="password" type="password" autocomplete="new-password" minlength="8" required><small>De 8 a 72 bytes. Los caracteres acentuados pueden ocupar más de un byte.</small></div>
+          <button class="btn btn-secondary" type="submit">Registrarme</button>
+        </form>
+      </div>
+      <div data-sesion="privada" hidden>
+        <h2>Hola, <span data-nombre-usuario></span></h2>
+        <p data-email-usuario></p>
+        <button type="button" class="btn btn-secondary" data-cerrar-sesion>Cerrar sesión</button>
+        <h2>Mis reservas</h2>
+        <ul id="mis-reservas-lista" class="reservas-lista"></ul>
+        <a class="btn btn-primary" href="comprar.html">Reservar una cancha</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer" id="contacto">
+    <div class="footer-inner">
+      <div class="footer-col footer-col--brand">
+        <a href="index.html" class="footer-brand-lockup">
+          <img class="footer-brand-icon" src="images/logo-icon.png" alt="" aria-hidden="true">
+          <span class="footer-wordmark">Cancha<span class="logo-ya">Ya</span></span>
+        </a>
+        <p class="footer-tagline">Reservá canchas de fútbol 5, 7 y 11 en los complejos de Posadas, Misiones.</p>
+      </div>
+
+      <nav class="footer-col" aria-label="Navegación del pie de página">
+        <h3 class="footer-h">Navegación</h3>
+        <a href="index.html">Inicio</a>
+        <a href="listado_tabla.html">Tabla</a>
+        <a href="listado_box.html">Tarjetas</a>
+        <a href="detalle.html">Ficha de complejo</a>
+        <a href="comprar.html">Reservar</a>
+        <a href="cotizar.html">Cotizar</a>
+      </nav>
+
+      <div class="footer-col">
+        <h3 class="footer-h">Contacto</h3>
+        <p>Posadas, Misiones</p>
+        <p>Mail: a confirmar</p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 CanchaYa · Posadas, Misiones</p>
+    </div>
+  </footer>
+
+</body>
+</html>
+
