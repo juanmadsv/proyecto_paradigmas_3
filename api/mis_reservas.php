@@ -90,6 +90,7 @@ try {
         'fecha' => $fecha, 'horario' => $hora, 'telefono' => $telefono, 'pago' => $pago,
         'servicios' => json_encode($servicios, JSON_THROW_ON_ERROR),
         'cupon' => $cupon === '' ? null : $cupon, 'total' => $total, 'sena' => $sena,
+        'turno_activo' => $complejo . '|' . $fecha . '|' . $hora . ':00',
     ]);
 } catch (PDOException $error) {
     if (($error->errorInfo[1] ?? 0) === 1062) responder(409, ['error' => 'Otro usuario acaba de reservar ese horario. Elegí otro.']);
