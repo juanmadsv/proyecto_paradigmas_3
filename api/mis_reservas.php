@@ -45,8 +45,7 @@ $total = $subtotal - ($cupon === 'UCP10' ? (int) round($subtotal * 0.10) : 0);
 $sena = (int) round($total * 0.5);
 $fecha = date('Y-m-d');
 try {
-    $consulta = db()->prepare('INSERT INTO reservas (usuario_id, complejo, tipo, fecha, horario, telefono, pago, servicios_json, cupon, total, sena) VALUES (:usuario_id, :complejo, :tipo, :fecha, :horario, :telefono, :pago, :servicios, :cupon, :total, :sena)');
-    $consulta->execute([
+    $idReserva = (new ReservaModel(db()))->crear([
         'usuario_id' => $usuario['id'], 'complejo' => $complejo, 'tipo' => $tipo,
         'fecha' => $fecha, 'horario' => $hora, 'telefono' => $telefono, 'pago' => $pago,
         'servicios' => json_encode($servicios, JSON_THROW_ON_ERROR),
