@@ -42,7 +42,7 @@ $precios = ['parrilla' => 3000, 'quincho' => 8000, 'vestuarios' => 0, 'estaciona
 $subtotal = (int) $c['precio'];
 foreach ($servicios as $servicio) $subtotal += $precios[$servicio];
 $total = $subtotal - ($cupon === 'UCP10' ? (int) round($subtotal * 0.10) : 0);
-$sena = (int) round($total * 0.5);
+$sena = (int) round($total * 0.20);
 $fecha = date('Y-m-d');
 try {
     $idReserva = (new ReservaModel(db()))->crear([
