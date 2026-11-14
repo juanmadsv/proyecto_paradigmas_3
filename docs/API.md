@@ -25,10 +25,10 @@ X-CSRF-Token: <token-de-la-sesion>
 
 ```json
 {
-  "complejo": "complejo-demo",
+  "complejo": "terraza",
   "tipo": "5",
   "fecha": "AAAA-MM-DD",
-  "horario": "18:00",
+  "horario": "20:00",
   "telefono": "3764000000",
   "pago": "mercadopago",
   "servicios": ["quincho"],
