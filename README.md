@@ -1,129 +1,90 @@
-# CanchaYa — Paradigmas III
+# CanchaYa — AE4 / Paradigmas III
 
-Catálogo de complejos y cotizador públicos, con registro/login en PHP y reservas
-privadas persistidas en MySQL. La interacción de cuenta y reserva usa fetch y
-actualiza el DOM sin recargar; las páginas HTML existentes se conservan.
+CanchaYa permite explorar complejos deportivos, cotizar una cancha, registrar una cuenta y reservar un turno. La entrada de la versión AE4 es la SPA en `public/index.html`; las páginas HTML de la raíz se conservan como antecedentes de AE1 y AE2.
 
-## Instalar en XAMPP (Windows)
+## Arquitectura actual
 
-1. Actualizar esta rama dentro de `C:\xampp\htdocs\canchaYaFrontend`.
-2. Iniciar **Apache** y **MySQL** desde XAMPP. Se necesita PHP 8.0 o superior con
-   las extensiones `pdo_mysql` y `session` (incluidas en XAMPP habitual).
-3. Abrir `http://localhost/phpmyadmin/`, entrar en **Importar**, seleccionar
-   `database/schema.sql` del proyecto y ejecutar. Crea `canchaya`, `usuarios` y
-   `reservas`; amplía `usuarios.password` a `VARCHAR(255)` si ya existía.
-4. Para XAMPP con el usuario `root` sin contraseña, la configuración predeterminada
-   funciona. Si tu MySQL tiene otra clave/puerto/usuario, copiar
-   `config/database.example.php` como `config/database.local.php` y completarlo.
-   El archivo local está ignorado por Git y la carpeta está protegida por Apache.
-   También se aceptan `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`.
-5. Abrir `http://localhost/canchaYaFrontend/`, entrar en **Mi cuenta**, registrarse
-   e iniciar sesión. Después entrar en **Reservar** y elegir un turno disponible.
-6. Volver a **Mi cuenta** para consultar las reservas propias y cerrar sesión.
+```text
+public/
+  index.html                 Vista única de la SPA
+  assets/app.js              Navegación, fetch y renderizado seguro con nodos DOM
+  assets/app.css             Estilos responsive y foco visible
+api/                         Endpoints JSON que actúan como controladores
+models/
+  UsuarioModel.php           Consultas de usuarios mediante PDO
+  ReservaModel.php           Consultas y persistencia de reservas mediante PDO
+config/
+  database.example.php       Ejemplo sin credenciales
+database/
+  schema.sql                 Esquema MySQL
+data/                        Catálogo y turnos de demostración
+tests/
+  api_smoke.py               Verificación automatizada de la API
+```
 
-La importación de SQL es un paso manual: un pull de Git no crea las tablas de
-MySQL de tu PC. Para una base previa con otra estructura, revisar el esquema
-antes de importarlo. No se ejecutan migraciones automáticamente al abrir la web.
+La SPA se comunica con la API mediante `fetch()` y JSON. Los endpoints de PHP delegan las consultas de usuarios y reservas en modelos. La conexión PDO se configura en `api/bootstrap.php`; las reglas de autenticación, validación y códigos HTTP permanecen en los endpoints.
 
-## Cómo se cumple la consigna
+## Instalar en XAMPP
 
-| Requisito | Implementación |
+1. Colocar el proyecto en `C:\\xampp\\htdocs\\canchaYaFrontend`.
+2. Iniciar Apache y MySQL. Se requiere PHP 8.0 o posterior con `pdo_mysql` y sesiones.
+3. En phpMyAdmin, importar `database/schema.sql`.
+4. Para MySQL distinto de `root` sin contraseña, copiar `config/database.example.php` como `config/database.local.php` y completar los valores. Ese archivo local está ignorado por Git. También se admiten `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`.
+5. Abrir `http://localhost/canchaYaFrontend/public/`.
+6. El endpoint privado de reservas puede consultarse en `http://localhost/canchaYaFrontend/api/mis_reservas.php`.
+
+La importación del esquema es manual; actualizar el repositorio no modifica la base local. Para probar cambios de datos, usar una base de pruebas separada.
+
+## Alcance implementado en esta versión
+
+| Caso de uso AE1 | Estado en el código |
 | --- | --- |
-| Tabla usuarios y hash completo | `database/schema.sql`: `password VARCHAR(255)` |
-| Registro JSON y BCRYPT | `api/registro.php`: `password_hash($pass, PASSWORD_BCRYPT)` |
-| Consultas preparadas | PDO con parámetros y emulación desactivada |
-| Login seguro | `api/login.php`: `password_verify()` y `session_regenerate_id(true)` |
-| Estado del servidor | `api/bootstrap.php`: `session_start()` y `$_SESSION['usuario_id']` |
-| Endpoint privado | `api/mis_reservas.php`: `exigirUsuario()` responde 401 antes de consultar la BD si no hay sesión |
-| Verificar sesión al cargar | `app.js`: fetch a `api/mis_reservas.php` en cada página |
-| DOM según sesión | formularios/botones con `data-sesion`, ocultos inicialmente; fieldset deshabilitado sin sesión |
-| Renderizado seguro | nombre, email, errores, confirmación y reservas con `textContent`/nodos de texto |
+| CU-01 Registrarse e iniciar sesión | Registro y autenticación del jugador con BCRYPT y sesión |
+| CU-02 Buscar y filtrar complejos | Catálogo con filtros por texto, zona y tipo |
+| CU-03 Consultar disponibilidad y detalle | Fichas y turnos del día consultados desde la API |
+| CU-04 Generar una reserva | Creación persistente de reserva con control de sesión y conflicto de turno |
+| CU-05 Pagar una reserva | Parcial: se registra el medio declarado; no existe pasarela ni cobro real |
+| CU-06 Consultar o cancelar una reserva | Consulta de reservas propias; la cancelación todavía no está implementada |
+| CU-07 a CU-14 | No implementados en esta versión: administración de complejos, oferta, cobros, reclamos y estadísticas |
 
-BCRYPT admite hasta 72 bytes: se valida una contraseña de 8 a 72 bytes y nunca se
-recorta silenciosamente. No se devuelve el hash ni se guarda la contraseña en
-cookies, localStorage o sessionStorage. Nombre y email salen de la cuenta; ya no
-se solicitan otra vez al reservar. El único identificador de usuario válido es el
-de la sesión, aunque el cliente envíe otro `usuario_id`.
+La disponibilidad usa turnos de demostración para el día actual. La seña del 20% respeta la regla principal documentada en AE1, pero es informativa: no confirma un pago. El sitio no almacena datos de tarjeta ni envía notificaciones a propietarios.
 
 ## API y códigos HTTP
 
-| Servicio | Método | Acceso / resultado |
+| Endpoint | Método | Resultado principal |
 | --- | --- | --- |
-| `api/csrf.php` | GET | Token de la sesión anónima o autenticada |
-| `api/registro.php` | POST JSON | 201 creado, 409 email repetido, 422 datos inválidos |
-| `api/login.php` | POST JSON | 200 autenticado, 401 credenciales incorrectas |
-| `api/logout.php` | POST JSON | Destruye sesión y elimina cookie |
-| `api/mis_reservas.php` | GET | 200 usuario y sus reservas; 401 sin sesión |
-| `api/mis_reservas.php` | POST JSON | 201 reserva guardada; 401 sin sesión; 409 turno ocupado |
-| `api/turnos.php` | GET | Disponibilidad pública del día, sin datos personales |
+| `api/csrf.php` | GET | Token CSRF de la sesión |
+| `api/registro.php` | POST JSON | 201 creado; 400 datos inválidos; 409 email repetido |
+| `api/login.php` | POST JSON | 200 autenticado; 401 credenciales incorrectas |
+| `api/logout.php` | POST JSON | 200 sesión cerrada |
+| `api/turnos.php` | GET | 200 disponibilidad pública del día |
+| `api/mis_reservas.php` | GET | 200 reservas propias; 401 sin sesión |
+| `api/mis_reservas.php` | POST JSON | 201 reserva creada; 400 entrada inválida; 401 sin sesión; 409 turno ocupado |
 
-Los POST necesitan `Content-Type: application/json` y `X-CSRF-Token`. El token
-se recibe en `csrf.php` o en el login/endpoint privado. Falta de token: 403.
-JSON roto: 400; tipo de contenido incorrecto: 415; método incorrecto: 405.
-Un problema de configuración/BD devuelve 500 con mensaje genérico, sin SQL ni claves.
+Los POST usan `Content-Type: application/json` y `X-CSRF-Token`. El servidor responde 403 si falta o no coincide el token, 405 ante un método incorrecto, 415 ante un tipo de contenido incorrecto, 400 ante JSON o datos inválidos y 500 con un mensaje genérico ante fallas internas.
 
-## Sesiones y seguridad
+## Seguridad y accesibilidad implementadas
 
-- Cookie `CANCHAYA_SESSID` con `HttpOnly`, `SameSite=Lax` y alcance del proyecto.
-  En HTTPS también se activa `Secure`; HTTP queda habilitado para localhost.
-- Modo estricto de sesión, cookies como único transporte y vencimiento tras
-  30 minutos de inactividad. El ID se renueva al autenticar y el token CSRF rota.
-- Las respuestas JSON no se almacenan en caché (`no-store`).
-- Ocultar un formulario sólo ayuda a la interfaz: la autorización real se hace
-  siempre en PHP. Cambiar el DOM o enviar un `usuario_id` falso no la evita.
-- Los nombres se conservan como datos y se muestran con `textContent`. Se puede
-  probar un nombre como `<img src=x onerror="alert(1)">`: debe aparecer como
-  texto, sin imagen ni ejecución de JavaScript.
-- El total y la seña se recalculan en PHP con el catálogo y los servicios admitidos.
-  El cupón UCP10 conserva el 10 %. Un precio enviado por el navegador se ignora.
-- La clave única de turno evita dos reservas del mismo complejo/fecha/horario.
-  Todas las consultas de reservas filtran por el usuario autenticado.
+- Contraseñas con `password_hash(..., PASSWORD_BCRYPT)` y `password_verify()`; la columna usa `VARCHAR(255)`.
+- Consultas PDO preparadas con parámetros nombrados y emulación desactivada.
+- Sesión estricta, cookie `HttpOnly` y `SameSite=Lax`; el identificador de sesión se regenera al autenticar.
+- Los endpoints privados identifican al usuario desde `$_SESSION`; no confían en un `usuario_id` enviado por el cliente.
+- Las mutaciones requieren CSRF. Las respuestas JSON usan `no-store` y errores internos no exponen SQL ni credenciales.
+- El JavaScript construye contenido con `createElement`, `textContent` y nodos de texto; evita asignaciones a `innerHTML`.
+- La SPA incluye regiones `aria-live`, etiquetas asociadas a formularios, enlace para saltar al contenido, foco visible y estilos responsive.
 
-## Pruebas
+## Verificación y límites de la evidencia
 
-Con una **base de pruebas** creada mediante el mismo SQL y el servidor ejecutándose:
+El script `tests/api_smoke.py` comprueba autenticación, CSRF, aislamiento de reservas y conflictos. Ejecutarlo únicamente contra una base de pruebas:
 
 ```bash
 python tests/api_smoke.py http://localhost/canchaYaFrontend
 ```
 
-El script crea dos cuentas nuevas y una reserva, sin borrar datos. Necesita al
-menos un horario libre en los datos de demostración. Comprueba 401, CSRF,
-credenciales, rotación del ID, usuarios separados, conflicto de turno, importe
-calculado por PHP y logout. Usa sólo la biblioteca estándar de Python.
+Para la entrega AE4 todavía se debe guardar la matriz ISO/IEC 25010 con rutas y líneas concretas, ejecutar la auditoría Lighthouse hasta alcanzar 100/100 en accesibilidad, verificar el recorrido solo con teclado y capturar la pestaña Network. El resultado de Lighthouse y el comportamiento con XAMPP dependen de ejecutar esta rama en el entorno local.
 
-Prueba manual de 401: cerrar sesión, abrir en el navegador
-`http://localhost/canchaYaFrontend/api/mis_reservas.php` y comprobar en **Red**
-que el estado sea **401 Unauthorized**. Tras el login, repetir y comprobar 200.
-En phpMyAdmin el campo password debe contener un hash con prefijo `$2y$`.
-
-## Funciones previas y alcance
-
-El buscador (opción 3), los listados, las fichas y **Cotizar** (opción 5) siguen
-siendo públicos. El presupuesto de Cotizar es una estimación independiente y no
-se transfiere automáticamente a una reserva. Las reservas usan una hora para el
-día actual, y la disponibilidad se comparte por complejo, sin separarla por tipo
-de cancha. Los JSON siguen definiendo el catálogo y los horarios base; MySQL
-agrega las reservas ocupadas. Las reservas ahora sobreviven a recargas/logout.
-La seña es informativa: no hay pasarela de pagos ni envío de correos.
-
-Este trabajo corresponde al entorno académico/local. Para exponerlo en Internet
-se necesita además HTTPS, credenciales MySQL con permisos mínimos y controles
-de abuso (por ejemplo, limitación de intentos de autenticación).
-
-Las fundamentaciones `AE2_Opcion3_SOHDM.md`, `AE2_Opcion5_EORM.md` y
-`AE2_Opcion10_SOHDM.md` describen las etapas anteriores. La opción 10 evolucionó:
-la confirmación simulada fue reemplazada por los servicios PHP aquí documentados.
-
-Referencias: [password_hash](https://www.php.net/manual/es/function.password-hash.php),
-[password_verify](https://www.php.net/manual/es/function.password-verify.php),
-[sesiones](https://www.php.net/manual/es/book.session.php),
-[PDO prepare](https://www.php.net/manual/es/pdo.prepare.php).
+La versión actual cubre el flujo principal del jugador; no debe presentarse como implementación de todos los casos de uso de AE1. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 
 ## Recuperación de contraseña
 
-Mi cuenta incluye **Olvidé mi contraseña**. Consultar [RECUPERACION.md](RECUPERACION.md)
-para importar la migración adicional, instalar PHPMailer, configurar Gmail y ejecutar
-el proceso de envío. La recuperación no enviará correos hasta completar esos pasos.
-No se necesitan cambios de configuración para el registro/login habitual después
-de importar la migración y volver a iniciar sesión.
+La función de recuperación está documentada en [RECUPERACION.md](RECUPERACION.md). Requiere importar la migración indicada, instalar Composer y configurar el correo. La recuperación por correo no funciona hasta completar esa configuración.
