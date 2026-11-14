@@ -18,7 +18,7 @@ Este documento registra el estado del código en la rama `ae4-tifas-implementaci
 
 | Característica | Evidencia en código | Estado |
 | --- | --- | --- |
-| Adecuación funcional | Flujo de cuenta, catálogo, disponibilidad diaria, creación y consulta de reservas: `public/assets/app.js`, `api/registro.php`, `api/login.php`, `api/turnos.php`, `api/mis_reservas.php` | Parcial: cubre el recorrido principal del jugador, pero no todo el catálogo de CU de AE1 ni un CRUD completo de reservas. |
+| Adecuación funcional | Flujo de cuenta, catálogo, disponibilidad por fecha, creación y consulta de reservas: `public/assets/app.js`, `api/registro.php`, `api/login.php`, `api/turnos.php`, `api/mis_reservas.php` | Parcial: cubre el recorrido principal del jugador, pero no todo el catálogo de CU de AE1 ni un CRUD completo de reservas. |
 | Eficiencia de desempeño | `fetch()` asíncrono en `public/assets/app.js`; actualizaciones con `replaceChildren()` sin recarga completa | Parcial: no se midieron tamaños de respuesta ni latencias; falta evidencia de ejecución. |
 | Compatibilidad | Interfaz HTML/JS separada de endpoints PHP JSON | Parcial: la separación está en el diseño; falta probar navegadores y dispositivos concretos. |
 | Fiabilidad | `api/bootstrap.php` centraliza respuestas HTTP y errores; `database/schema.sql` mantiene una clave única para turnos activos; `tests/api_smoke.py` | Parcial: el esquema evita reservas simultáneas del mismo turno y el script está disponible, pero su resultado debe registrarse contra una base de pruebas. La migración 003 adapta bases existentes. |
@@ -37,6 +37,20 @@ Este documento registra el estado del código en la rama `ae4-tifas-implementaci
 - Política de seña: AE1 define 20%; `tarifas.json`, `main.js` y `api/mis_reservas.php` usan 20%. El cobro real no está integrado.
 - Cancelación: `api/mis_reservas.php` valida sesión y CSRF; `models/ReservaModel.php` limita la cancelación a 24 horas y marca el turno para que deje de contarse como ocupado.
 - Fecha: `api/turnos.php` acepta fechas de hoy hasta 90 días adelante y superpone las reservas activas a la plantilla de disponibilidad.
+
+## Índice de código para exposición
+
+Las líneas corresponden a esta versión de la rama y pueden cambiar al editar archivos. La explicación paso a paso está en `docs/AE4_guia_defensa.md`.
+
+- Fetch y navegación: `public/assets/app.js:101`, `public/assets/app.js:481`.
+- Catálogo y filtros: `public/assets/app.js:136`.
+- Reserva y disponibilidad: `public/assets/app.js:228`, `public/assets/app.js:315`.
+- Registro y hash BCRYPT: `api/registro.php:13-15`; modelo de usuario: `models/UsuarioModel.php:11-29`.
+- Verificación de contraseña y regeneración de sesión: `api/login.php:14-17`.
+- Sesión, CSRF y respuesta JSON: `api/bootstrap.php:7-20`, `api/bootstrap.php:87-121`.
+- Crear, listar y cancelar reservas: `api/mis_reservas.php:5-85`; `models/ReservaModel.php:11-57`.
+- Esquema y exclusión de turno activo duplicado: `database/schema.sql:15-34`.
+- Accesibilidad: `public/index.html:12-28`, `public/assets/app.css:26`, `public/assets/app.js:193-215`.
 
 ## Evidencias que deben agregarse al informe final
 
