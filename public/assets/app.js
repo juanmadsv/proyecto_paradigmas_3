@@ -226,7 +226,7 @@ function renderDetails(id) {
 }
 
 async function renderReserve(id) {
-  const view = panel("Reservar una cancha", "Los horarios mostrados se consultan en el servidor para el día de hoy. La reserva queda vinculada a tu cuenta.");
+  const view = panel("Reservar una cancha", "Elegí una fecha, un turno y los servicios. La disponibilidad se vuelve a validar en el servidor.");
   if (!currentUser) {
     const notice = node("p", "Iniciá sesión para confirmar una reserva.", "status-inline");
     notice.setAttribute("role", "status");
@@ -235,105 +235,127 @@ async function renderReserve(id) {
   const entries = Object.entries(catalog);
   const currentId = catalog[id] ? id : entries[0]?.[0];
   if (!currentId) { view.appendChild(node("p", "No hay complejos para mostrar.")); setPage("Reservar", view); return; }
-  let turnos;
-  try { turnos = await request("turnos.php"); }
-  catch (error) { view.appendChild(node("p", error.message, "error")); setPage("Reservar", view); return; }
 
   const form = node("form", null, "form-grid");
-  form.noValidate = false;
   const complexSelect = document.createElement("select");
   complexSelect.id = "reserve-complex";
-  entries.forEach(([key, c]) => { const o=node("option",c.nombre);o.value=key;o.selected=key===currentId;complexSelect.appendChild(o); });
+  entries.forEach(([key, c]) => { const option=node("option",c.nombre);option.value=key;option.selected=key===currentId;complexSelect.appendChild(option); });
   form.appendChild(field("Complejo", complexSelect));
-  const types = catalog[currentId].tipos.split(" ").map(t => [t, ({ "5":"Fútbol 5", "7":"Fútbol 7", "11":"Fútbol 11" })[t] || t]);
+
+  const dateControl=document.createElement("input");
+  dateControl.type="date";dateControl.id="reserve-date";dateControl.name="fecha";dateControl.required=true;
+  const today=new Date();
+  const localDate=value=>new Date(value.getTime()-value.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  dateControl.min=localDate(today);
+  const maxDate=new Date(today);maxDate.setDate(maxDate.getDate()+90);
+  dateControl.max=localDate(maxDate);dateControl.value=dateControl.min;
+  form.appendChild(field("Fecha (hasta 90 días)",dateControl));
+
   const typeSelect = document.createElement("select");
   typeSelect.id = "reserve-type";
-  types.forEach(([value,label])=>{const o=node("option",label);o.value=value;typeSelect.appendChild(o);});
+  const fillTypes=key=>{
+    typeSelect.replaceChildren(...catalog[key].tipos.split(" ").map(t=>{
+      const option=node("option",({"5":"Fútbol 5","7":"Fútbol 7","11":"Fútbol 11"})[t]||t);
+      option.value=t;return option;
+    }));
+  };
+  fillTypes(currentId);
   form.appendChild(field("Tipo de cancha", typeSelect));
-  const scheduleSelect = document.createElement("select");
-  scheduleSelect.id = "reserve-time";
-  const schedule = (turnos.turnos && turnos.turnos[currentId]) || [];
-  const available = schedule.filter(t => t.libre);
-  available.forEach(t=>{const o=node("option",t.hora);o.value=t.hora;scheduleSelect.appendChild(o);});
-  if (!available.length) { const o=node("option","No hay turnos disponibles hoy");o.value="";scheduleSelect.appendChild(o); }
-  form.appendChild(field("Horario disponible (hoy)", scheduleSelect));
-  const phone = document.createElement("input");
-  phone.id="reserve-phone"; phone.name="telefono"; phone.type="tel"; phone.autocomplete="tel"; phone.required=true; phone.maxLength=30;
+
+  const scheduleSelect=document.createElement("select");
+  scheduleSelect.id="reserve-time";scheduleSelect.required=true;
+  form.appendChild(field("Horario disponible",scheduleSelect));
+
+  const phone=document.createElement("input");
+  phone.id="reserve-phone";phone.name="telefono";phone.type="tel";phone.autocomplete="tel";phone.required=true;phone.maxLength=30;
   form.appendChild(field("Teléfono de contacto",phone));
-  const payment = document.createElement("select");
+
+  const payment=document.createElement("select");
   payment.id="reserve-payment";
-  PAYMENT_OPTIONS.forEach(([value,label])=>{const o=node("option",label);o.value=value;payment.appendChild(o);});
+  PAYMENT_OPTIONS.forEach(([value,label])=>{const option=node("option",label);option.value=value;payment.appendChild(option);});
   form.appendChild(field("Medio de pago declarado",payment));
-  const coupon = document.createElement("input");
+
+  const coupon=document.createElement("input");
   coupon.id="reserve-coupon";coupon.name="cupon";coupon.autocomplete="off";coupon.maxLength=20;
   form.appendChild(field("Cupón (opcional)",coupon));
-  const servicesWrap = node("fieldset");
+
+  const servicesWrap=node("fieldset");
   const legend=node("legend","Servicios adicionales");
-  servicesWrap.appendChild(legend);
   const servicesList=node("ul",null,"clean");
   const serviceInputs=[];
   const addServices=key=>{
-    servicesList.replaceChildren();
-    serviceInputs.length=0;
+    servicesList.replaceChildren();serviceInputs.length=0;
     (catalog[key].servicios||[]).forEach(code=>{
-      if(!SERVICE_NAMES[code]) return;
-      const li=node("li");
+      if(!SERVICE_NAMES[code])return;
+      const item=node("li");
       const label=node("label",null,"check-row");
-      const input=document.createElement("input"); input.type="checkbox";input.value=code;input.dataset.price=String(SERVICE_PRICES[code]||0);
-      const text=node("span",SERVICE_NAMES[code]+" — "+((SERVICE_PRICES[code]||0)?"+ "+pesos(SERVICE_PRICES[code]):"incluido"));
-      label.append(input,text);li.appendChild(label);servicesList.appendChild(li);serviceInputs.push(input);
+      const input=document.createElement("input");input.type="checkbox";input.value=code;input.dataset.price=String(SERVICE_PRICES[code]||0);
+      label.append(input,node("span",SERVICE_NAMES[code]+" — "+((SERVICE_PRICES[code]||0)?"+ "+pesos(SERVICE_PRICES[code]):"incluido")));
+      item.appendChild(label);servicesList.appendChild(item);serviceInputs.push(input);
     });
     servicesWrap.replaceChildren(legend,servicesList);
   };
-  addServices(currentId);
-  form.appendChild(servicesWrap);
+  addServices(currentId);form.appendChild(servicesWrap);
+
   const summary=node("div",null,"price-summary");
   summary.setAttribute("role","status");summary.setAttribute("aria-live","polite");
   const updateSummary=()=>{
-    const c=catalog[complexSelect.value];
+    const complex=catalog[complexSelect.value];
     const extra=serviceInputs.filter(input=>input.checked).reduce((sum,input)=>sum+Number(input.dataset.price),0);
-    const subtotal=Number(c.precio)+extra;
-    const couponActive=coupon.value.trim().toUpperCase()==="UCP10";
-    const total=subtotal-(couponActive?Math.round(subtotal*.10):0);
-    const sena=Math.round(total*.20);
-    summary.replaceChildren(node("p","Total estimado: "+pesos(total)),node("p","Seña mínima (20%): "+pesos(sena)),node("p","Saldo estimado: "+pesos(total-sena)));
+    const subtotal=Number(complex.precio)+extra;
+    const discount=coupon.value.trim().toUpperCase()==="UCP10"?Math.round(subtotal*.10):0;
+    const total=subtotal-discount,sena=Math.round(total*.20);
+    summary.replaceChildren(
+      node("p","Total estimado: "+pesos(total)),
+      node("p","Seña mínima (20%): "+pesos(sena)),
+      node("p","Saldo estimado: "+pesos(total-sena))
+    );
   };
-  complexSelect.addEventListener("change",async()=>{
-    const selected=complexSelect.value;
-    const newTypes=catalog[selected].tipos.split(" ").map(t=>[t,({"5":"Fútbol 5","7":"Fútbol 7","11":"Fútbol 11"})[t]||t]);
-    typeSelect.replaceChildren(...newTypes.map(([value,label])=>{const o=node("option",label);o.value=value;return o;}));
+  const feedback=node("p","", "status-inline");
+  feedback.setAttribute("role","status");feedback.setAttribute("aria-live","polite");
+  const submit=button("Confirmar reserva");
+  submit.disabled=!currentUser;
+  const refreshAvailability=async()=>{
+    submit.disabled=true;
+    scheduleSelect.replaceChildren();
     try{
-      const refreshed=await request("turnos.php");
-      const opts=((refreshed.turnos&&refreshed.turnos[selected])||[]).filter(t=>t.libre).map(t=>{const o=node("option",t.hora);o.value=t.hora;return o;});
-      if(!opts.length){const o=node("option","No hay turnos disponibles hoy");o.value="";opts.push(o);}
-      scheduleSelect.replaceChildren(...opts);
-      submit.disabled = !currentUser || !opts.length;
-    }catch(error){announce(error.message,true);}
-    addServices(selected);updateSummary();
-  });
-  [coupon,...serviceInputs].forEach(input=>input.addEventListener("input",updateSummary));
+      const response=await request("turnos.php?fecha="+encodeURIComponent(dateControl.value));
+      const available=(response.turnos&&response.turnos[complexSelect.value]||[]).filter(slot=>slot.libre);
+      if(available.length){
+        scheduleSelect.replaceChildren(...available.map(slot=>{const option=node("option",slot.hora);option.value=slot.hora;return option;}));
+      }else{
+        const option=node("option","No hay turnos disponibles para esta fecha");option.value="";scheduleSelect.appendChild(option);
+        feedback.textContent="Elegí otra fecha o complejo.";
+      }
+      submit.disabled=!currentUser||!available.length;
+    }catch(error){
+      const option=node("option","No se pudo cargar la disponibilidad");option.value="";scheduleSelect.appendChild(option);
+      feedback.textContent=error.message;announce(error.message,true);
+    }
+  };
+  complexSelect.addEventListener("change",()=>{fillTypes(complexSelect.value);addServices(complexSelect.value);updateSummary();refreshAvailability();});
+  dateControl.addEventListener("change",refreshAvailability);
   servicesWrap.addEventListener("change",updateSummary);
   coupon.addEventListener("input",updateSummary);
   updateSummary();
-  const feedback=node("p","", "status-inline");feedback.setAttribute("role","status");feedback.setAttribute("aria-live","polite");
-  const submit=button("Confirmar reserva");
-  submit.disabled=!currentUser||!available.length;
+  refreshAvailability();
+
   form.addEventListener("submit",async event=>{
     event.preventDefault();
     if(!currentUser){feedback.textContent="Iniciá sesión antes de reservar.";return;}
     submit.disabled=true;feedback.textContent="Guardando reserva…";
     try{
       const result=await request("mis_reservas.php",{method:"POST",body:{
-        complejo:complexSelect.value,tipo:typeSelect.value,horario:scheduleSelect.value,telefono:phone.value.trim(),
-        pago:payment.value,cupon:coupon.value.trim(),servicios:serviceInputs.filter(input=>input.checked).map(input=>input.value)
+        complejo:complexSelect.value,tipo:typeSelect.value,fecha:dateControl.value,horario:scheduleSelect.value,
+        telefono:phone.value.trim(),pago:payment.value,cupon:coupon.value.trim(),
+        servicios:serviceInputs.filter(input=>input.checked).map(input=>input.value)
       }});
-      feedback.textContent=result.mensaje||"Reserva guardada.";
-      announce("Reserva guardada correctamente.");
-      await renderRoute();
+      announce(result.mensaje||"Reserva guardada.");
+      location.hash="#mis-reservas";
     }catch(error){feedback.textContent=error.message;announce(error.message,true);submit.disabled=false;}
   });
   form.append(summary,submit);
-  view.append(form,feedback);
+  view.appendChild(form);view.appendChild(feedback);
   setPage("Reservar",view);
 }
 
@@ -383,16 +405,37 @@ function renderAccount() {
 }
 
 async function renderMyReservations() {
-  const view = panel("Mis reservas", "Consultá las reservas asociadas a tu sesión.");
+  const view = panel("Mis reservas", "Consultá y cancelá tus reservas con al menos 24 horas de anticipación.");
   if(!currentUser){view.append(node("p","Iniciá sesión para ver tus reservas.","status-inline"),link("Ir a Mi cuenta","#cuenta","button"));setPage("Mis reservas",view);return;}
   try{
     const data=await request("mis_reservas.php");
     currentUser=data.usuario||currentUser;
-    if(!data.reservas.length){view.appendChild(node("p","Todavía no tenés reservas."));}
+    if(!data.reservas.length)view.appendChild(node("p","Todavía no tenés reservas."));
     data.reservas.forEach(reserva=>{
       const item=node("article",null,"reservation");
-      item.append(node("h2",reserva.complejo),node("p",reserva.fecha+" · "+reserva.horario+" · Fútbol "+reserva.tipo));
+      const complexName=catalog[reserva.complejo]?.nombre||reserva.complejo;
+      item.append(node("h2",complexName),node("p",reserva.fecha+" · "+reserva.horario+" · Fútbol "+reserva.tipo));
       item.append(node("p","Total: "+pesos(reserva.total)+" · Seña: "+pesos(reserva.sena)));
+      item.append(node("p","Estado: "+(reserva.estado==="cancelada"?"Cancelada":"Confirmada")));
+      if(reserva.estado==="confirmada"){
+        const start=new Date(reserva.fecha+"T"+reserva.horario+":00");
+        const canCancel=start.getTime()-Date.now()>=24*60*60*1000;
+        if(canCancel){
+          const cancel=node("button","Cancelar reserva");
+          cancel.type="button";
+          cancel.addEventListener("click",async()=>{
+            cancel.disabled=true;
+            try{
+              const result=await request("mis_reservas.php",{method:"DELETE",body:{reserva_id:reserva.id}});
+              announce(result.mensaje||"Reserva cancelada.");
+              await renderMyReservations();
+            }catch(error){announce(error.message,true);cancel.disabled=false;}
+          });
+          item.appendChild(cancel);
+        }else{
+          item.appendChild(node("p","La cancelación requiere al menos 24 horas de anticipación.","muted"));
+        }
+      }
       view.appendChild(item);
     });
   }catch(error){view.appendChild(node("p",error.message,"error"));}
