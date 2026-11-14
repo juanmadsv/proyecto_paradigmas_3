@@ -2,6 +2,19 @@
 
 Este documento registra el estado del código en la rama `ae4-tifas-implementacion`. Describe evidencia visible en archivos y separa implementación de verificación. No acredita por sí solo un puntaje Lighthouse ni una prueba ejecutada.
 
+## Arquitectura desacoplada actual
+
+```mermaid
+flowchart LR
+  jugador["Persona usuaria"] -->|"HTML, CSS y JS"| spa["SPA Vanilla"]
+  spa -->|"fetch() / JSON"| api["Controladores PHP"]
+  api --> modelos["Modelos PDO"]
+  modelos --> mysql["MySQL"]
+  spa --> catalogo["Catálogo y tarifas JSON"]
+```
+
+La API valida la sesión, CSRF, reglas de reserva y entradas. Los modelos encapsulan persistencia; catálogo y plantilla de horarios todavía son datos estáticos de demostración.
+
 ## Trazabilidad de casos de uso de AE1
 
 | Caso de uso | Evidencia actual | Estado y límite |
