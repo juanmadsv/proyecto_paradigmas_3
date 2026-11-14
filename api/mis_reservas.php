@@ -56,6 +56,6 @@ try {
     throw $error;
 }
 responder(201, ['mensaje' => 'Reserva guardada.', 'reserva' => [
-    'id' => (int) db()->lastInsertId(), 'complejo' => $complejo, 'tipo' => $tipo,
+    'id' => $idReserva, 'complejo' => $complejo, 'tipo' => $tipo,
     'fecha' => $fecha, 'horario' => $hora, 'total' => $total, 'sena' => $sena,
 ]]);
