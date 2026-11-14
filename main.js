@@ -215,7 +215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     tipoSel.addEventListener("change", refrescarTitulo);
 
-    const SENA_PCT = 0.5;   // seña que se paga ahora para dejar reservado (la mitad)
+    const SENA_PCT = 0.20;   // seña que se paga ahora para dejar reservado (la mitad)
     const cuponInput = document.querySelector("#codigo-cupon");
     const mensajeCupon = document.querySelector("#mensaje-cupon");
     let cuponActivo = false;
