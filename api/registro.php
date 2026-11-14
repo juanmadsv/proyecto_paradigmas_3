@@ -12,8 +12,7 @@ if ($nombre === '' || strlen($nombre) > 100 || !filter_var($email, FILTER_VALIDA
 }
 $hash = password_hash($pass, PASSWORD_BCRYPT);
 try {
-    $consulta = db()->prepare('INSERT INTO usuarios (nombre, email, password) VALUES (:nombre, :email, :password)');
-    $consulta->execute(['nombre' => $nombre, 'email' => $email, 'password' => $hash]);
+    (new UsuarioModel(db()))->crear($nombre, $email, $hash);
 } catch (PDOException $error) {
     if (($error->errorInfo[1] ?? 0) === 1062) {
         responder(409, ['error' => 'Ese email ya tiene una cuenta.']);
