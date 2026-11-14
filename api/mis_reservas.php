@@ -3,9 +3,8 @@ require __DIR__ . '/bootstrap.php';
 $usuario = exigirUsuario(); // Sin sesión: 401 inmediato, incluso enviando un usuario_id falso.
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $consulta = db()->prepare('SELECT id, complejo, tipo, fecha, TIME_FORMAT(horario, "%H:%i") AS horario, total, sena FROM reservas WHERE usuario_id = :usuario_id ORDER BY fecha DESC, horario DESC');
-    $consulta->execute(['usuario_id' => $usuario['id']]);
-    responder(200, ['usuario' => $usuario, 'reservas' => $consulta->fetchAll(), 'csrf_token' => csrfToken()]);
+    $reservas = (new ReservaModel(db()))->listarPorUsuario((int) $usuario['id']);
+    responder(200, ['usuario' => $usuario, 'reservas' => $reservas, 'csrf_token' => csrfToken()]);
 }
 metodo('POST');
 exigirCSRF();
