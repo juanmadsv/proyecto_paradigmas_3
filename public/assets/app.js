@@ -1,6 +1,6 @@
 "use strict";
 
-const ROOT = "../";
+const ROOT = document.body.dataset.root || "../";
 const API = ROOT + "api/";
 const app = document.querySelector("#app");
 const main = document.querySelector("#contenido");
