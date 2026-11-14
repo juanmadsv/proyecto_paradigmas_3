@@ -32,9 +32,9 @@ final class ReservaModel {
     public function crear(array $datos): int {
         $consulta = $this->db->prepare(
             'INSERT INTO reservas
-             (usuario_id, complejo, tipo, fecha, horario, telefono, pago, servicios_json, cupon, total, sena)
+             (usuario_id, complejo, tipo, fecha, horario, telefono, pago, servicios_json, cupon, total, sena, turno_activo)
              VALUES
-             (:usuario_id, :complejo, :tipo, :fecha, :horario, :telefono, :pago, :servicios, :cupon, :total, :sena)'
+             (:usuario_id, :complejo, :tipo, :fecha, :horario, :telefono, :pago, :servicios, :cupon, :total, :sena, :turno_activo)'
         );
         $consulta->execute($datos);
         return (int) $this->db->lastInsertId();
@@ -46,7 +46,7 @@ final class ReservaModel {
             ->format('Y-m-d H:i:s');
         $consulta = $this->db->prepare(
             "UPDATE reservas
-             SET estado = 'cancelada'
+             SET estado = 'cancelada', turno_activo = NULL
              WHERE id = :id
                AND usuario_id = :usuario_id
                AND estado = 'confirmada'
