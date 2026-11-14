@@ -47,7 +47,7 @@ La importación del esquema es manual; actualizar el repositorio no modifica la 
 | CU-06 Consultar o cancelar una reserva | Consulta de reservas propias y cancelación con 24 horas de anticipación; no realiza reintegros |
 | CU-07 a CU-14 | No implementados en esta versión: administración de complejos, oferta, cobros, reclamos y estadísticas |
 
-La disponibilidad combina una plantilla de turnos de demostración con las reservas activas de MySQL y permite elegir una fecha dentro de los próximos 90 días. La cancelación libera el turno para que pueda reservarse de nuevo. La seña del 20% respeta la regla principal documentada en AE1, pero es informativa: no confirma un pago. El sitio no almacena datos de tarjeta ni envía notificaciones a propietarios.
+La disponibilidad combina una plantilla de turnos de demostración con las reservas activas de MySQL, permite elegir una fecha dentro de los próximos 90 días y oculta horarios que ya comenzaron. La cancelación libera el turno para que pueda reservarse de nuevo. La seña del 20% respeta la regla principal documentada en AE1, pero es informativa: no confirma un pago. El sitio no almacena datos de tarjeta ni envía notificaciones a propietarios.
 
 ## API y códigos HTTP
 
@@ -82,7 +82,7 @@ El script `tests/api_smoke.py` comprueba autenticación, CSRF, aislamiento de re
 python tests/api_smoke.py http://localhost/canchaYaFrontend
 ```
 
-El contrato de endpoints JSON está en `docs/API.md`. La matriz de trazabilidad y autoevaluación está en `docs/AE4_trazabilidad_y_matriz_ISO.md`; el guion de exposición y recorrido está en `docs/AE4_guia_defensa.md`. Para cerrar la evidencia de entrega todavía se deben ejecutar Lighthouse, verificar el recorrido solo con teclado y capturar la pestaña Network. No se afirma un puntaje Lighthouse hasta medirlo. El resultado de Lighthouse y el comportamiento con XAMPP dependen de ejecutar esta rama en el entorno local.
+El contrato de endpoints JSON está en `docs/API.md`. La matriz de trazabilidad y autoevaluación está en `docs/AE4_trazabilidad_y_matriz_ISO.md`; el guion de exposición y recorrido está en `docs/AE4_guia_defensa.md`; la preparación del informe y ZIP está en `docs/AE4_entrega.md`. Para cerrar la evidencia de entrega todavía se deben ejecutar Lighthouse, verificar el recorrido solo con teclado y capturar la pestaña Network. No se afirma un puntaje Lighthouse hasta medirlo. El resultado de Lighthouse y el comportamiento con XAMPP dependen de ejecutar esta rama en el entorno local.
 
 La versión actual cubre el flujo principal del jugador; no debe presentarse como implementación de todos los casos de uso de AE1. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 
