@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS reservas (
     ) STORED,
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_reservas_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-    UNIQUE KEY turno_unico (turno_activo),
+    UNIQUE KEY turno_activo_unico (turno_activo),
     KEY reservas_usuario (usuario_id, fecha)
 ) ENGINE=InnoDB;
 
