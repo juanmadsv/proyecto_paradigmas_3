@@ -26,11 +26,7 @@ CREATE TABLE IF NOT EXISTS reservas (
     total DECIMAL(10,2) NOT NULL,
     sena DECIMAL(10,2) NOT NULL,
     estado ENUM('confirmada','cancelada') NOT NULL DEFAULT 'confirmada',
-    turno_activo VARCHAR(80) GENERATED ALWAYS AS (
-        CASE WHEN estado = 'confirmada'
-        THEN CONCAT(complejo, '|', DATE_FORMAT(fecha, '%Y-%m-%d'), '|', TIME_FORMAT(horario, '%H:%i:%s'))
-        ELSE NULL END
-    ) STORED,
+    turno_activo VARCHAR(80) DEFAULT NULL,
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_reservas_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     UNIQUE KEY turno_activo_unico (turno_activo),
