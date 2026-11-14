@@ -28,7 +28,7 @@ La SPA se comunica con la API mediante `fetch()` y JSON. Los endpoints de PHP de
 
 1. Colocar el proyecto en `C:\\xampp\\htdocs\\canchaYaFrontend`.
 2. Iniciar Apache y MySQL. Se requiere PHP 8.0 o posterior con `pdo_mysql` y sesiones.
-3. En phpMyAdmin, importar `database/schema.sql`.
+3. Para una instalación nueva, en phpMyAdmin importar `database/schema.sql`. Si ya existe la base de AE1/AE2, importar además `database/migrations/003_cancelacion_reservas.sql` para habilitar cancelaciones y liberar turnos. La migración debe ejecutarse sobre la base `canchaya`.
 4. Para MySQL distinto de `root` sin contraseña, copiar `config/database.example.php` como `config/database.local.php` y completar los valores. Ese archivo local está ignorado por Git. También se admiten `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`.
 5. Abrir `http://localhost/canchaYaFrontend/`.
 6. El endpoint privado de reservas puede consultarse en `http://localhost/canchaYaFrontend/api/mis_reservas.php`.
@@ -41,13 +41,13 @@ La importación del esquema es manual; actualizar el repositorio no modifica la 
 | --- | --- |
 | CU-01 Registrarse e iniciar sesión | Registro y autenticación del jugador con BCRYPT y sesión |
 | CU-02 Buscar y filtrar complejos | Catálogo con filtros por texto, zona y tipo |
-| CU-03 Consultar disponibilidad y detalle | Fichas y turnos del día consultados desde la API |
-| CU-04 Generar una reserva | Creación persistente de reserva con control de sesión y conflicto de turno |
+| CU-03 Consultar disponibilidad y detalle | Fichas y turnos de una fecha elegida consultados desde la API |
+| CU-04 Generar una reserva | Creación persistente con fecha, sesión, recálculo de importes y control de turno duplicado |
 | CU-05 Pagar una reserva | Parcial: se registra el medio declarado; no existe pasarela ni cobro real |
-| CU-06 Consultar o cancelar una reserva | Consulta de reservas propias; la cancelación todavía no está implementada |
+| CU-06 Consultar o cancelar una reserva | Consulta de reservas propias y cancelación con 24 horas de anticipación; no realiza reintegros |
 | CU-07 a CU-14 | No implementados en esta versión: administración de complejos, oferta, cobros, reclamos y estadísticas |
 
-La disponibilidad usa turnos de demostración para el día actual. La seña del 20% respeta la regla principal documentada en AE1, pero es informativa: no confirma un pago. El sitio no almacena datos de tarjeta ni envía notificaciones a propietarios.
+La disponibilidad combina una plantilla de turnos de demostración con las reservas activas de MySQL y permite elegir una fecha dentro de los próximos 90 días. La cancelación libera el turno para que pueda reservarse de nuevo. La seña del 20% respeta la regla principal documentada en AE1, pero es informativa: no confirma un pago. El sitio no almacena datos de tarjeta ni envía notificaciones a propietarios.
 
 ## API y códigos HTTP
 
@@ -57,9 +57,10 @@ La disponibilidad usa turnos de demostración para el día actual. La seña del 
 | `api/registro.php` | POST JSON | 201 creado; 400 datos inválidos; 409 email repetido |
 | `api/login.php` | POST JSON | 200 autenticado; 401 credenciales incorrectas |
 | `api/logout.php` | POST JSON | 200 sesión cerrada |
-| `api/turnos.php` | GET | 200 disponibilidad pública del día |
+| `api/turnos.php` | GET `?fecha=YYYY-MM-DD` | 200 disponibilidad pública para la fecha; 400 fecha fuera del rango |
 | `api/mis_reservas.php` | GET | 200 reservas propias; 401 sin sesión |
 | `api/mis_reservas.php` | POST JSON | 201 reserva creada; 400 entrada inválida; 401 sin sesión; 409 turno ocupado |
+| `api/mis_reservas.php` | DELETE JSON `{reserva_id}` | 200 cancelada; 400 ID inválido; 401 sin sesión; 403 CSRF; 409 no existe, no pertenece o faltan menos de 24 horas |
 
 Los POST usan `Content-Type: application/json` y `X-CSRF-Token`. El servidor responde 403 si falta o no coincide el token, 405 ante un método incorrecto, 415 ante un tipo de contenido incorrecto, 400 ante JSON o datos inválidos y 500 con un mensaje genérico ante fallas internas.
 
@@ -81,7 +82,7 @@ El script `tests/api_smoke.py` comprueba autenticación, CSRF, aislamiento de re
 python tests/api_smoke.py http://localhost/canchaYaFrontend
 ```
 
-Para la entrega AE4 todavía se debe guardar la matriz ISO/IEC 25010 con rutas y líneas concretas, ejecutar la auditoría Lighthouse hasta alcanzar 100/100 en accesibilidad, verificar el recorrido solo con teclado y capturar la pestaña Network. El resultado de Lighthouse y el comportamiento con XAMPP dependen de ejecutar esta rama en el entorno local.
+La matriz de trazabilidad y autoevaluación está en `docs/AE4_trazabilidad_y_matriz_ISO.md`. Para cerrar la evidencia de entrega todavía se deben anotar las líneas finales, ejecutar Lighthouse, verificar el recorrido solo con teclado y capturar la pestaña Network. No se afirma un puntaje Lighthouse hasta medirlo. El resultado de Lighthouse y el comportamiento con XAMPP dependen de ejecutar esta rama en el entorno local.
 
 La versión actual cubre el flujo principal del jugador; no debe presentarse como implementación de todos los casos de uso de AE1. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 
