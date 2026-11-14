@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../models/UsuarioModel.php';
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
@@ -112,9 +114,7 @@ function exigirUsuario(): array {
     if (!isset($_SESSION['usuario_id'])) {
         responder(401, ['error' => 'Iniciá sesión para continuar.']);
     }
-    $consulta = db()->prepare('SELECT id, nombre, email, version_sesion FROM usuarios WHERE id = :id');
-    $consulta->execute(['id' => $_SESSION['usuario_id']]);
-    $usuario = $consulta->fetch();
+    $usuario = (new UsuarioModel(db()))->buscarPorId((int) $_SESSION['usuario_id']);
     if (!$usuario || (int) ($usuario['version_sesion'] ?? 0) !== (int) ($_SESSION['version_sesion'] ?? 0)) {
         $_SESSION = [];
         session_regenerate_id(true);
