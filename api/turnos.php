@@ -26,5 +26,15 @@ foreach ($reservasOcupadas as $reserva) {
         }
     }
 }
+
+$ahora = new DateTimeImmutable('now');
+foreach ($datos['turnos'] as $complejo => $turnos) {
+    foreach ($turnos as $indice => $turno) {
+        $inicioTurno = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $fecha . ' ' . $turno['hora']);
+        if (!$inicioTurno || $inicioTurno <= $ahora) {
+            $datos['turnos'][$complejo][$indice]['libre'] = false;
+        }
+    }
+}
 $datos['fecha'] = $fecha;
 responder(200, $datos);
