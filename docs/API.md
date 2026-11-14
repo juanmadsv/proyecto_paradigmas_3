@@ -10,9 +10,9 @@ Base local: `http://localhost/canchaYaFrontend/api/`. Todas las respuestas usan 
 | `POST registro.php` | `nombre`, `email`, `password` | 201: cuenta creada | 400 datos inválidos/JSON inválido; 403 CSRF; 409 email existente; 413 cuerpo mayor a 16 KB; 415 tipo de contenido; 500 error genérico |
 | `POST login.php` | `email`, `password` | 200: `usuario` y nuevo `csrf_token` | 401 credenciales inválidas; 403 CSRF; 400 JSON inválido; 413 cuerpo demasiado grande; 415 tipo de contenido; 500 error genérico |
 | `POST logout.php` | Objeto JSON vacío | 200: sesión cerrada | 403 CSRF; 405 método; 415 contenido; 500 error genérico |
-| `GET turnos.php?fecha=YYYY-MM-DD` | Fecha opcional; predeterminada hoy | 200: fecha y lista de turnos por complejo, con marca `libre` | 400 fecha inválida o fuera de hoy–90 días; 405 método; 500 error genérico |
+| `GET turnos.php?fecha=YYYY-MM-DD` | Fecha opcional; predeterminada hoy | 200: fecha y lista de turnos por complejo, con marca `libre`; excluye reservas tomadas y horarios pasados | 400 fecha inválida o fuera de hoy–90 días; 405 método; 500 error genérico |
 | `GET mis_reservas.php` | Cookie de sesión | 200: usuario autenticado, reservas propias y token CSRF | 401 sin sesión o sesión vencida; 405 método; 500 error genérico |
-| `POST mis_reservas.php` | `complejo`, `tipo`, `fecha`, `horario`, `telefono`, `pago`, `servicios[]`, `cupon` opcional | 201: reserva creada, total y seña | 400 datos inválidos; 401 sin sesión; 403 CSRF; 409 turno ocupado; 413 cuerpo demasiado grande; 415 tipo de contenido; 500 error genérico |
+| `POST mis_reservas.php` | `complejo`, `tipo`, `fecha`, `horario`, `telefono`, `pago`, `servicios[]`, `cupon` opcional | 201: reserva creada, total y seña | 400 datos inválidos; 401 sin sesión; 403 CSRF; 409 turno ocupado o pasado; 413 cuerpo demasiado grande; 415 tipo de contenido; 500 error genérico |
 | `DELETE mis_reservas.php` | `reserva_id` | 200: reserva cancelada | 400 ID inválido; 401 sin sesión; 403 CSRF; 409 no existe/no pertenece/faltan menos de 24 horas; 413 cuerpo demasiado grande; 415 tipo de contenido; 500 error genérico |
 
 ## Ejemplo: creación de reserva
