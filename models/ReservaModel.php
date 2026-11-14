@@ -10,10 +10,10 @@ final class ReservaModel {
 
     public function listarPorUsuario(int $usuarioId): array {
         $consulta = $this->db->prepare(
-            'SELECT id, complejo, tipo, fecha, TIME_FORMAT(horario, "%H:%i") AS horario, total, sena, estado
+            "SELECT id, complejo, tipo, fecha, TIME_FORMAT(horario, '%H:%i') AS horario, total, sena, estado
              FROM reservas
              WHERE usuario_id = :usuario_id
-             ORDER BY fecha DESC, horario DESC'
+             ORDER BY fecha DESC, horario DESC"
         );
         $consulta->execute(['usuario_id' => $usuarioId]);
         return $consulta->fetchAll();
