@@ -8,7 +8,7 @@ $email = strtolower(texto($datos, 'email'));
 $pass = isset($datos['password']) && is_string($datos['password']) ? $datos['password'] : '';
 // BCRYPT admite como máximo 72 bytes: se rechazan entradas mayores, sin truncarlas.
 if ($nombre === '' || strlen($nombre) > 100 || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190 || strlen($pass) < 8 || strlen($pass) > 72 || strpos($pass, "\0") !== false) {
-    responder(422, ['error' => 'Ingresá un nombre (hasta 100 bytes), un email válido y una contraseña de 8 a 72 bytes.']);
+    responder(400, ['error' => 'Ingresá un nombre (hasta 100 bytes), un email válido y una contraseña de 8 a 72 bytes.']);
 }
 $hash = password_hash($pass, PASSWORD_BCRYPT);
 try {
