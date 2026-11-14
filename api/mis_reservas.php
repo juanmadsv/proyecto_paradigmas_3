@@ -6,6 +6,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $reservas = (new ReservaModel(db()))->listarPorUsuario((int) $usuario['id']);
     responder(200, ['usuario' => $usuario, 'reservas' => $reservas, 'csrf_token' => csrfToken()]);
 }
+
+if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+    exigirCSRF();
+    $datos = cuerpoJSON();
+    $reservaId = filter_var($datos['reserva_id'] ?? null, FILTER_VALIDATE_INT);
+    if (!$reservaId || $reservaId < 1) {
+        responder(400, ['error' => 'Indicá una reserva válida para cancelar.']);
+    }
+    $cancelada = (new ReservaModel(db()))->cancelar((int) $reservaId, (int) $usuario['id']);
+    if (!$cancelada) {
+        responder(409, ['error' => 'La reserva no existe, no te pertenece o faltan menos de 24 horas para el turno.']);
+    }
+    responder(200, ['mensaje' => 'Reserva cancelada. No se procesó ningún reintegro porque no hay pasarela de pago integrada.']);
+}
+
 metodo('POST');
 exigirCSRF();
 $datos = cuerpoJSON();
@@ -17,11 +32,30 @@ $hora = texto($datos, 'horario');
 $telefono = texto($datos, 'telefono');
 $pago = texto($datos, 'pago');
 $cupon = strtoupper(texto($datos, 'cupon'));
-$servicios = $datos['servicios'] ?? [];
+$fecha = texto($datos, 'fecha');
 $c = $catalogo[$complejo] ?? null;
-if (!$c || !in_array($tipo, explode(' ', $c['tipos']), true) || !preg_match('/^[0-9+() -]{6,30}$/D', $telefono) || !in_array($pago, ['debito', 'credito', 'mercadopago', 'personalpay', 'naranjax', 'uala'], true)) {
+$fechaSolicitada = DateTimeImmutable::createFromFormat('!Y-m-d', $fecha);
+$hoy = new DateTimeImmutable('today');
+$maxima = $hoy->modify('+90 days');
+
+if (
+    !$c ||
+    !in_array($tipo, explode(' ', $c['tipos']), true) ||
+    !preg_match('/^[0-9+() -]{6,30}$/D', $telefono) ||
+    !in_array($pago, ['debito', 'credito', 'mercadopago', 'personalpay', 'naranjax', 'uala'], true)
+) {
     responder(400, ['error' => 'Revisá el complejo, tipo de cancha, teléfono y forma de pago.']);
 }
+if (
+    !$fechaSolicitada ||
+    $fechaSolicitada->format('Y-m-d') !== $fecha ||
+    $fechaSolicitada < $hoy ||
+    $fechaSolicitada > $maxima
+) {
+    responder(400, ['error' => 'Elegí una fecha entre hoy y los próximos 90 días.']);
+}
+
+$servicios = $datos['servicios'] ?? [];
 if (!is_array($servicios) || count($servicios) > 4) {
     responder(400, ['error' => 'Servicios inválidos.']);
 }
@@ -37,13 +71,14 @@ foreach ($turnos['turnos'][$complejo] ?? [] as $turno) {
 }
 if (!$libre) responder(409, ['error' => 'Ese horario no está disponible.']);
 if ($cupon !== '' && $cupon !== 'UCP10') responder(400, ['error' => 'El cupón no es válido.']);
+
 // El importe se calcula en el servidor: nunca se acepta un total del navegador.
 $precios = ['parrilla' => 3000, 'quincho' => 8000, 'vestuarios' => 0, 'estacionamiento' => 0];
 $subtotal = (int) $c['precio'];
 foreach ($servicios as $servicio) $subtotal += $precios[$servicio];
 $total = $subtotal - ($cupon === 'UCP10' ? (int) round($subtotal * 0.10) : 0);
 $sena = (int) round($total * 0.20);
-$fecha = date('Y-m-d');
+
 try {
     $idReserva = (new ReservaModel(db()))->crear([
         'usuario_id' => $usuario['id'], 'complejo' => $complejo, 'tipo' => $tipo,
