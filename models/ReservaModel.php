@@ -21,9 +21,9 @@ final class ReservaModel {
 
     public function listarOcupadasPorFecha(string $fecha): array {
         $consulta = $this->db->prepare(
-            'SELECT complejo, TIME_FORMAT(horario, "%H:%i") AS hora
+            "SELECT complejo, TIME_FORMAT(horario, '%H:%i') AS hora
              FROM reservas
-             WHERE fecha = :fecha AND estado = 'confirmada''
+             WHERE fecha = :fecha AND estado = 'confirmada'"
         );
         $consulta->execute(['fecha' => $fecha]);
         return $consulta->fetchAll();
