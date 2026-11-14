@@ -82,7 +82,7 @@ El script `tests/api_smoke.py` comprueba autenticación, CSRF, aislamiento de re
 python tests/api_smoke.py http://localhost/canchaYaFrontend
 ```
 
-La matriz de trazabilidad y autoevaluación está en `docs/AE4_trazabilidad_y_matriz_ISO.md`. Para cerrar la evidencia de entrega todavía se deben anotar las líneas finales, ejecutar Lighthouse, verificar el recorrido solo con teclado y capturar la pestaña Network. No se afirma un puntaje Lighthouse hasta medirlo. El resultado de Lighthouse y el comportamiento con XAMPP dependen de ejecutar esta rama en el entorno local.
+La matriz de trazabilidad y autoevaluación está en `docs/AE4_trazabilidad_y_matriz_ISO.md`; el guion de exposición y recorrido está en `docs/AE4_guia_defensa.md`. Para cerrar la evidencia de entrega todavía se deben ejecutar Lighthouse, verificar el recorrido solo con teclado y capturar la pestaña Network. No se afirma un puntaje Lighthouse hasta medirlo. El resultado de Lighthouse y el comportamiento con XAMPP dependen de ejecutar esta rama en el entorno local.
 
 La versión actual cubre el flujo principal del jugador; no debe presentarse como implementación de todos los casos de uso de AE1. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 
