@@ -10,7 +10,7 @@ final class ReservaModel {
 
     public function listarPorUsuario(int $usuarioId): array {
         $consulta = $this->db->prepare(
-            'SELECT id, complejo, tipo, fecha, TIME_FORMAT(horario, "%H:%i") AS horario, total, sena
+            'SELECT id, complejo, tipo, fecha, TIME_FORMAT(horario, "%H:%i") AS horario, total, sena, estado
              FROM reservas
              WHERE usuario_id = :usuario_id
              ORDER BY fecha DESC, horario DESC'
@@ -23,7 +23,7 @@ final class ReservaModel {
         $consulta = $this->db->prepare(
             'SELECT complejo, TIME_FORMAT(horario, "%H:%i") AS hora
              FROM reservas
-             WHERE fecha = :fecha'
+             WHERE fecha = :fecha AND estado = 'confirmada''
         );
         $consulta->execute(['fecha' => $fecha]);
         return $consulta->fetchAll();
@@ -38,5 +38,25 @@ final class ReservaModel {
         );
         $consulta->execute($datos);
         return (int) $this->db->lastInsertId();
+    }
+
+    public function cancelar(int $reservaId, int $usuarioId): bool {
+        $limite = (new DateTimeImmutable('now', new DateTimeZone('America/Argentina/Buenos_Aires')))
+            ->modify('+24 hours')
+            ->format('Y-m-d H:i:s');
+        $consulta = $this->db->prepare(
+            "UPDATE reservas
+             SET estado = 'cancelada'
+             WHERE id = :id
+               AND usuario_id = :usuario_id
+               AND estado = 'confirmada'
+               AND CONCAT(fecha, ' ', horario) >= :limite"
+        );
+        $consulta->execute([
+            'id' => $reservaId,
+            'usuario_id' => $usuarioId,
+            'limite' => $limite,
+        ]);
+        return $consulta->rowCount() === 1;
     }
 }
