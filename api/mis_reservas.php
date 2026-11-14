@@ -42,6 +42,7 @@ if (
     !$c ||
     !in_array($tipo, explode(' ', $c['tipos']), true) ||
     !preg_match('/^[0-9+() -]{6,30}$/D', $telefono) ||
+    !preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/D', $hora) ||
     !in_array($pago, ['debito', 'credito', 'mercadopago', 'personalpay', 'naranjax', 'uala'], true)
 ) {
     responder(400, ['error' => 'Revisá el complejo, tipo de cancha, teléfono y forma de pago.']);
@@ -70,6 +71,10 @@ foreach ($turnos['turnos'][$complejo] ?? [] as $turno) {
     if ($turno['hora'] === $hora && $turno['libre'] === true) $libre = true;
 }
 if (!$libre) responder(409, ['error' => 'Ese horario no está disponible.']);
+$inicioTurno = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $fecha . ' ' . $hora);
+if (!$inicioTurno || $inicioTurno <= new DateTimeImmutable('now')) {
+    responder(409, ['error' => 'No se pueden reservar horarios que ya comenzaron.']);
+}
 if ($cupon !== '' && $cupon !== 'UCP10') responder(400, ['error' => 'El cupón no es válido.']);
 
 // El importe se calcula en el servidor: nunca se acepta un total del navegador.
