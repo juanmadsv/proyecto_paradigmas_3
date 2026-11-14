@@ -176,6 +176,7 @@ function renderHome() {
   count.setAttribute("aria-live", "polite");
   const list = node("ul", null, "card-grid clean");
   list.setAttribute("aria-label", "Resultados de complejos");
+  list.setAttribute("aria-live", "polite");
   const render = () => {
     const term = search.value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
     const selectedZone = zoneSelect.value, selectedType = typeSelect.value;
@@ -306,6 +307,7 @@ async function renderReserve(id) {
       const opts=((refreshed.turnos&&refreshed.turnos[selected])||[]).filter(t=>t.libre).map(t=>{const o=node("option",t.hora);o.value=t.hora;return o;});
       if(!opts.length){const o=node("option","No hay turnos disponibles hoy");o.value="";opts.push(o);}
       scheduleSelect.replaceChildren(...opts);
+      submit.disabled = !currentUser || !opts.length;
     }catch(error){announce(error.message,true);}
     addServices(selected);updateSummary();
   });
