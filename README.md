@@ -1,6 +1,6 @@
 # CanchaYa — AE4 / Paradigmas III
 
-CanchaYa permite explorar complejos deportivos, cotizar una cancha, registrar una cuenta y reservar un turno. La entrada de la versión AE4 es la SPA en `public/index.html`; las páginas HTML de la raíz se conservan como antecedentes de AE1 y AE2.
+CanchaYa permite explorar complejos deportivos, cotizar una cancha, registrar una cuenta y reservar un turno. La entrada de la versión AE4 es `index.html`, que carga la SPA ubicada en `public/assets/`; `public/index.html` sirve como entrada equivalente. Las páginas HTML legacy se conservan como antecedentes de AE1 y AE2.
 
 ## Arquitectura actual
 
@@ -30,7 +30,7 @@ La SPA se comunica con la API mediante `fetch()` y JSON. Los endpoints de PHP de
 2. Iniciar Apache y MySQL. Se requiere PHP 8.0 o posterior con `pdo_mysql` y sesiones.
 3. En phpMyAdmin, importar `database/schema.sql`.
 4. Para MySQL distinto de `root` sin contraseña, copiar `config/database.example.php` como `config/database.local.php` y completar los valores. Ese archivo local está ignorado por Git. También se admiten `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`.
-5. Abrir `http://localhost/canchaYaFrontend/public/`.
+5. Abrir `http://localhost/canchaYaFrontend/`.
 6. El endpoint privado de reservas puede consultarse en `http://localhost/canchaYaFrontend/api/mis_reservas.php`.
 
 La importación del esquema es manual; actualizar el repositorio no modifica la base local. Para probar cambios de datos, usar una base de pruebas separada.
