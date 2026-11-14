@@ -20,14 +20,14 @@ $cupon = strtoupper(texto($datos, 'cupon'));
 $servicios = $datos['servicios'] ?? [];
 $c = $catalogo[$complejo] ?? null;
 if (!$c || !in_array($tipo, explode(' ', $c['tipos']), true) || !preg_match('/^[0-9+() -]{6,30}$/D', $telefono) || !in_array($pago, ['debito', 'credito', 'mercadopago', 'personalpay', 'naranjax', 'uala'], true)) {
-    responder(422, ['error' => 'Revisá el complejo, tipo de cancha, teléfono y forma de pago.']);
+    responder(400, ['error' => 'Revisá el complejo, tipo de cancha, teléfono y forma de pago.']);
 }
 if (!is_array($servicios) || count($servicios) > 4) {
-    responder(422, ['error' => 'Servicios inválidos.']);
+    responder(400, ['error' => 'Servicios inválidos.']);
 }
 foreach ($servicios as $servicio) {
     if (!is_string($servicio) || !in_array($servicio, $c['servicios'], true)) {
-        responder(422, ['error' => 'El complejo no ofrece uno de los servicios seleccionados.']);
+        responder(400, ['error' => 'El complejo no ofrece uno de los servicios seleccionados.']);
     }
 }
 $servicios = array_values(array_unique($servicios));
@@ -36,7 +36,7 @@ foreach ($turnos['turnos'][$complejo] ?? [] as $turno) {
     if ($turno['hora'] === $hora && $turno['libre'] === true) $libre = true;
 }
 if (!$libre) responder(409, ['error' => 'Ese horario no está disponible.']);
-if ($cupon !== '' && $cupon !== 'UCP10') responder(422, ['error' => 'El cupón no es válido.']);
+if ($cupon !== '' && $cupon !== 'UCP10') responder(400, ['error' => 'El cupón no es válido.']);
 // El importe se calcula en el servidor: nunca se acepta un total del navegador.
 $precios = ['parrilla' => 3000, 'quincho' => 8000, 'vestuarios' => 0, 'estacionamiento' => 0];
 $subtotal = (int) $c['precio'];
