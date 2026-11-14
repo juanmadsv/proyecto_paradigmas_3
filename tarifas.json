@@ -1,6 +1,6 @@
 {
   "precioBaseHora": 25000,
-  "senaPorc": 0.5,
+  "senaPorc": 0.20,
   "tiposCancha": [
     { "valor": "5",  "nombre": "Fútbol 5",  "recargo": 0 },
     { "valor": "7",  "nombre": "Fútbol 7",  "recargo": 4000 },
