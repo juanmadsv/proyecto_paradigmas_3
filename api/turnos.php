@@ -18,10 +18,13 @@ if (
 $datos = datosDominio('turnos.json');
 $reservasOcupadas = (new ReservaModel(db()))->listarOcupadasPorFecha($fecha);
 foreach ($reservasOcupadas as $reserva) {
-    foreach ($datos['turnos'][$reserva['complejo']] ?? [] as &$turno) {
-        if ($turno['hora'] === $reserva['hora']) $turno['libre'] = false;
+    $complejo = $reserva['complejo'];
+    if (!isset($datos['turnos'][$complejo])) continue;
+    foreach ($datos['turnos'][$complejo] as $indice => $turno) {
+        if ($turno['hora'] === $reserva['hora']) {
+            $datos['turnos'][$complejo][$indice]['libre'] = false;
+        }
     }
-    unset($turno);
 }
 $datos['fecha'] = $fecha;
 responder(200, $datos);
