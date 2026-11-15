@@ -12,7 +12,7 @@ Esta guía refleja el estado de la rama `ae4-tifas-implementacion`. Las líneas 
 6. Confirmar una reserva. En Network, mostrar el POST JSON a `api/mis_reservas.php`, el código 201 y la respuesta JSON. Mostrar que se calcula una seña del 20%, sin afirmar que hubo un cobro.
 7. Abrir “Mis reservas”, cancelar una reserva de prueba que tenga más de 24 horas de anticipación y mostrar el DELETE JSON. Explicar que no se tramita un reintegro.
 8. En una ventana privada o sesión cerrada, solicitar `api/mis_reservas.php` y comprobar la respuesta 401.
-9. Lighthouse ya fue ejecutado por el equipo: se reporta 100/100 en Accesibilidad para `#inicio`, `#reservar`, `#cuenta`, `#mis-reservas` y `#cotizar`. Guardar e incorporar las capturas con URL y auditoría visibles para documentar la medición.
+9. Lighthouse ya fue ejecutado por el equipo: se reporta 100/100 en Accesibilidad para `#inicio`, `#reservar`, `#cuenta`, `#mis-reservas` y `#cotizar`. Las cinco capturas con URL y puntuación están incorporadas al informe técnico; proyectar una o más durante la defensa.
 
 ## Mapa del código para explicar
 
@@ -50,7 +50,7 @@ Es la regla económica implementada para calcular el monto sugerido. No hay inte
 Los roles y paneles de propietarios/administración, aprobación de complejos, gestión completa de horarios y pagos, reclamos y estadísticas (CU-07 a CU-14), además de una pasarela real. El estado exacto está documentado en la matriz; presentarlo con claridad evita afirmar funciones que la aplicación no tiene.
 
 **¿Qué evidencia falta para afirmar calidad medida?**  
-Ejecutar el flujo en XAMPP, pruebas de API en una base separada, teclado y Lighthouse; guardar capturas de Network y de resultados. El código muestra controles implementados, pero no reemplaza los resultados observados.
+El equipo recorrió XAMPP y teclado y ejecutó Lighthouse. Las capturas Lighthouse y del 401 anónimo están en el informe; faltan Network de los flujos autenticados y resultados automatizados contra una base de pruebas. El código muestra controles implementados, pero no reemplaza los resultados observados.
 
 ## Pendientes locales previos a la defensa
 
@@ -58,4 +58,4 @@ Ejecutar el flujo en XAMPP, pruebas de API en una base separada, teclado y Light
 - Si se reutiliza una base existente, importar `database/migrations/003_cancelacion_reservas.sql` en la base `canchaya`; para una base nueva, importar `database/schema.sql`.
 - Ejecutar el recorrido con una cuenta y datos de prueba.
 - Ejecutar las comprobaciones automatizadas existentes solo contra una base de prueba.
-- Guardar capturas propias de Lighthouse, Network y navegación por teclado para incorporarlas al informe final.
+- Conservar el informe PDF con las capturas Lighthouse y 401; completar Network de los flujos autenticados y, si se solicita como evidencia, navegación por teclado.
