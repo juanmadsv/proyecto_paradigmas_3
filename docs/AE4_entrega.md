@@ -43,7 +43,8 @@ git archive --format=zip --output=../CanchaYa-AE4.zip ae4-tifas-implementacion
 - [ ] Recorrer alta, inicio/cierre de sesión, catálogo, disponibilidad, creación, consulta y cancelación.
 - [ ] Ejecutar las comprobaciones existentes contra una base de pruebas aislada.
 - [ ] Probar la navegación usando solo Tab y Enter y guardar la captura.
-- [ ] Ejecutar Lighthouse sobre la versión final y guardar la captura completa.
+- [x] Ejecutar Lighthouse: el equipo reporta 100/100 en Accesibilidad para las cinco rutas documentadas.
+- [ ] Guardar e incorporar las capturas completas de Lighthouse al PDF.
 - [ ] Inspeccionar Network y guardar respuestas JSON y códigos HTTP de los flujos principales.
 - [ ] Completar datos de carátula, revisar el PDF y exportarlo.
 - [ ] Generar el ZIP desde la misma rama documentada y cargar ambos entregables en Moodle.
