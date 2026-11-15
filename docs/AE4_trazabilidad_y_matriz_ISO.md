@@ -1,6 +1,6 @@
 # Trazabilidad AE1–AE4 y autoevaluación ISO/IEC 25010
 
-Este documento registra el estado del código en la rama `ae4-tifas-implementacion`. Describe evidencia visible en archivos y separa implementación de verificación. No acredita por sí solo un puntaje Lighthouse ni una prueba ejecutada.
+Este documento registra el estado del código en la rama `ae4-tifas-implementacion`. Separa implementación de verificación. El informe técnico adjunto incorpora las capturas Lighthouse informadas por el equipo y la evidencia del 401 anónimo; no acredita resultados de pruebas automatizadas.
 
 ## Arquitectura desacoplada actual
 
@@ -36,7 +36,7 @@ La API valida la sesión, CSRF, reglas de reserva y entradas. Los modelos encaps
 | Compatibilidad | Interfaz HTML/JS separada de endpoints PHP JSON | Parcial: la separación está en el diseño; falta probar navegadores y dispositivos concretos. |
 | Fiabilidad | `api/bootstrap.php` centraliza respuestas HTTP y errores; `database/schema.sql` mantiene una clave única para turnos activos; `tests/api_smoke.py` | Parcial: el esquema evita reservas simultáneas del mismo turno y el script está disponible, pero su resultado debe registrarse contra una base de pruebas. La migración 003 adapta bases existentes. |
 | Seguridad | `models/UsuarioModel.php`, `models/ReservaModel.php`, `api/registro.php`, `api/login.php`, `api/bootstrap.php`, `api/mis_reservas.php` | Implementada en el flujo cubierto: BCRYPT, PDO con parámetros, sesiones, regeneración de ID, CSRF, autorización por sesión y errores genéricos. Requiere verificación de ejecución. |
-| Usabilidad y accesibilidad | `public/index.html`, `public/assets/app.js`, `public/assets/app.css` | Parcial: hay etiquetas asociadas, teclado nativo, foco visible y regiones `aria-live`. El equipo reporta 100/100 en Accesibilidad para `#inicio`, `#reservar`, `#cuenta`, `#mis-reservas` y `#cotizar`; falta incorporar las capturas del reporte al informe final. |
+| Usabilidad y accesibilidad | `public/index.html`, `public/assets/app.js`, `public/assets/app.css` | Parcial: hay etiquetas asociadas, teclado nativo, foco visible y regiones `aria-live`. El equipo reporta 100/100 en Accesibilidad para `#inicio`, `#reservar`, `#cuenta`, `#mis-reservas` y `#cotizar`; las cinco capturas están incorporadas al informe técnico. |
 | Mantenibilidad | Endpoints bajo `api/`; persistencia de usuarios y reservas en `models/`; conexión central en `api/bootstrap.php`; `database/migrations/` | Parcial: existe separación inicial por capas; parte de las reglas de reserva siguen en el endpoint y los datos de catálogo/horarios son JSON estático. |
 
 ## Evidencias técnicas principales
@@ -67,9 +67,9 @@ Las líneas corresponden a esta versión de la rama y pueden cambiar al editar a
 
 ## Evidencias que deben agregarse al informe final
 
-1. Captura de Lighthouse con el resultado de Accesibilidad de la versión final.
+1. Lighthouse 100/100 en cinco rutas: capturas incorporadas al informe técnico.
 2. Registro de recorrido solo con teclado (Tab y Enter) y de cualquier ajuste hecho para completarlo.
-3. Capturas de Network de registro, inicio de sesión, consulta de turnos, creación de reserva y respuesta 401 anónima.
+3. Network/JSON de respuesta 401 anónima incorporado al informe; faltan capturas de registro, inicio de sesión, consulta de turnos, creación y cancelación.
 4. Resultado de `tests/api_smoke.py` ejecutado con base de pruebas.
 5. Diagrama final de arquitectura y listado de endpoints, métodos, entradas, respuestas y códigos.
 6. ZIP de la misma versión entregada, incluyendo el código y `database/schema.sql`.
