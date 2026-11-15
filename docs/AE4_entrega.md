@@ -6,9 +6,9 @@
 - Arquitectura y matriz honesta de implementación: `docs/AE4_trazabilidad_y_matriz_ISO.md`.
 - Inventario de endpoints: `docs/API.md`.
 - Recorrido y preguntas de defensa: `docs/AE4_guia_defensa.md`.
-- Lighthouse: el equipo reporta 100/100 en Accesibilidad para `#inicio`, `#reservar`, `#cuenta`, `#mis-reservas` y `#cotizar`; falta agregar las capturas al informe.
-- Teclado, Network y recorrido local: probados parcialmente; conservar capturas de Network y de navegación como evidencia.
-- Informe PDF final: requiere agregar carátula con los datos definitivos de la pareja y adjuntar capturas/evidencias reales.
+- Lighthouse: 100/100 reportado en las cinco vistas; capturas incorporadas al informe técnico.
+- Recorrido local y teclado: probados por el equipo. Network/JSON del 401 anónimo está anexado; faltan capturas de las operaciones autenticadas.
+- Informe PDF: preparado con carátula, trazabilidad, arquitectura, API, matriz y evidencias Lighthouse/401. Revisar nombres de carátula antes de presentarlo.
 - Entrega Moodle: debe realizarla el equipo desde su cuenta del campus.
 
 ## Preparación del informe PDF
@@ -21,7 +21,7 @@ Orden propuesto, alineado con la consigna:
 4. API REST: incorporar el inventario de `docs/API.md`, ejemplos JSON y códigos HTTP.
 5. Seguridad: explicar BCRYPT, PDO preparado, sesión regenerada, control de acceso por sesión, token CSRF y renderizado DOM seguro.
 6. Matriz ISO/IEC 25010: usar `docs/AE4_trazabilidad_y_matriz_ISO.md` e indicar estado parcial cuando la evidencia no esté medida.
-7. Evidencias: insertar capturas propias de Lighthouse, navegación por teclado y Network; incluir fecha, URL local y resultado observado.
+7. Evidencias: el informe incorpora Lighthouse y 401 anónimo; completar capturas Network de las operaciones autenticadas.
 8. Conclusiones y límites: declarar pagos reales, paneles administrativos/propietarios y casos de uso pendientes sin presentarlos como implementados.
 
 ## Crear el paquete ZIP
@@ -44,9 +44,9 @@ git archive --format=zip --output=../CanchaYa-AE4.zip ae4-tifas-implementacion
 - [ ] Ejecutar las comprobaciones existentes contra una base de pruebas aislada.
 - [ ] Probar la navegación usando solo Tab y Enter y guardar la captura.
 - [x] Ejecutar Lighthouse: el equipo reporta 100/100 en Accesibilidad para las cinco rutas documentadas.
-- [ ] Guardar e incorporar las capturas completas de Lighthouse al PDF.
-- [ ] Inspeccionar Network y guardar respuestas JSON y códigos HTTP de los flujos principales.
-- [ ] Completar datos de carátula, revisar el PDF y exportarlo.
+- [x] Incorporar las cinco capturas de Lighthouse al informe PDF.
+- [ ] Guardar capturas Network de registro, login, turnos, reserva y cancelación; el 401 anónimo ya está documentado.
+- [ ] Confirmar nombres de integrantes de la carátula y revisar el PDF final.
 - [ ] Generar el ZIP desde la misma rama documentada y cargar ambos entregables en Moodle.
 
 La lista de verificación registra trabajo pendiente; marcar cada punto únicamente después de realizarlo y conservar evidencia de los resultados.
