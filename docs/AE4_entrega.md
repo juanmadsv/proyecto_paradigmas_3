@@ -42,7 +42,8 @@ git archive --format=zip --output=../CanchaYa-AE4.zip ae4-tifas-implementacion
 - [ ] Crear o actualizar la base local y aplicar la migración 003 si ya existía.
 - [ ] Recorrer alta, inicio/cierre de sesión, catálogo, disponibilidad, creación, consulta y cancelación.
 - [ ] Ejecutar las comprobaciones existentes contra una base de pruebas aislada.
-- [ ] Probar la navegación usando solo Tab y Enter y guardar la captura.
+- [x] Recorrer la interfaz usando solo Tab y Enter.
+- [ ] Guardar una captura de la navegación por teclado.
 - [x] Ejecutar Lighthouse: el equipo reporta 100/100 en Accesibilidad para las cinco rutas documentadas.
 - [x] Incorporar las cinco capturas de Lighthouse al informe PDF.
 - [ ] Guardar capturas Network de registro, login, turnos, reserva y cancelación; el 401 anónimo ya está documentado.
