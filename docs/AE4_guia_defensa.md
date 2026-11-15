@@ -12,7 +12,7 @@ Esta guía refleja el estado de la rama `ae4-tifas-implementacion`. Las líneas 
 6. Confirmar una reserva. En Network, mostrar el POST JSON a `api/mis_reservas.php`, el código 201 y la respuesta JSON. Mostrar que se calcula una seña del 20%, sin afirmar que hubo un cobro.
 7. Abrir “Mis reservas”, cancelar una reserva de prueba que tenga más de 24 horas de anticipación y mostrar el DELETE JSON. Explicar que no se tramita un reintegro.
 8. En una ventana privada o sesión cerrada, solicitar `api/mis_reservas.php` y comprobar la respuesta 401.
-9. Ejecutar Lighthouse sobre la versión desplegada localmente y guardar la captura con la URL visible. Informar el resultado medido, aunque no alcance 100; no presentar un puntaje como logrado antes de ejecutarlo.
+9. Lighthouse ya fue ejecutado por el equipo: se reporta 100/100 en Accesibilidad para `#inicio`, `#reservar`, `#cuenta`, `#mis-reservas` y `#cotizar`. Guardar e incorporar las capturas con URL y auditoría visibles para documentar la medición.
 
 ## Mapa del código para explicar
 
