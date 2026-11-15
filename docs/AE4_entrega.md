@@ -6,7 +6,8 @@
 - Arquitectura y matriz honesta de implementación: `docs/AE4_trazabilidad_y_matriz_ISO.md`.
 - Inventario de endpoints: `docs/API.md`.
 - Recorrido y preguntas de defensa: `docs/AE4_guia_defensa.md`.
-- Lighthouse, teclado, Network y ejecución en XAMPP: pendientes de captura local; este repositorio no afirma que el puntaje 100/100 ya se haya obtenido.
+- Lighthouse: el equipo reporta 100/100 en Accesibilidad para `#inicio`, `#reservar`, `#cuenta`, `#mis-reservas` y `#cotizar`; falta agregar las capturas al informe.
+- Teclado, Network y recorrido local: probados parcialmente; conservar capturas de Network y de navegación como evidencia.
 - Informe PDF final: requiere agregar carátula con los datos definitivos de la pareja y adjuntar capturas/evidencias reales.
 - Entrega Moodle: debe realizarla el equipo desde su cuenta del campus.
 
