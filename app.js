@@ -40,30 +40,62 @@ document.addEventListener("DOMContentLoaded", async () => {
       servicios.every((s) => c.servicios.includes(s)) &&
       usos.every((u) => c.usos.split(" ").includes(u))
     );
-    lista.innerHTML = resultados.map(([id, c]) => `
-      <li class="complex-card">
-        <img class="complex-photo" src="images/${id}.jpg" alt="Logo de ${c.nombre}">
-        <div class="complex-body">
-          <h3 class="complex-name">${c.nombre}</h3>
-          <p class="complex-meta">${c.tipo}</p>
-          <p class="complex-address">${c.dir}</p>
-          <div class="complex-services">${c.servicios.map((s) => `<span class="service-chip">${servicio[s]}</span>`).join("")}</div>
-          <p class="complex-price">Desde ${pesos(c.precio)} <span>la hora</span></p>
-        </div>
-        <div class="complex-actions">
-          <a href="detalle.html?c=${encodeURIComponent(id)}" class="btn btn-secondary btn-sm">Ver ficha</a>
-          <a href="comprar.html?c=${encodeURIComponent(id)}" class="btn btn-primary btn-sm">Reservar cancha</a>
-        </div>
-      </li>`).join("");
-    lista.querySelectorAll(".complex-photo").forEach((img) => {
-      img.addEventListener("error", () => {
-        const nombre = img.closest(".complex-card").querySelector(".complex-name").textContent;
-        const letras = nombre.replace(/^(el|la)\s+/i, "").slice(0, 2).toUpperCase();
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"><rect width="100%" height="100%" fill="#12a150"/><text x="120" y="140" text-anchor="middle" font-family="Arial" font-size="90" fill="white">${letras}</text></svg>`;
-        img.src = "data:image/svg+xml," + encodeURIComponent(svg);
+    const tarjetas = document.createDocumentFragment();
+    resultados.forEach(([id, c]) => {
+      const tarjeta = document.createElement("li");
+      tarjeta.className = "complex-card";
+      const imagen = document.createElement("img");
+      imagen.className = "complex-photo";
+      imagen.src = "images/" + encodeURIComponent(id) + ".jpg";
+      imagen.alt = "Logo de " + c.nombre;
+      imagen.addEventListener("error", () => {
+        const placeholder = '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240"><rect width="240" height="240" fill="#12a150"/><circle cx="120" cy="120" r="54" fill="#ffffff"/></svg>';
+        imagen.src = "data:image/svg+xml," + encodeURIComponent(placeholder);
       }, { once: true });
-      if (img.complete && img.naturalWidth === 0) img.dispatchEvent(new Event("error"));
+      const cuerpo = document.createElement("div");
+      cuerpo.className = "complex-body";
+      const nombre = document.createElement("h3");
+      nombre.className = "complex-name";
+      nombre.textContent = c.nombre;
+      const tipoEl = document.createElement("p");
+      tipoEl.className = "complex-meta";
+      tipoEl.textContent = c.tipo;
+      const direccion = document.createElement("p");
+      direccion.className = "complex-address";
+      direccion.textContent = c.dir;
+      const serviciosEl = document.createElement("div");
+      serviciosEl.className = "complex-services";
+      c.servicios.forEach((codigo) => {
+        if (!servicio[codigo]) return;
+        const chip = document.createElement("span");
+        chip.className = "service-chip";
+        chip.textContent = servicio[codigo];
+        serviciosEl.appendChild(chip);
+      });
+      const precio = document.createElement("p");
+      precio.className = "complex-price";
+      precio.append(document.createTextNode("Desde " + pesos(c.precio) + " "));
+      const hora = document.createElement("span");
+      hora.textContent = "la hora";
+      precio.appendChild(hora);
+      cuerpo.append(nombre, tipoEl, direccion, serviciosEl, precio);
+      const acciones = document.createElement("div");
+      acciones.className = "complex-actions";
+      const ficha = document.createElement("a");
+      ficha.href = "detalle.html?c=" + encodeURIComponent(id);
+      ficha.className = "btn btn-secondary btn-sm";
+      ficha.textContent = "Ver ficha";
+      const reservar = document.createElement("a");
+      reservar.href = "comprar.html?c=" + encodeURIComponent(id);
+      reservar.className = "btn btn-primary btn-sm";
+      reservar.textContent = "Reservar cancha";
+      acciones.append(ficha, reservar);
+      tarjeta.append(imagen, cuerpo, acciones);
+      tarjetas.appendChild(tarjeta);
     });
+    lista.replaceChildren(tarjetas);
+
+
     vacio.hidden = resultados.length !== 0;
     total.textContent = `${resultados.length} ${resultados.length === 1 ? "complejo" : "complejos"}`;
     estado.textContent = `Mostrando ${resultados.length} de ${catalogo.length} complejos. Los resultados cambian al escribir o elegir filtros.`;
@@ -142,26 +174,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const descuentos = [descHoras?.etiqueta, descServicios?.etiqueta].filter(Boolean);
 
-    totalEl.innerHTML =
-      `Presupuesto: ${pesos(total)}` +
-      `<small>${pesos(precioHora)} x ${horas} h de cancha${subtotalServicios ? ` + ${pesos(subtotalServicios)} de servicios` : ""}</small>` +
-      (descuentos.length ? `<small class="calc-desc">Descuentos aplicados: ${descuentos.join(" · ")}</small>` : "") +
-      `<span class="rv-sena">Seña sugerida (${Math.round(TARIFAS.senaPorc * 100)}%): ${pesos(sena)}` +
-      `<small>El resto (${pesos(total - sena)}) se paga en el complejo.</small></span>`;
+    const resumen = [document.createTextNode("Presupuesto: " + pesos(total))];
+    const detalle = document.createElement("small");
+    detalle.textContent = pesos(precioHora) + " x " + horas + " h de cancha" + (subtotalServicios ? " + " + pesos(subtotalServicios) + " de servicios" : "");
+    resumen.push(detalle);
+    if (descuentos.length) {
+      const detalleDescuentos = document.createElement("small");
+      detalleDescuentos.className = "calc-desc";
+      detalleDescuentos.textContent = "Descuentos aplicados: " + descuentos.join(" · ");
+      resumen.push(detalleDescuentos);
+    }
+    const senaEl = document.createElement("span");
+    senaEl.className = "rv-sena";
+    senaEl.appendChild(document.createTextNode("Seña sugerida (" + Math.round(TARIFAS.senaPorc * 100) + "%): " + pesos(sena)));
+    const saldo = document.createElement("small");
+    saldo.textContent = "El resto (" + pesos(total - sena) + ") se paga en el complejo.";
+    senaEl.appendChild(saldo);
+    resumen.push(senaEl);
+    totalEl.replaceChildren(...resumen);
+
   };
 
   const renderOpciones = () => {
-    tipoSel.innerHTML = TARIFAS.tiposCancha
-      .map((t) => `<option value="${t.valor}">${t.nombre}${t.recargo ? ` (+${pesos(t.recargo)} la hora)` : ""}</option>`)
-      .join("");
+    tipoSel.replaceChildren(...TARIFAS.tiposCancha.map((tipo) => {
+      const opcion = document.createElement("option");
+      opcion.value = tipo.valor;
+      opcion.textContent = tipo.nombre + (tipo.recargo ? " (+" + pesos(tipo.recargo) + " la hora)" : "");
+      return opcion;
+    }));
 
-    servList.innerHTML = TARIFAS.servicios
-      .map((s) => `
-        <li><label>
-          <input type="checkbox" name="calc-servicio" value="${s.valor}" data-precio="${s.precio}">
-          ${s.nombre} — ${pesos(s.precio)}
-        </label></li>`)
-      .join("");
+    const servicios = document.createDocumentFragment();
+    TARIFAS.servicios.forEach((servicioItem) => {
+      const li = document.createElement("li");
+      const label = document.createElement("label");
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.name = "calc-servicio";
+      input.value = servicioItem.valor;
+      input.dataset.precio = String(servicioItem.precio);
+      label.append(input, document.createTextNode(" " + servicioItem.nombre + " — " + pesos(servicioItem.precio)));
+      li.appendChild(label);
+      servicios.appendChild(li);
+    });
+    servList.replaceChildren(servicios);
+
   };
 
   const cargarTarifas = async () => {

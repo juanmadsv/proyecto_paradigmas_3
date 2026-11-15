@@ -72,13 +72,13 @@
           <select id="rv-horario" name="horario">
             <option value="">Cargando horarios...</option>
           </select>
-          <p class="rv-estado" id="rv-estado" aria-live="polite"></p>
+          <p class="rv-estado" id="rv-estado" role="status" aria-live="polite"></p>
         </div>
 
         <!-- Servicios del complejo elegido (los completa main.js) -->
         <div class="field" id="rv-serv-box" hidden>
           <span class="field-legend">Servicios para agregar</span>
-          <ul class="check-list" id="rv-serv"></ul>
+          <ul class="check-list" id="rv-serv" aria-live="polite"></ul>
         </div>
 
         <!-- 2. Datos del cliente -->

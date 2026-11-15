@@ -25,9 +25,11 @@ CREATE TABLE IF NOT EXISTS reservas (
     cupon VARCHAR(20) DEFAULT NULL,
     total DECIMAL(10,2) NOT NULL,
     sena DECIMAL(10,2) NOT NULL,
+    estado ENUM('confirmada','cancelada') NOT NULL DEFAULT 'confirmada',
+    turno_activo VARCHAR(80) DEFAULT NULL,
     creado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_reservas_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
-    UNIQUE KEY turno_unico (complejo, fecha, horario),
+    UNIQUE KEY turno_activo_unico (turno_activo),
     KEY reservas_usuario (usuario_id, fecha)
 ) ENGINE=InnoDB;
 

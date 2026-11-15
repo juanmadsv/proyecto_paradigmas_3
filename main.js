@@ -82,68 +82,107 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   /* ---------- Listados armados desde COMPLEJOS ---------- */
-  const chipsServicios = (arr) => arr.map((s) => `<span class="service-chip">${NOMBRE_SERV[s]}</span>`).join("");
+  const crearNodo = (etiqueta, clase = "", texto = "") => {
+    const nodo = document.createElement(etiqueta);
+    if (clase) nodo.className = clase;
+    nodo.textContent = texto;
+    return nodo;
+  };
+
+  const chipsServicios = (arr) => {
+    const caja = crearNodo("div", "complex-services");
+    arr.forEach((servicio) => {
+      if (NOMBRE_SERV[servicio]) caja.appendChild(crearNodo("span", "service-chip", NOMBRE_SERV[servicio]));
+    });
+    return caja;
+  };
 
   const tablaComplejos = document.querySelector("#tabla-complejos");
   if (tablaComplejos) {
-    tablaComplejos.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
-      <tr>
-        <td>${c.nombre}</td>
-        <td>${c.zona}</td>
-        <td>${c.tipo}</td>
-        <td>${c.servicios.map((s) => NOMBRE_SERV[s]).join(", ")}</td>
-        <td>${pesos(c.precio)}</td>
-        <td><a href="detalle.html?c=${clave}">Ver ficha</a></td>
-      </tr>`).join("");
+    const filas = document.createDocumentFragment();
+    Object.entries(COMPLEJOS).forEach(([clave, c]) => {
+      const fila = document.createElement("tr");
+      [c.nombre, c.zona, c.tipo, c.servicios.map((s) => NOMBRE_SERV[s]).filter(Boolean).join(", "), pesos(c.precio)].forEach((valor) => {
+        fila.appendChild(crearNodo("td", "", String(valor)));
+      });
+      const celda = document.createElement("td");
+      const enlace = crearNodo("a", "", "Ver ficha");
+      enlace.href = "detalle.html?c=" + encodeURIComponent(clave);
+      celda.appendChild(enlace);
+      fila.appendChild(celda);
+      filas.appendChild(fila);
+    });
+    tablaComplejos.replaceChildren(filas);
   }
 
   const cardsComplejos = document.querySelector("#cards-complejos");
   if (cardsComplejos) {
-    cardsComplejos.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
-      <li class="complex-card">
-        <img class="complex-photo" src="images/${clave}.jpg" alt="Logo de ${c.nombre}">
-        <div class="complex-body">
-          <h3 class="complex-name">${c.nombre}</h3>
-          <p class="complex-meta">${c.tipo}</p>
-          <p class="complex-address">${c.dir}</p>
-          <div class="complex-services">${chipsServicios(c.servicios)}</div>
-          <p class="complex-price">Desde ${pesos(c.precio)} <span>la hora</span></p>
-        </div>
-        <a href="detalle.html?c=${clave}" class="btn btn-primary btn-sm">Ver ficha</a>
-      </li>`).join("");
+    const tarjetas = document.createDocumentFragment();
+    Object.entries(COMPLEJOS).forEach(([clave, c]) => {
+      const tarjeta = crearNodo("li", "complex-card");
+      const imagen = crearNodo("img", "complex-photo");
+      imagen.src = "images/" + encodeURIComponent(clave) + ".jpg";
+      imagen.alt = "Logo de " + c.nombre;
+      const cuerpo = crearNodo("div", "complex-body");
+      cuerpo.append(
+        crearNodo("h3", "complex-name", c.nombre),
+        crearNodo("p", "complex-meta", c.tipo),
+        crearNodo("p", "complex-address", c.dir),
+        chipsServicios(c.servicios)
+      );
+      const precio = crearNodo("p", "complex-price");
+      precio.append(document.createTextNode("Desde " + pesos(c.precio) + " "));
+      precio.appendChild(crearNodo("span", "", "la hora"));
+      cuerpo.appendChild(precio);
+      const enlace = crearNodo("a", "btn btn-primary btn-sm", "Ver ficha");
+      enlace.href = "detalle.html?c=" + encodeURIComponent(clave);
+      tarjeta.append(imagen, cuerpo, enlace);
+      tarjetas.appendChild(tarjeta);
+    });
+    cardsComplejos.replaceChildren(tarjetas);
   }
 
+
   /* ---------- Ficha de complejo (detalle.html) ----------
-     Arma la ficha de TODOS los complejos, una abajo de la otra.
-     Si se llega con ?c=olimpo (botón "Ver ficha"), baja hasta ese complejo. */
+     Arma las fichas desde datos del catálogo usando nodos de texto seguros. */
   const fichasLista = document.querySelector("#fichas-lista");
-
   if (fichasLista) {
-    fichasLista.innerHTML = Object.entries(COMPLEJOS).map(([clave, c]) => `
-      <article class="ficha-item" id="c-${clave}">
-        <h3 class="ficha-nombre">${c.nombre}</h3>
-        <div class="ficha">
-          <img class="ficha-foto" src="images/${clave}.jpg" alt="Logo de ${c.nombre}" data-nombre="${c.nombre}">
-          <div class="ficha-datos">
-            <p class="ficha-dato"><strong>Dirección:</strong> ${c.dir}</p>
-            <p class="ficha-dato"><strong>Zona:</strong> ${c.zona}</p>
-            <p class="ficha-dato"><strong>Tipo de cancha:</strong> ${c.tipo}</p>
-            <p class="ficha-dato"><strong>Precio:</strong> Desde ${pesos(c.precio)} la hora</p>
-            <div class="complex-services">${chipsServicios(c.servicios)}</div>
-            <a href="comprar.html?c=${clave}" class="btn btn-primary">Reservar <span class="arrow">→</span></a>
-          </div>
-        </div>
-        <p class="section-text ficha-desc">${c.resumen}</p>
-      </article>`).join("");
-
-    fichasLista.querySelectorAll(".ficha-foto").forEach((img) => {
-      img.addEventListener("error", () => { img.src = placeholder(img.dataset.nombre); }, { once: true });
-      if (img.complete && img.naturalWidth === 0) img.dispatchEvent(new Event("error"));
+    const fichas = document.createDocumentFragment();
+    Object.entries(COMPLEJOS).forEach(([clave, c]) => {
+      const ficha = crearNodo("article", "ficha-item");
+      ficha.id = "c-" + clave;
+      ficha.appendChild(crearNodo("h3", "ficha-nombre", c.nombre));
+      const datos = crearNodo("div", "ficha");
+      const imagen = crearNodo("img", "ficha-foto");
+      imagen.src = "images/" + encodeURIComponent(clave) + ".jpg";
+      imagen.alt = "Logo de " + c.nombre;
+      imagen.dataset.nombre = c.nombre;
+      imagen.addEventListener("error", () => { imagen.src = placeholder(imagen.dataset.nombre); }, { once: true });
+      if (imagen.complete && imagen.naturalWidth === 0) imagen.dispatchEvent(new Event("error"));
+      const informacion = crearNodo("div", "ficha-datos");
+      const agregarDato = (etiqueta, valor) => {
+        const parrafo = crearNodo("p", "ficha-dato");
+        parrafo.append(crearNodo("strong", "", etiqueta + ":"), document.createTextNode(" " + valor));
+        informacion.appendChild(parrafo);
+      };
+      agregarDato("Dirección", c.dir);
+      agregarDato("Zona", c.zona);
+      agregarDato("Tipo de cancha", c.tipo);
+      agregarDato("Precio", "Desde " + pesos(c.precio) + " la hora");
+      informacion.appendChild(chipsServicios(c.servicios));
+      const reservar = crearNodo("a", "btn btn-primary", "Reservar");
+      reservar.href = "comprar.html?c=" + encodeURIComponent(clave);
+      reservar.appendChild(crearNodo("span", "arrow", "→"));
+      informacion.appendChild(reservar);
+      datos.append(imagen, informacion);
+      ficha.append(datos, crearNodo("p", "section-text ficha-desc", c.resumen));
+      fichas.appendChild(ficha);
     });
-
+    fichasLista.replaceChildren(fichas);
     const foco = document.querySelector("#c-" + claveComplejo(new URLSearchParams(location.search).get("c")));
     if (location.search && foco) foco.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+
 
   /* ---------- Formulario de reserva (comprar.html) ----------
      Desde "Complejos disponibles" el botón lleva a comprar.html?c=terraza.
@@ -155,11 +194,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     const PRECIO_SERV = { parrilla: 3000, quincho: 8000, vestuarios: 0, estacionamiento: 0 };
     const descComplejo = (c) => `${c.nombre} — ${c.tipo}, ${c.dir}. ${c.resumen}`;
 
-    selComplejo.innerHTML = Object.entries(COMPLEJOS)
-      .map(([clave, c]) => `<option value="${clave}">${c.nombre} — ${c.tipo} — ${pesos(c.precio)}</option>`)
-      .join("");
+    selComplejo.replaceChildren(...Object.entries(COMPLEJOS).map(([clave, c]) => {
+      const opcion = document.createElement("option");
+      opcion.value = clave;
+      opcion.textContent = c.nombre + " — " + c.tipo + " — " + pesos(c.precio);
+      return opcion;
+    }));
 
-    const descEl  = document.querySelector("#rv-desc");
+        const descEl  = document.querySelector("#rv-desc");
     const tituloEl = document.querySelector("#rv-titulo");
     const tipoSel = document.querySelector("#rv-tipo");
     const servBox = document.querySelector("#rv-serv-box");
@@ -173,7 +215,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     };
     tipoSel.addEventListener("change", refrescarTitulo);
 
-    const SENA_PCT = 0.5;   // seña que se paga ahora para dejar reservado (la mitad)
+    const SENA_PCT = 0.20;   // seña que se paga ahora para dejar reservado (la mitad)
     const cuponInput = document.querySelector("#codigo-cupon");
     const mensajeCupon = document.querySelector("#mensaje-cupon");
     let cuponActivo = false;
@@ -188,14 +230,17 @@ document.addEventListener("DOMContentLoaded", async () => {
       totalEl.dataset.total = total;
       totalEl.dataset.sena = sena;
       const desglose = extra ? ` (${pesos(base)} cancha + ${pesos(extra)} servicios)` : " la hora";
-      totalEl.innerHTML =
-        (cuponActivo
-          ? `<span class="rv-subtotal">Subtotal: ${pesos(subtotal)}${desglose}</span>` +
-            `<span class="rv-descuento">Cupón UCP10 (10%): -${pesos(descuento)}</span>`
-          : "") +
-        `Total: ${pesos(total)}${cuponActivo ? "" : desglose}` +
-        `<span class="rv-sena">Seña para reservar (${Math.round(SENA_PCT * 100)}%): ${pesos(sena)}` +
-        `<small>El resto (${pesos(total - sena)}) se paga en el complejo.</small></span>`;
+      const resumen = [];
+      if (cuponActivo) {
+        const subtotalEl = crearNodo("span", "rv-subtotal", "Subtotal: " + pesos(subtotal) + desglose);
+        const descuentoEl = crearNodo("span", "rv-descuento", "Cupón UCP10 (10%): -" + pesos(descuento));
+        resumen.push(subtotalEl, descuentoEl);
+      }
+      resumen.push(document.createTextNode("Total: " + pesos(total) + (cuponActivo ? "" : desglose)));
+      const senaEl = crearNodo("span", "rv-sena", "Seña para reservar (" + Math.round(SENA_PCT * 100) + "%): " + pesos(sena));
+      senaEl.appendChild(crearNodo("small", "", "El resto (" + pesos(total - sena) + ") se paga en el complejo."));
+      resumen.push(senaEl);
+      totalEl.replaceChildren(...resumen);
       return { total, sena };
     };
 
@@ -230,20 +275,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       descEl.textContent = descComplejo(c);
 
       // opciones de tipo de cancha segun lo que ofrece este complejo (5 / 7 / 11)
-      tipoSel.innerHTML = c.tipos.split(" ")
-        .map((t) => `<option value="${t}">${nombreTipo(t)}</option>`)
-        .join("");
+      tipoSel.replaceChildren(...c.tipos.split(" ").map((tipo) => {
+        const opcion = document.createElement("option");
+        opcion.value = tipo;
+        opcion.textContent = nombreTipo(tipo);
+        return opcion;
+      }));
       refrescarTitulo();
 
-      servList.innerHTML = "";
+      servList.replaceChildren();
       if (c.servicios.length) {
         servBox.hidden = false;
         c.servicios.forEach((s) => {
-          const p = PRECIO_SERV[s] || 0;
+          if (!NOMBRE_SERV[s]) return;
+          const precio = PRECIO_SERV[s] || 0;
           const li = document.createElement("li");
-          li.innerHTML = `<label><input type="checkbox" name="servicio" value="${s}" data-precio="${p}"> ` +
-            `${NOMBRE_SERV[s]} — ${p ? "+" + pesos(p) : "incluido"}</label>`;
-          li.querySelector("input").addEventListener("change", () => calcularTotal(c.precio));
+          const label = document.createElement("label");
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.name = "servicio";
+          input.value = s;
+          input.dataset.precio = String(precio);
+          input.addEventListener("change", () => calcularTotal(c.precio));
+          label.append(input, document.createTextNode(" " + NOMBRE_SERV[s] + " — " + (precio ? "+" + pesos(precio) : "incluido")));
+          li.appendChild(label);
           servList.appendChild(li);
         });
       } else {
