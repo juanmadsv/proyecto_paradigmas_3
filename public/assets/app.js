@@ -362,6 +362,9 @@ async function renderReserve(id) {
   });
   form.append(summary,submit);
   view.appendChild(form);view.appendChild(feedback);
+  const homeAction=node("div",null,"actions");
+  homeAction.appendChild(link("Volver al inicio","#inicio","button secondary"));
+  view.appendChild(homeAction);
   setPage("Reservar",view);
 }
 

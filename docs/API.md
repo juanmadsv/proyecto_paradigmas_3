@@ -2,6 +2,10 @@
 
 Base local: `http://localhost/canchaYaFrontend/api/`. Todas las respuestas usan `Content-Type: application/json; charset=utf-8`, no se guardan en caché y devuelven errores JSON. Las operaciones de escritura requieren `Content-Type: application/json` y `X-CSRF-Token`, obtenido desde `GET csrf.php`.
 
+## Separación MVC
+
+Los scripts de `api/` funcionan como controladores: validan el método y el formato HTTP, aplican los controles de sesión y CSRF y serializan la respuesta. `UsuarioModel`, `ReservaModel`, `RecuperacionModel` y `CatalogoModel` encapsulan reglas del dominio y persistencia. `DomainError` expresa fallos de negocio; `api/bootstrap.php` los traduce a estados HTTP. Los errores PDO no controlados se responden con un mensaje genérico `500`.
+
 ## Endpoints
 
 | Ruta y método | Entrada | Respuesta correcta | Errores principales |
