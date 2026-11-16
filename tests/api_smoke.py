@@ -65,7 +65,7 @@ complejo, tipo, turno = next(
     for tipo, turnos in tipos.items()
     for slot in turnos if slot['libre']
 )
-reserva = {'complejo': complejo, 'tipo': tipo, 'horario': turno, 'telefono': '3761234567',
+reserva = {'complejo': complejo, 'tipo': tipo, 'fecha': horarios['fecha'], 'horario': turno, 'telefono': '3761234567',
            'pago': 'debito', 'servicios': [], 'cupon': 'UCP10', 'total': 1, 'usuario_id': 99999}
 assert cliente.pedir('mis_reservas.php', reserva, token=False)[0] == 403
 assert cliente.pedir('mis_reservas.php', {**reserva, 'servicios': ['inexistente']})[0] == 422
