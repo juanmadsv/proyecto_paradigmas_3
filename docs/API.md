@@ -21,6 +21,10 @@ Los scripts de `api/` funcionan como controladores: validan el método y el form
 | `DELETE mis_reservas.php` | `reserva_id` | 200: reserva cancelada | 400 ID inválido; 401 sin sesión; 403 CSRF; 409 no existe/no pertenece/faltan menos de 24 horas; 413 cuerpo demasiado grande; 415 tipo de contenido; 500 error genérico |
 | `GET admin.php` | Cookie de sesión | 200: ofertas con precio y horarios propios por tipo, y reservas de los complejos asignados | 401 sin sesión; 403 cuenta sin permisos; 405 método; 500 error genérico |
 | `PUT admin.php` | `complejo`, `ofertas` con precio y `horarios[]` por cada tipo elegido | 200: configuración actualizada | 400 valores inválidos; 401 sin sesión; 403 CSRF o complejo no asignado; 413 cuerpo demasiado grande; 415 tipo de contenido; 500 error genérico |
+| `POST recuperar_password.php` | `email`; requiere CSRF | 202: mensaje genérico, igual para emails existentes/inexistentes y límite alcanzado | 400 JSON inválido; 403 CSRF; 405 método; 413 cuerpo demasiado grande; 415 tipo de contenido; 422 email inválido; 500 error genérico |
+| `POST restablecer_password.php` | `token`, `password`, `password_confirmation`; requiere CSRF | 200: contraseña actualizada y nuevo token CSRF | 400 token inválido/vencido; 403 CSRF; 405 método; 413 cuerpo demasiado grande; 415 tipo de contenido; 422 contraseña/confirmación inválida; 500 error genérico |
+
+Las dos rutas de recuperación están implementadas en el repositorio, pero el flujo de correo no fue configurado ni validado para esta entrega; se documentan para que el inventario de rutas coincida con el código, no como funcionalidad aceptada del recorrido AE4. Requieren configurar el correo y ejecutar el trabajador CLI descritos en `docs/RECUPERACION.md`.
 
 Ejemplo del cuerpo para configurar fútbol 5 y fútbol 7 de manera independiente:
 
