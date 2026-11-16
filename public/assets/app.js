@@ -399,7 +399,13 @@ function renderAccount() {
     try{
       const result=await request("login.php",{method:"POST",body:{email:login.elements.email.value,password:login.elements.password.value}});
       currentUser=result.usuario;csrfToken=result.csrf_token||csrfToken;announce("Sesión iniciada.");await renderRoute();
-    }catch(error){status.textContent=error.message;loginButton.disabled=false;}
+    }catch(error){
+      const invalidCredentials=error.message==="Email o contraseña incorrectos.";
+      const message=invalidCredentials?"El usuario o la contraseña son incorrectos.":error.message;
+      status.textContent=message;status.className="status-inline error";
+      if(invalidCredentials)showToast(message);
+      loginButton.disabled=false;
+    }
   });
   const register=node("form",null,"panel");
   register.appendChild(node("h2","Crear cuenta","panel-heading"));
