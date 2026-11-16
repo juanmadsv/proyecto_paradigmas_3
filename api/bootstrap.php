@@ -1,8 +1,10 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../models/DomainError.php';
 require_once __DIR__ . '/../models/UsuarioModel.php';
 require_once __DIR__ . '/../models/ReservaModel.php';
+require_once __DIR__ . '/../models/RecuperacionModel.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -14,6 +16,21 @@ function responder(int $estado, array $datos): void {
     http_response_code($estado);
     echo json_encode($datos, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     exit;
+}
+
+/** Traduce errores del dominio a respuestas HTTP en el límite de la aplicación. */
+function responderErrorDominio(DomainError $error): void {
+    $estados = [
+        'bad_request' => 400,
+        'unauthorized' => 401,
+        'conflict' => 409,
+        'invalid_input' => 422,
+    ];
+    $estado = $estados[$error->category()] ?? 500;
+    $mensaje = $estado >= 500
+        ? 'No se pudo completar la operación. Revisá la configuración del servidor.'
+        : $error->getMessage();
+    responder($estado, ['error' => $mensaje]);
 }
 
 set_exception_handler(function (Throwable $error): void {
@@ -33,10 +50,9 @@ if (PHP_SAPI !== 'cli') {
         'lifetime' => 0, 'path' => $ruta,
         'secure' => $seguro, 'httponly' => true, 'samesite' => 'Lax',
     ]);
-    session_cache_limiter(''); // Conservar el encabezado no-store definido arriba.
+    session_cache_limiter('');
     session_start();
 
-    // Una sesión autenticada vence luego de 30 minutos sin actividad.
     if (isset($_SESSION['usuario_id'], $_SESSION['ultima_actividad']) && time() - $_SESSION['ultima_actividad'] > 1800) {
         $_SESSION = [];
         session_regenerate_id(true);
@@ -44,7 +60,6 @@ if (PHP_SAPI !== 'cli') {
     if (isset($_SESSION['usuario_id'])) {
         $_SESSION['ultima_actividad'] = time();
     }
-
 }
 
 function metodo(string $esperado): void {
@@ -111,7 +126,6 @@ function db(): PDO {
 }
 
 function exigirUsuario(): array {
-    // Este guardián corre ANTES de consultar MySQL o procesar una reserva.
     if (!isset($_SESSION['usuario_id'])) {
         responder(401, ['error' => 'Iniciá sesión para continuar.']);
     }
