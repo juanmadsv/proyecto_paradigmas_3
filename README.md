@@ -68,7 +68,7 @@ La disponibilidad combina los horarios habituales configurados en MySQL con las 
 | Endpoint | Método | Resultado principal |
 | --- | --- | --- |
 | `api/csrf.php` | GET | Token CSRF de la sesión |
-| `api/registro.php` | POST JSON | 201 creado; 400 datos inválidos; 409 email repetido |
+| `api/registro.php` | POST JSON | 201 creado; 400 JSON inválido; 409 email repetido; 422 campos inválidos |
 | `api/login.php` | POST JSON | 200 autenticado; 401 credenciales incorrectas. La interfaz muestra un aviso breve y accesible ante 401 |
 | `api/logout.php` | POST JSON | 200 sesión cerrada |
 | `api/turnos.php` | GET `?fecha=YYYY-MM-DD` | 200 disponibilidad por complejo y tipo de cancha para la fecha; 400 fecha fuera del rango |
