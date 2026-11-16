@@ -64,7 +64,7 @@ input, select { width: 100%; min-height: 44px; padding: .6rem .7rem; border: 1px
 input[type="checkbox"] { width: 1.1rem; min-height: 1.1rem; height: 1.1rem; accent-color: var(--green); }
 .check-row { display: flex; align-items: center; gap: .55rem; }
 .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 1rem; padding: 0; list-style: none; }
-.card { display: grid; grid-template-rows: auto 1fr; overflow: hidden; background: #fff; border: 1px solid var(--border); border-radius: .9rem; }
+.card { display: grid; grid-template-rows: auto 1fr; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: .9rem; }
 .card img { width: 100%; height: 170px; object-fit: cover; background: #dbe9de; }
 .card-body { display: grid; align-content: start; gap: .45rem; padding: 1rem; }
 .card h3 { margin: 0; font-size: 1.2rem; }
