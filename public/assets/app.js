@@ -36,6 +36,12 @@ const announce = (message, error = false) => {
   globalStatus.textContent = message;
   globalStatus.dataset.error = String(error);
 };
+const showToast = message => {
+  const toast = node("div", message, "toast");
+  toast.setAttribute("aria-hidden", "true");
+  document.body.appendChild(toast);
+  window.setTimeout(() => toast.remove(), 700);
+};
 const setPage = (title, content) => {
   document.title = title + " · CanchaYa";
   app.replaceChildren(content);
@@ -396,7 +402,10 @@ function renderAccount() {
     e.preventDefault();registerButton.disabled=true;status.textContent="Creando cuenta…";
     try{
       const result=await request("registro.php",{method:"POST",body:{nombre:register.elements.nombre.value.trim(),email:register.elements.email.value,password:register.elements.password.value}});
-      status.textContent=result.mensaje||"Cuenta creada. Ya podés iniciar sesión.";status.className="status-inline success";register.reset();
+      const successMessage=result.mensaje||"Cuenta creada. Ya podés iniciar sesión.";
+      status.textContent=successMessage;status.className="status-inline success";register.reset();
+      showToast(successMessage);
+      login.elements.email.focus();
     }catch(error){status.textContent=error.message;status.className="status-inline error";}
     finally{registerButton.disabled=false;}
   });
@@ -407,6 +416,9 @@ function renderAccount() {
 async function renderMyReservations() {
   const view = panel("Mis reservas", "Consultá y cancelá tus reservas con al menos 24 horas de anticipación.");
   if(!currentUser){view.append(node("p","Iniciá sesión para ver tus reservas.","status-inline"),link("Ir a Mi cuenta","#cuenta","button"));setPage("Mis reservas",view);return;}
+  const reserveAction=node("div",null,"actions");
+  reserveAction.appendChild(link("Realizar una reserva","#reservar","button"));
+  view.appendChild(reserveAction);
   try{
     const data=await request("mis_reservas.php");
     currentUser=data.usuario||currentUser;
