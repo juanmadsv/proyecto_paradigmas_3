@@ -85,6 +85,10 @@ ul.clean { padding-left: 1.25rem; }
 .reservation { padding: 1rem 0; border-top: 1px solid var(--border); }
 .price-summary { padding: .8rem; background: #eff7ef; border-radius: .6rem; }
 .price-summary p { margin: .25rem 0; }
+.admin-offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: .8rem; }
+.admin-offer-edit { min-width: 0; margin: 0; padding: .9rem; border: 1px solid var(--border); border-radius: .7rem; background: #fff; }
+.admin-offer-edit > legend { padding: 0 .35rem; font-size: 1.1rem; }
+.admin-offer-edit > fieldset { min-width: 0; margin-top: .8rem; border: 1px solid var(--border); border-radius: .6rem; }
 .admin-schedule { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: .55rem; }
 .admin-time-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding: .45rem .6rem; border: 1px solid var(--border); border-radius: .55rem; background: #fff; }
 .admin-time-row button { min-height: 40px; }

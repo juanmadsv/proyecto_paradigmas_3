@@ -8,8 +8,7 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         responder(200, $modelo->datosPanel(
             (int) $usuario['id'],
-            $catalogo->complejos(),
-            $catalogo->turnos()
+            $catalogo->complejos()
         ));
     }
     if ($_SERVER['REQUEST_METHOD'] === 'PUT') {

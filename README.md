@@ -22,6 +22,7 @@ config/
 database/
   schema.sql                 Esquema MySQL
   migrations/004_panel_administracion.sql  Permisos y configuración del panel
+  migrations/005_ofertas_por_tipo.sql  Horarios y precios por tipo y concurrencia
 data/                        Catálogo y turnos de demostración
 tests/
   api_smoke.py               Verificación automatizada de la API
@@ -33,7 +34,7 @@ La SPA se comunica con la API mediante `fetch()` y JSON. Los controladores de `a
 
 1. Colocar el proyecto en `C:\\xampp\\htdocs\\canchaYaFrontend`.
 2. Iniciar Apache y MySQL. Se requiere PHP 8.0 o posterior con `pdo_mysql` y sesiones.
-3. Para una instalación nueva, en phpMyAdmin importar `database/schema.sql`. Si ya existe la base de AE1/AE2, importar `database/migrations/003_cancelacion_reservas.sql` y `database/migrations/004_panel_administracion.sql` sobre `canchaya`.
+3. Para una instalación nueva, en phpMyAdmin importar `database/schema.sql`. Si ya existe la base de AE1/AE2, importar en orden `database/migrations/003_cancelacion_reservas.sql`, `database/migrations/004_panel_administracion.sql` y `database/migrations/005_ofertas_por_tipo.sql` sobre `canchaya`.
 4. Para MySQL distinto de `root` sin contraseña, copiar `config/database.example.php` como `config/database.local.php` y completar los valores. Ese archivo local está ignorado por Git. También se admiten `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` y `DB_PASSWORD`.
 5. Abrir `http://localhost/canchaYaFrontend/`.
 6. El endpoint privado de reservas puede consultarse en `http://localhost/canchaYaFrontend/api/mis_reservas.php`.
@@ -53,11 +54,11 @@ La importación del esquema es manual; actualizar el repositorio no modifica la 
 | Administración del DFD | Panel para que las cuentas asignadas gestionen tipos de cancha, precio por hora y horarios habituales, y consulten reservas de sus complejos |
 | Otros CU-07 a CU-14 | Pendientes: alta de complejos, cobros reales, aprobación, reclamos y estadísticas |
 
-La disponibilidad combina los horarios habituales configurados en MySQL con las reservas activas y permite elegir una fecha dentro de los próximos 90 días. El catálogo JSON aporta la información descriptiva inicial; los tipos, precios y horarios que el administrador modifica se guardan en MySQL y prevalecen sobre esos valores. La cancelación libera el turno para que pueda reservarse de nuevo. La seña del 20% es informativa: no confirma un pago. El sitio no almacena datos de tarjeta ni envía notificaciones a propietarios.
+La disponibilidad combina los horarios habituales configurados en MySQL con las reservas activas y permite elegir una fecha dentro de los próximos 90 días. El administrador configura de manera independiente el precio y los horarios de cada tipo de cancha que ofrece. La disponibilidad, el precio estimado y el cálculo del servidor usan el tipo seleccionado. Las reservas de dos tipos distintos pueden ocupar la misma hora; un segundo turno del mismo tipo, complejo, fecha y hora se rechaza. La cancelación libera esa combinación para reservarla de nuevo. La seña del 20% es informativa: no confirma un pago. El sitio no almacena datos de tarjeta ni envía notificaciones a propietarios.
 
 ### Habilitar una cuenta administradora
 
-1. Importar la migración `database/migrations/004_panel_administracion.sql` si la base ya existía.
+1. En una base que ya tenía el panel, importar `database/migrations/005_ofertas_por_tipo.sql`. En una base anterior, aplicar antes las migraciones 003 y 004 en orden.
 2. Crear una cuenta desde la pantalla Mi cuenta y cerrar la sesión.
 3. En PowerShell, asignar esa cuenta a un complejo desde la carpeta del proyecto: `C:\xampp\php\php.exe tools\asignar_administrador.php correo@ejemplo.com terraza`. Los códigos disponibles son `terraza`, `rampla`, `napoles`, `establo`, `potrero` y `olimpo`. Repetir el comando por cada complejo que deba administrar.
 4. Volver a iniciar sesión. El acceso Administración aparece para esa cuenta; la API verifica la asignación en cada solicitud.
@@ -70,13 +71,13 @@ La disponibilidad combina los horarios habituales configurados en MySQL con las 
 | `api/registro.php` | POST JSON | 201 creado; 400 datos inválidos; 409 email repetido |
 | `api/login.php` | POST JSON | 200 autenticado; 401 credenciales incorrectas |
 | `api/logout.php` | POST JSON | 200 sesión cerrada |
-| `api/turnos.php` | GET `?fecha=YYYY-MM-DD` | 200 disponibilidad pública para la fecha; 400 fecha fuera del rango |
+| `api/turnos.php` | GET `?fecha=YYYY-MM-DD` | 200 disponibilidad por complejo y tipo de cancha para la fecha; 400 fecha fuera del rango |
 | `api/catalogo.php` | GET | 200 catálogo descriptivo combinado con la configuración guardada |
 | `api/mis_reservas.php` | GET | 200 reservas propias; 401 sin sesión |
 | `api/mis_reservas.php` | POST JSON | 201 reserva creada; 400 entrada inválida; 401 sin sesión; 409 turno ocupado |
 | `api/mis_reservas.php` | DELETE JSON `{reserva_id}` | 200 cancelada; 400 ID inválido; 401 sin sesión; 403 CSRF; 409 no existe, no pertenece o faltan menos de 24 horas |
-| `api/admin.php` | GET | 200 configuración y reservas de complejos asignados; 401 sin sesión; 403 sin asignación |
-| `api/admin.php` | PUT JSON | 200 configuración guardada; 400 datos inválidos; 401 sin sesión; 403 rol/asignación o CSRF |
+| `api/admin.php` | GET | 200 precios y horarios independientes por tipo, y reservas de complejos asignados; 401 sin sesión; 403 sin asignación |
+| `api/admin.php` | PUT JSON | 200 ofertas por tipo guardadas; 400 datos inválidos; 401 sin sesión; 403 rol/asignación o CSRF |
 
 Los POST usan `Content-Type: application/json` y `X-CSRF-Token`. El servidor responde 403 si falta o no coincide el token, 405 ante un método incorrecto, 415 ante un tipo de contenido incorrecto, 400 ante JSON o datos inválidos y 500 con un mensaje genérico ante fallas internas.
 
@@ -101,7 +102,7 @@ python tests/api_smoke.py http://localhost/canchaYaFrontend
 
 El contrato de la API está en `docs/API.md` y las instrucciones de recuperación de cuenta en `docs/RECUPERACION.md`. Los informes académicos y evidencias se organizan en formato PDF dentro de `docs/`: AE1, las tres opciones documentadas de AE2 y el informe técnico AE4.
 
-El recorrido local y las capturas de Lighthouse están documentados en `docs/AE4_Informe_Tecnico_CanchaYa.pdf`. El equipo informa 100/100 en Accesibilidad para las cinco vistas tras las mejoras previas; el enlace «Volver al inicio» recién agregado en Reservar queda pendiente de validación. Se conservan las capturas existentes. `tests/api_smoke.py` no se reporta como ejecutado en esta entrega. Las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
+El usuario informó 100/100 en Accesibilidad para las cinco vistas del recorrido previo. Se conservan las capturas existentes; el panel de administración y los nuevos controles de oferta por tipo deben auditarse manualmente con Lighthouse. `tests/api_smoke.py` no se reporta como ejecutado en esta entrega. Las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
 
 La versión actual cubre el flujo principal del jugador; no debe presentarse como implementación de todos los casos de uso de AE1. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 

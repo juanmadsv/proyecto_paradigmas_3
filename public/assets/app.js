@@ -309,10 +309,12 @@ async function renderReserve(id) {
   const updateSummary=()=>{
     const complex=catalog[complexSelect.value];
     const extra=serviceInputs.filter(input=>input.checked).reduce((sum,input)=>sum+Number(input.dataset.price),0);
-    const subtotal=Number(complex.precio)+extra;
+    const price=Number(complex.ofertas?.[typeSelect.value]?.precio??complex.precio);
+    const subtotal=price+extra;
     const discount=coupon.value.trim().toUpperCase()==="UCP10"?Math.round(subtotal*.10):0;
     const total=subtotal-discount,sena=Math.round(total*.20);
     summary.replaceChildren(
+      node("p","Precio por hora: "+pesos(price)),
       node("p","Total estimado: "+pesos(total)),
       node("p","Seña mínima (20%): "+pesos(sena)),
       node("p","Saldo estimado: "+pesos(total-sena))
@@ -327,7 +329,8 @@ async function renderReserve(id) {
     scheduleSelect.replaceChildren();
     try{
       const response=await request("turnos.php?fecha="+encodeURIComponent(dateControl.value));
-      const available=(response.turnos&&response.turnos[complexSelect.value]||[]).filter(slot=>slot.libre);
+      const byType=response.turnos&&response.turnos[complexSelect.value]||{};
+      const available=(byType[typeSelect.value]||[]).filter(slot=>slot.libre);
       if(available.length){
         scheduleSelect.replaceChildren(...available.map(slot=>{const option=node("option",slot.hora);option.value=slot.hora;return option;}));
       }else{
@@ -342,6 +345,7 @@ async function renderReserve(id) {
   };
   complexSelect.addEventListener("change",()=>{fillTypes(complexSelect.value);addServices(complexSelect.value);updateSummary();refreshAvailability();});
   dateControl.addEventListener("change",refreshAvailability);
+  typeSelect.addEventListener("change",()=>{updateSummary();refreshAvailability();});
   servicesWrap.addEventListener("change",updateSummary);
   coupon.addEventListener("input",updateSummary);
   updateSummary();
@@ -525,50 +529,73 @@ async function renderAdmin() {
     view.appendChild(field("Complejo asignado",select));
 
     const editor=node("form",null,"panel");
-    editor.appendChild(node("h2","Canchas, precio y horarios","panel-heading"));
-    const typeFieldset=node("fieldset");typeFieldset.appendChild(node("legend","Tipos de cancha disponibles"));
+    editor.appendChild(node("h2","Configuración por tipo de cancha","panel-heading"));
+    editor.appendChild(node("p","Marcá los tipos que ofrecés. Cada uno tiene su propio precio y sus propios horarios habituales."));
+    const typeFieldset=node("fieldset");typeFieldset.appendChild(node("legend","Tipos de cancha ofrecidos"));
     const typeInputs=[];
-    [["5","Fútbol 5"],["7","Fútbol 7"],["11","Fútbol 11"]].forEach(([value,labelText])=>{
-      const label=node("label",null,"check-row");
-      const input=document.createElement("input");input.type="checkbox";input.value=value;
-      label.append(input,node("span",labelText));typeFieldset.appendChild(label);typeInputs.push(input);
-    });
-    editor.appendChild(typeFieldset);
-
-    const price=textControl("admin-price","Precio por hora (ARS)","number",{min:"1",max:"10000000",step:"1",required:true});
-    editor.appendChild(price);
-    const schedule=node("fieldset");schedule.appendChild(node("legend","Horarios habituales (pasos de 30 minutos)"));
-    const scheduleList=node("ul",null,"admin-schedule clean");
-    const timeControl=document.createElement("input");timeControl.type="time";timeControl.id="admin-new-time";timeControl.step="1800";
-    const addTime=node("button","Agregar horario","button secondary");addTime.type="button";
-    const addTimeRow=node("div",null,"actions");addTimeRow.append(field("Nuevo horario",timeControl),addTime);
-    const times=new Set();
-    const drawTimes=()=>{
-      scheduleList.replaceChildren();
-      [...times].sort().forEach(time=>{
-        const row=node("li",null,"admin-time-row");
-        row.appendChild(node("span",time));
-        const remove=node("button","Quitar "+time,"button secondary");remove.type="button";
-        remove.addEventListener("click",()=>{times.delete(time);drawTimes();});
-        row.appendChild(remove);scheduleList.appendChild(row);
-      });
-      if(!times.size)scheduleList.appendChild(node("li","No hay horarios activos."));
+    const offerState=new Map();
+    const offerEditors=node("div",null,"admin-offers");
+    const typeLabels={"5":"Fútbol 5","7":"Fútbol 7","11":"Fútbol 11"};
+    const getOfferState=tipo=>{
+      if(!offerState.has(tipo)){
+        const complex=catalog[select.value];
+        const fallback=complex.ofertas?.[tipo]||{precio:complex.precio,horarios:[]};
+        offerState.set(tipo,{precio:String(fallback.precio),horarios:new Set(fallback.horarios||[])});
+      }
+      return offerState.get(tipo);
     };
-    addTime.addEventListener("click",()=>{
-      const value=timeControl.value;
-      if(!value||!/(?:00|30)$/.test(value)){status.textContent="Elegí un horario en un intervalo de 30 minutos.";return;}
-      times.add(value);timeControl.value="";status.textContent="Horario agregado a la configuración pendiente.";drawTimes();
+    const drawOfferEditors=()=>{
+      offerEditors.replaceChildren();
+      typeInputs.filter(item=>item.input.checked).forEach(({tipo})=>{
+        const state=getOfferState(tipo);
+        const offer=node("fieldset",null,"admin-offer-edit");
+        offer.appendChild(node("legend",typeLabels[tipo]));
+        const price=textControl("admin-price-"+tipo,"Precio por hora (ARS)","number",{min:"1",max:"10000000",step:"1",required:true});
+        const priceInput=price.querySelector("input");priceInput.value=state.precio;
+        priceInput.addEventListener("input",()=>{state.precio=priceInput.value;});
+        offer.appendChild(price);
+
+        const schedule=node("fieldset");schedule.appendChild(node("legend","Horarios habituales (pasos de 30 minutos)"));
+        const scheduleList=node("ul",null,"admin-schedule clean");
+        const drawTimes=()=>{
+          scheduleList.replaceChildren();
+          [...state.horarios].sort().forEach(time=>{
+            const row=node("li",null,"admin-time-row");row.appendChild(node("span",time));
+            const remove=node("button","Quitar "+time,"button secondary");remove.type="button";
+            remove.addEventListener("click",()=>{state.horarios.delete(time);drawTimes();});
+            row.appendChild(remove);scheduleList.appendChild(row);
+          });
+          if(!state.horarios.size)scheduleList.appendChild(node("li","No hay horarios activos."));
+        };
+        const timeControl=document.createElement("input");timeControl.type="time";timeControl.id="admin-time-"+tipo;timeControl.step="1800";
+        const addTime=node("button","Agregar horario","button secondary");addTime.type="button";
+        addTime.addEventListener("click",()=>{
+          const value=timeControl.value;
+          if(!value||!/(?:00|30)$/.test(value)){status.textContent="Elegí un horario en un intervalo de 30 minutos.";return;}
+          if(!state.horarios.has(value)&&state.horarios.size>=48){status.textContent="Ese tipo ya tiene el máximo de 48 horarios.";return;}
+          state.horarios.add(value);timeControl.value="";status.textContent="Horario agregado a la configuración pendiente.";drawTimes();
+        });
+        const addTimeRow=node("div",null,"actions");addTimeRow.append(field("Nuevo horario",timeControl),addTime);
+        schedule.append(scheduleList,addTimeRow);offer.appendChild(schedule);offerEditors.appendChild(offer);drawTimes();
+      });
+    };
+    [["5","Fútbol 5"],["7","Fútbol 7"],["11","Fútbol 11"]].forEach(([tipo,labelText])=>{
+      const label=node("label",null,"check-row");
+      const input=document.createElement("input");input.type="checkbox";input.value=tipo;
+      input.addEventListener("change",drawOfferEditors);
+      label.append(input,node("span",labelText));typeFieldset.appendChild(label);typeInputs.push({tipo,input});
     });
-    schedule.append(scheduleList,addTimeRow);editor.appendChild(schedule);
+    editor.append(typeFieldset,offerEditors);
     const save=node("button","Guardar configuración");save.type="submit";editor.appendChild(save);
     editor.addEventListener("submit",async event=>{
       event.preventDefault();save.disabled=true;status.textContent="Guardando configuración…";
       try{
         const result=await request("admin.php",{method:"PUT",body:{
           complejo:select.value,
-          tipos:typeInputs.filter(input=>input.checked).map(input=>input.value),
-          precio:price.querySelector("input").value,
-          horarios:[...times].sort()
+          ofertas:Object.fromEntries(typeInputs.filter(item=>item.input.checked).map(({tipo})=>{
+            const state=getOfferState(tipo);
+            return [tipo,{precio:state.precio,horarios:[...state.horarios].sort()}];
+          }))
         }});
         status.textContent=result.mensaje||"Configuración guardada.";status.className="status-inline success";
         const response=await request("catalogo.php");catalog=response.complejos;
@@ -585,9 +612,10 @@ async function renderAdmin() {
     const populateEditor=()=>{
       const complex=data.complejos.find(item=>item.codigo===select.value);
       if(!complex)return;
-      typeInputs.forEach(input=>{input.checked=complex.tipos.includes(input.value);});
-      price.querySelector("input").value=String(complex.precio);
-      times.clear();complex.horarios.forEach(time=>times.add(time));drawTimes();
+      offerState.clear();
+      Object.entries(complex.ofertas).forEach(([tipo,oferta])=>offerState.set(tipo,{precio:String(oferta.precio),horarios:new Set(oferta.horarios)}));
+      typeInputs.forEach(item=>{item.input.checked=Object.hasOwn(complex.ofertas,item.tipo);});
+      drawOfferEditors();
     };
     const drawReservations=()=>{
       const found=data.reservas.filter(item=>item.complejo===select.value);

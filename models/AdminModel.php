@@ -18,7 +18,7 @@ final class AdminModel {
     }
 
     /** Devuelve sólo complejos asignados al administrador autenticado. */
-    public function datosPanel(int $usuarioId, array $catalogo, array $plantillaTurnos): array {
+    public function datosPanel(int $usuarioId, array $catalogo): array {
         $consulta = $this->db->prepare(
             'SELECT complejo_codigo FROM administradores_complejo WHERE usuario_id = :usuario_id ORDER BY complejo_codigo'
         );
@@ -30,12 +30,7 @@ final class AdminModel {
             $complejos[] = [
                 'codigo' => $codigo,
                 'nombre' => $catalogo[$codigo]['nombre'],
-                'tipos' => preg_split('/\s+/', trim((string) $catalogo[$codigo]['tipos']), -1, PREG_SPLIT_NO_EMPTY),
-                'precio' => (int) $catalogo[$codigo]['precio'],
-                'horarios' => array_values(array_map(
-                    static fn(array $turno): string => (string) $turno['hora'],
-                    array_filter($plantillaTurnos['turnos'][$codigo] ?? [], static fn(array $turno): bool => ($turno['libre'] ?? false) === true)
-                )),
+                'ofertas' => $catalogo[$codigo]['ofertas'],
             ];
         }
 
@@ -63,7 +58,7 @@ final class AdminModel {
         return ['complejos' => $complejos, 'reservas' => $reservas];
     }
 
-    /** Actualiza los tipos de cancha, el precio y la plantilla horaria asignados. */
+    /** Actualiza precios y horarios independientes para cada tipo de cancha habilitado. */
     public function actualizarConfiguracion(int $usuarioId, array $datos, array $catalogo): void {
         $codigo = isset($datos['complejo']) && is_string($datos['complejo']) ? trim($datos['complejo']) : '';
         $complejo = $catalogo[$codigo] ?? null;
@@ -72,51 +67,58 @@ final class AdminModel {
         }
         $this->exigirAsignacion($usuarioId, $codigo);
 
-        $tipos = $datos['tipos'] ?? null;
         $permitidos = ['5', '7', '11'];
-        if (!is_array($tipos) || count($tipos) < 1 || count($tipos) > 3) {
+        $ofertas = $datos['ofertas'] ?? null;
+        if (!is_array($ofertas) || count($ofertas) < 1 || count($ofertas) > 3) {
             throw new DomainError('bad_request', 'Seleccioná al menos un tipo de cancha.');
         }
-        foreach ($tipos as $tipo) {
-            if (!is_string($tipo) || !in_array($tipo, $permitidos, true)) {
+        $normalizadas = [];
+        foreach ($ofertas as $tipo => $oferta) {
+            $tipo = (string) $tipo;
+            if (!in_array($tipo, $permitidos, true) || !is_array($oferta)) {
                 throw new DomainError('bad_request', 'Hay un tipo de cancha inválido.');
             }
-        }
-        $tipos = array_values(array_unique($tipos));
-        sort($tipos, SORT_NUMERIC);
 
-        $precio = $datos['precio'] ?? null;
-        if (!is_string($precio) && !is_int($precio) && !is_float($precio)) {
-            throw new DomainError('bad_request', 'Ingresá un precio por hora válido.');
-        }
-        $precio = (string) $precio;
-        if (!preg_match('/^[0-9]{1,8}$/D', $precio) || (int) $precio < 1 || (int) $precio > 10000000) {
-            throw new DomainError('bad_request', 'El precio debe ser un importe entero entre $1 y $10.000.000.');
-        }
-
-        $horarios = $datos['horarios'] ?? null;
-        if (!is_array($horarios) || count($horarios) > 24) {
-            throw new DomainError('bad_request', 'La lista de horarios no es válida.');
-        }
-        foreach ($horarios as $hora) {
-            if (!is_string($hora) || !preg_match('/^(?:[01][0-9]|2[0-3]):(?:00|30)$/D', $hora)) {
-                throw new DomainError('bad_request', 'Usá horarios en intervalos de 30 minutos.');
+            $precio = $oferta['precio'] ?? null;
+            if (!is_string($precio) && !is_int($precio)) {
+                throw new DomainError('bad_request', 'Ingresá un precio por hora válido para cada tipo.');
             }
+            $precio = (string) $precio;
+            if (!preg_match('/^[0-9]{1,8}$/D', $precio) || (int) $precio < 1 || (int) $precio > 10000000) {
+                throw new DomainError('bad_request', 'Cada precio debe ser un importe entero entre $1 y $10.000.000.');
+            }
+
+            $horarios = $oferta['horarios'] ?? null;
+            if (!is_array($horarios) || count($horarios) > 48) {
+                throw new DomainError('bad_request', 'La lista de horarios no es válida.');
+            }
+            foreach ($horarios as $hora) {
+                if (!is_string($hora) || !preg_match('/^(?:[01][0-9]|2[0-3]):(?:00|30)$/D', $hora)) {
+                    throw new DomainError('bad_request', 'Usá horarios en intervalos de 30 minutos.');
+                }
+            }
+            $horarios = array_values(array_unique($horarios));
+            sort($horarios, SORT_STRING);
+            $normalizadas[(int) $tipo] = ['precio' => (int) $precio, 'horarios' => $horarios];
         }
-        $horarios = array_values(array_unique($horarios));
-        sort($horarios, SORT_STRING);
+
+        ksort($normalizadas, SORT_NUMERIC);
+        $tipos = array_map('strval', array_keys($normalizadas));
+        $primeraOferta = reset($normalizadas);
 
         $consulta = $this->db->prepare(
-            'INSERT INTO configuracion_complejos (codigo, tipos, precio, horarios_json, actualizado_por)
-             VALUES (:codigo, :tipos, :precio, :horarios_json, :actualizado_por)
+            'INSERT INTO configuracion_complejos (codigo, tipos, precio, horarios_json, ofertas_json, actualizado_por)
+             VALUES (:codigo, :tipos, :precio, :horarios_json, :ofertas_json, :actualizado_por)
              ON DUPLICATE KEY UPDATE tipos = VALUES(tipos), precio = VALUES(precio),
-                 horarios_json = VALUES(horarios_json), actualizado_por = VALUES(actualizado_por), actualizado_en = CURRENT_TIMESTAMP'
+                 horarios_json = VALUES(horarios_json), ofertas_json = VALUES(ofertas_json),
+                 actualizado_por = VALUES(actualizado_por), actualizado_en = CURRENT_TIMESTAMP'
         );
         $consulta->execute([
             'codigo' => $codigo,
             'tipos' => implode(' ', $tipos),
-            'precio' => number_format((int) $precio, 2, '.', ''),
-            'horarios_json' => json_encode($horarios, JSON_THROW_ON_ERROR),
+            'precio' => number_format($primeraOferta['precio'], 2, '.', ''),
+            'horarios_json' => json_encode($primeraOferta['horarios'], JSON_THROW_ON_ERROR),
+            'ofertas_json' => json_encode($normalizadas, JSON_THROW_ON_ERROR),
             'actualizado_por' => $usuarioId,
         ]);
     }

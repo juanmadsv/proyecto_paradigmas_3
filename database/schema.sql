@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS configuracion_complejos (
     tipos VARCHAR(20) NOT NULL,
     precio DECIMAL(10,2) NOT NULL,
     horarios_json TEXT NOT NULL,
+    ofertas_json TEXT DEFAULT NULL,
     actualizado_por INT UNSIGNED NOT NULL,
     actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_config_complejo_usuario FOREIGN KEY (actualizado_por)

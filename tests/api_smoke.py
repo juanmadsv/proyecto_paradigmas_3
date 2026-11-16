@@ -59,8 +59,13 @@ assert 'password' not in privado['usuario']
 assert privado['reservas'] == []
 
 _, horarios = cliente.pedir('turnos.php')
-complejo, turno = next((c, t['hora']) for c, turnos in horarios['turnos'].items() for t in turnos if t['libre'])
-reserva = {'complejo': complejo, 'tipo': '5', 'horario': turno, 'telefono': '3761234567',
+complejo, tipo, turno = next(
+    (c, tipo, slot['hora'])
+    for c, tipos in horarios['turnos'].items()
+    for tipo, turnos in tipos.items()
+    for slot in turnos if slot['libre']
+)
+reserva = {'complejo': complejo, 'tipo': tipo, 'horario': turno, 'telefono': '3761234567',
            'pago': 'debito', 'servicios': [], 'cupon': 'UCP10', 'total': 1, 'usuario_id': 99999}
 assert cliente.pedir('mis_reservas.php', reserva, token=False)[0] == 403
 assert cliente.pedir('mis_reservas.php', {**reserva, 'servicios': ['inexistente']})[0] == 422
