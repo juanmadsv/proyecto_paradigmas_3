@@ -17,7 +17,7 @@ final class UsuarioModel {
             !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190 ||
             strlen($password) < 8 || strlen($password) > 72 || strpos($password, "\0") !== false
         ) {
-            throw new DomainError('bad_request', 'Ingresá un nombre (hasta 100 bytes), un email válido y una contraseña de 8 a 72 bytes.');
+            throw new DomainError('invalid_input', 'Ingresá un nombre (hasta 100 bytes), un email válido y una contraseña de 8 a 72 bytes.');
         }
 
         $hash = password_hash($password, PASSWORD_BCRYPT);
