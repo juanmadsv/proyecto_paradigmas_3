@@ -1,4 +1,4 @@
-# CanchaYa — AE4 / Paradigmas III
+# CanchaYa | Plataforma de reservas deportivas
 
 CanchaYa permite explorar complejos deportivos, cotizar una cancha, registrar una cuenta y reservar un turno. La entrada de la versión AE4 es `index.html`, que carga la SPA ubicada en `public/assets/`; `public/index.html` sirve como entrada equivalente. Las páginas HTML legacy se conservan como antecedentes de AE1 y AE2.
 
@@ -82,10 +82,12 @@ El script `tests/api_smoke.py` comprueba autenticación, CSRF, aislamiento de re
 python tests/api_smoke.py http://localhost/canchaYaFrontend
 ```
 
-El contrato de endpoints JSON está en `docs/API.md`. La matriz de trazabilidad y autoevaluación está en `docs/AE4_trazabilidad_y_matriz_ISO.md`; el guion de exposición y recorrido está en `docs/AE4_guia_defensa.md`; la preparación del informe y ZIP está en `docs/AE4_entrega.md`. El equipo reporta 100/100 en Accesibilidad de Lighthouse para `#inicio`, `#reservar`, `#cuenta`, `#mis-reservas` y `#cotizar`; las cinco capturas fueron incorporadas al informe técnico. Se adjuntó además evidencia Network/JSON del 401 anónimo; quedan pendientes capturas de los demás flujos HTTP y de navegación por teclado. Estas mediciones corresponden a la ejecución local reportada por el equipo; el rendimiento, compatibilidad entre navegadores y pruebas automatizadas requieren verificaciones separadas.
+El contrato de la API está en `docs/API.md` y las instrucciones de recuperación de cuenta en `docs/RECUPERACION.md`. Los informes académicos y evidencias se organizan en formato PDF dentro de `docs/`: AE1, las tres opciones documentadas de AE2 y el informe técnico AE4.
+
+El recorrido local previo y las capturas de Lighthouse están documentados en `docs/AE4_Informe_Tecnico_CanchaYa.pdf`. La rama de mejoras agrega un aviso de registro, un acceso directo desde Mis reservas y un indicador de foco más contrastado; esas modificaciones deben validarse manualmente antes de integrarse. El resultado automatizado de `tests/api_smoke.py`, las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
 
 La versión actual cubre el flujo principal del jugador; no debe presentarse como implementación de todos los casos de uso de AE1. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 
 ## Recuperación de contraseña
 
-La función de recuperación está documentada en [RECUPERACION.md](RECUPERACION.md). Requiere importar la migración indicada, instalar Composer y configurar el correo. La recuperación por correo no funciona hasta completar esa configuración.
+La función de recuperación está documentada en [docs/RECUPERACION.md](docs/RECUPERACION.md). Requiere importar la migración indicada, instalar Composer y configurar el correo. La recuperación por correo no funciona hasta completar esa configuración.
