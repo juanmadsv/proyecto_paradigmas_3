@@ -68,13 +68,13 @@ La disponibilidad combina los horarios habituales configurados en MySQL con las 
 | Endpoint | Método | Resultado principal |
 | --- | --- | --- |
 | `api/csrf.php` | GET | Token CSRF de la sesión |
-| `api/registro.php` | POST JSON | 201 creado; 400 datos inválidos; 409 email repetido |
+| `api/registro.php` | POST JSON | 201 creado; 400 JSON inválido; 409 email repetido; 422 campos inválidos |
 | `api/login.php` | POST JSON | 200 autenticado; 401 credenciales incorrectas. La interfaz muestra un aviso breve y accesible ante 401 |
 | `api/logout.php` | POST JSON | 200 sesión cerrada |
 | `api/turnos.php` | GET `?fecha=YYYY-MM-DD` | 200 disponibilidad por complejo y tipo de cancha para la fecha; 400 fecha fuera del rango |
 | `api/catalogo.php` | GET | 200 catálogo descriptivo combinado con la configuración guardada |
 | `api/mis_reservas.php` | GET | 200 reservas propias; 401 sin sesión |
-| `api/mis_reservas.php` | POST JSON | 201 reserva creada; 400 entrada inválida; 401 sin sesión; 409 turno ocupado |
+| `api/mis_reservas.php` | POST JSON | 201 reserva creada; 400 JSON inválido/fecha fuera de rango; 401 sin sesión; 409 turno ocupado; 422 campos inválidos |
 | `api/mis_reservas.php` | DELETE JSON `{reserva_id}` | 200 cancelada; 400 ID inválido; 401 sin sesión; 403 CSRF; 409 no existe, no pertenece o faltan menos de 24 horas |
 | `api/admin.php` | GET | 200 precios y horarios independientes por tipo, y reservas de complejos asignados; 401 sin sesión; 403 sin asignación |
 | `api/admin.php` | PUT JSON | 200 ofertas por tipo guardadas; 400 datos inválidos; 401 sin sesión; 403 rol/asignación o CSRF |
@@ -103,7 +103,7 @@ python tests/api_smoke.py http://localhost/canchaYaFrontend
 
 El contrato de la API está en `docs/API.md` y las instrucciones de recuperación de cuenta en `docs/RECUPERACION.md`. Los informes académicos y evidencias se organizan en formato PDF dentro de `docs/`: AE1, las tres opciones documentadas de AE2 y el informe técnico AE4.
 
-El usuario informa 100/100 en Accesibilidad para las cinco vistas del recorrido previo y para el panel de administración tras completar su recorrido. También confirmó que una cuenta sin asignación no puede acceder al panel y que las ofertas configuradas persisten y se reflejan en el sistema. Se conservan las capturas existentes; no se incorporaron capturas nuevas. `tests/api_smoke.py` no se reporta como ejecutado en esta entrega. Las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
+El usuario informa 100/100 en Accesibilidad para las cinco vistas del recorrido previo y para el panel de administración tras completar su recorrido. También confirmó que una cuenta sin asignación no puede acceder al panel y que las ofertas configuradas persisten y se reflejan en el sistema. Se conservan las capturas existentes; no se incorporaron capturas nuevas. `tests/api_smoke.py` se ejecutó contra la base aislada `canchaya_qa` y reportó `PASS` para autenticación, CSRF, sesión, conflictos, aislamiento, cálculo del servidor y cierre de sesión. La ejecución creó dos cuentas y una reserva persistente únicamente en esa base de pruebas. Lighthouse Performance en Microsoft Edge, modo Mobile: #inicio 99 (LCP 1,9 s; TBT 60 ms; CLS 0,053); #reservar 98 (1,8 s; 90 ms; 0,053); #cuenta 99 (1,7 s; 100 ms; 0,027); #administracion 99 (1,7 s; 40 ms; 0,053); #mis-reservas 100 (1,7 s; 0 ms; 0); #cotizar 100 (1,7 s; 30 ms; 0,007). No se informó la versión del navegador ni la cantidad de repeticiones. La verificación manual en un navegador adicional sigue pendiente.
 
 La versión cubre el flujo principal del jugador y el panel administrativo definido para el DFD del AE4; no implementa todos los casos de uso de AE1. La recuperación por correo no forma parte del alcance validado de esta entrega. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 

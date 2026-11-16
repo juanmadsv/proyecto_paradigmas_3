@@ -75,17 +75,17 @@ final class ReservaModel {
             !preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/D', $hora) ||
             !in_array($pago, ['debito', 'credito', 'mercadopago', 'personalpay', 'naranjax', 'uala'], true)
         ) {
-            throw new DomainError('bad_request', 'Revisá el complejo, tipo de cancha, teléfono y forma de pago.');
+            throw new DomainError('invalid_input', 'Revisá el complejo, tipo de cancha, teléfono y forma de pago.');
         }
 
         $fechaSolicitada = $this->validarFecha($fecha);
         $servicios = $datos['servicios'] ?? [];
         if (!is_array($servicios) || count($servicios) > 4) {
-            throw new DomainError('bad_request', 'Servicios inválidos.');
+            throw new DomainError('invalid_input', 'Servicios inválidos.');
         }
         foreach ($servicios as $servicio) {
             if (!is_string($servicio) || !in_array($servicio, $c['servicios'] ?? [], true)) {
-                throw new DomainError('bad_request', 'El complejo no ofrece uno de los servicios seleccionados.');
+                throw new DomainError('invalid_input', 'El complejo no ofrece uno de los servicios seleccionados.');
             }
         }
         $servicios = array_values(array_unique($servicios));
@@ -107,7 +107,7 @@ final class ReservaModel {
             throw new DomainError('conflict', 'No se pueden reservar horarios que ya comenzaron.');
         }
         if ($cupon !== '' && $cupon !== 'UCP10') {
-            throw new DomainError('bad_request', 'El cupón no es válido.');
+            throw new DomainError('invalid_input', 'El cupón no es válido.');
         }
 
         $preciosServicios = ['parrilla' => 3000, 'quincho' => 8000, 'vestuarios' => 0, 'estacionamiento' => 0];
