@@ -49,12 +49,12 @@ La importación del esquema es manual; actualizar el repositorio no modifica la 
 | CU-02 Buscar y filtrar complejos | Catálogo con filtros por texto, zona y tipo |
 | CU-03 Consultar disponibilidad y detalle | Fichas y turnos de una fecha elegida consultados desde la API |
 | CU-04 Generar una reserva | Creación persistente con fecha, sesión, recálculo de importes y control de turno duplicado |
-| CU-05 Pagar una reserva | Parcial: se registra el medio declarado; no existe pasarela ni cobro real |
+| CU-05 Pagar una reserva | Simulado: se registra el medio declarado y se muestran total/seña informativos; no hay pasarela, cobro ni reintegro |
 | CU-06 Consultar o cancelar una reserva | Consulta de reservas propias y cancelación con 24 horas de anticipación; no realiza reintegros |
 | Administración del DFD | Panel para que las cuentas asignadas gestionen tipos de cancha, precio por hora y horarios habituales, y consulten reservas de sus complejos |
-| Otros CU-07 a CU-14 | Pendientes: alta de complejos, cobros reales, aprobación, reclamos y estadísticas |
+| Otros CU-07 a CU-14 | Fuera del alcance acordado de esta entrega AE4; quedan como evolución posterior |
 
-La disponibilidad combina los horarios habituales configurados en MySQL con las reservas activas y permite elegir una fecha dentro de los próximos 90 días. El administrador configura de manera independiente el precio y los horarios de cada tipo de cancha que ofrece. La disponibilidad, el precio estimado y el cálculo del servidor usan el tipo seleccionado. Las reservas de dos tipos distintos pueden ocupar la misma hora; un segundo turno del mismo tipo, complejo, fecha y hora se rechaza. La cancelación libera esa combinación para reservarla de nuevo. La seña del 20% es informativa: no confirma un pago. El sitio no almacena datos de tarjeta ni envía notificaciones a propietarios.
+La disponibilidad combina los horarios habituales configurados en MySQL con las reservas activas y permite elegir una fecha dentro de los próximos 90 días. El administrador configura de manera independiente el precio y los horarios de cada tipo de cancha que ofrece. La disponibilidad, el precio estimado y el cálculo del servidor usan el tipo seleccionado. Las reservas de dos tipos distintos pueden ocupar la misma hora; un segundo turno del mismo tipo, complejo, fecha y hora se rechaza. La cancelación libera esa combinación para reservarla de nuevo. La seña del 20% y el medio declarado son parte de una simulación: no se procesa un cobro ni un reintegro, y el sitio no almacena datos de tarjeta ni envía notificaciones a propietarios. Los demás casos CU-07 a CU-14 no integran el alcance acordado del AE4.
 
 ### Habilitar una cuenta administradora
 
@@ -69,7 +69,7 @@ La disponibilidad combina los horarios habituales configurados en MySQL con las 
 | --- | --- | --- |
 | `api/csrf.php` | GET | Token CSRF de la sesión |
 | `api/registro.php` | POST JSON | 201 creado; 400 datos inválidos; 409 email repetido |
-| `api/login.php` | POST JSON | 200 autenticado; 401 credenciales incorrectas |
+| `api/login.php` | POST JSON | 200 autenticado; 401 credenciales incorrectas. La interfaz muestra un aviso breve y accesible ante 401 |
 | `api/logout.php` | POST JSON | 200 sesión cerrada |
 | `api/turnos.php` | GET `?fecha=YYYY-MM-DD` | 200 disponibilidad por complejo y tipo de cancha para la fecha; 400 fecha fuera del rango |
 | `api/catalogo.php` | GET | 200 catálogo descriptivo combinado con la configuración guardada |
@@ -90,6 +90,7 @@ Los POST usan `Content-Type: application/json` y `X-CSRF-Token`. El servidor res
 - El panel exige una asignación persistida en `administradores_complejo`; ocultar el enlace en la interfaz no reemplaza la autorización de la API.
 - Las mutaciones requieren CSRF. Las respuestas JSON usan `no-store` y errores internos no exponen SQL ni credenciales.
 - El JavaScript construye contenido con `createElement`, `textContent` y nodos de texto; evita asignaciones a `innerHTML`.
+- Los errores de autenticación se muestran en el formulario y mediante un aviso breve; el mensaje accesible no revela si falló el email o la contraseña.
 - La SPA incluye regiones `aria-live`, etiquetas asociadas a formularios, enlace para saltar al contenido, foco visible y estilos responsive.
 
 ## Verificación y límites de la evidencia
@@ -102,10 +103,10 @@ python tests/api_smoke.py http://localhost/canchaYaFrontend
 
 El contrato de la API está en `docs/API.md` y las instrucciones de recuperación de cuenta en `docs/RECUPERACION.md`. Los informes académicos y evidencias se organizan en formato PDF dentro de `docs/`: AE1, las tres opciones documentadas de AE2 y el informe técnico AE4.
 
-El usuario informa 100/100 en Accesibilidad para las cinco vistas del recorrido previo y para el panel de administración tras completar su recorrido. Se conservan las capturas existentes; no se incorporaron capturas nuevas. `tests/api_smoke.py` no se reporta como ejecutado en esta entrega. Las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
+El usuario informa 100/100 en Accesibilidad para las cinco vistas del recorrido previo y para el panel de administración tras completar su recorrido. También confirmó que una cuenta sin asignación no puede acceder al panel y que las ofertas configuradas persisten y se reflejan en el sistema. Se conservan las capturas existentes; no se incorporaron capturas nuevas. `tests/api_smoke.py` no se reporta como ejecutado en esta entrega. Las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
 
-La versión actual cubre el flujo principal del jugador; no debe presentarse como implementación de todos los casos de uso de AE1. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
+La versión cubre el flujo principal del jugador y el panel administrativo definido para el DFD del AE4; no implementa todos los casos de uso de AE1. La recuperación por correo no forma parte del alcance validado de esta entrega. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 
 ## Recuperación de contraseña
 
-La función de recuperación está documentada en [docs/RECUPERACION.md](docs/RECUPERACION.md). Requiere importar la migración indicada, instalar Composer y configurar el correo. La recuperación por correo no funciona hasta completar esa configuración.
+La recuperación por correo queda fuera del alcance de esta entrega y no está habilitada ni validada para usuarios. El documento [docs/RECUPERACION.md](docs/RECUPERACION.md) conserva las notas técnicas para una posible configuración posterior.
