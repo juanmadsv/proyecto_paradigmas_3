@@ -9,10 +9,13 @@ public/
   index.html                 Vista única de la SPA
   assets/app.js              Navegación, fetch y renderizado seguro con nodos DOM
   assets/app.css             Estilos responsive y foco visible
-api/                         Endpoints JSON que actúan como controladores
+api/                         Controladores HTTP JSON, sesiones y CSRF
 models/
-  UsuarioModel.php           Consultas de usuarios mediante PDO
-  ReservaModel.php           Consultas y persistencia de reservas mediante PDO
+  DomainError.php            Errores de reglas del dominio
+  CatalogoModel.php          Lectura del catálogo y turnos JSON de demostración
+  UsuarioModel.php           Registro, autenticación y persistencia PDO
+  ReservaModel.php           Reglas de disponibilidad, reservas y cancelación
+  RecuperacionModel.php      Solicitud, límites y restablecimiento de contraseña
 config/
   database.example.php       Ejemplo sin credenciales
 database/
@@ -22,7 +25,7 @@ tests/
   api_smoke.py               Verificación automatizada de la API
 ```
 
-La SPA se comunica con la API mediante `fetch()` y JSON. Los endpoints de PHP delegan las consultas de usuarios y reservas en modelos. La conexión PDO se configura en `api/bootstrap.php`; las reglas de autenticación, validación y códigos HTTP permanecen en los endpoints.
+La SPA se comunica con la API mediante `fetch()` y JSON. Los controladores de `api/` gestionan métodos HTTP, sesión, CSRF y serialización de respuestas; delegan autenticación, validaciones de dominio, disponibilidad, precios, cancelaciones y recuperación en los modelos. Los modelos encapsulan las reglas del negocio y el acceso PDO o a los JSON de demostración. `api/bootstrap.php` concentra infraestructura compartida y traduce errores de dominio a códigos HTTP. La organización aplica MVC desacoplado en el flujo implementado; los CU-07 a CU-14 aún no tienen vistas ni controladores.
 
 ## Instalar en XAMPP
 
@@ -84,7 +87,7 @@ python tests/api_smoke.py http://localhost/canchaYaFrontend
 
 El contrato de la API está en `docs/API.md` y las instrucciones de recuperación de cuenta en `docs/RECUPERACION.md`. Los informes académicos y evidencias se organizan en formato PDF dentro de `docs/`: AE1, las tres opciones documentadas de AE2 y el informe técnico AE4.
 
-El recorrido local previo y las capturas de Lighthouse están documentados en `docs/AE4_Informe_Tecnico_CanchaYa.pdf`. La rama de mejoras agrega un aviso de registro, un acceso directo desde Mis reservas y un indicador de foco más contrastado; esas modificaciones deben validarse manualmente antes de integrarse. El resultado automatizado de `tests/api_smoke.py`, las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
+El recorrido local y las capturas de Lighthouse están documentados en `docs/AE4_Informe_Tecnico_CanchaYa.pdf`. Las mejoras de interfaz están integradas en `main`; el equipo informa que volvió a obtener 100/100 en Accesibilidad en las cinco vistas. El PDF conserva las capturas ya incorporadas. `tests/api_smoke.py` no se reporta como ejecutado en esta entrega. Las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
 
 La versión actual cubre el flujo principal del jugador; no debe presentarse como implementación de todos los casos de uso de AE1. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 

@@ -5,7 +5,7 @@ pedir el correo o elegir una contraseña nueva cuando se abre el enlace recibido
 
 ## Instalación sobre la base que ya existe
 
-1. Actualizar la rama autenticacion-php-sesiones en la carpeta de XAMPP.
+1. Actualizar el proyecto a la versión vigente de `main` en la carpeta de XAMPP y conservar la configuración local de correo.
 2. En phpMyAdmin, importar **database/002_recuperacion.sql**. No borrar usuarios
    ni reservas. La migración crea dos tablas y agrega usuarios.version_sesion.
    Se puede volver a importar sin borrar datos. Las sesiones abiertas antes de
