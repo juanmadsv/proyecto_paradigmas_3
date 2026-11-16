@@ -74,7 +74,7 @@ La disponibilidad combina los horarios habituales configurados en MySQL con las 
 | `api/turnos.php` | GET `?fecha=YYYY-MM-DD` | 200 disponibilidad por complejo y tipo de cancha para la fecha; 400 fecha fuera del rango |
 | `api/catalogo.php` | GET | 200 catálogo descriptivo combinado con la configuración guardada |
 | `api/mis_reservas.php` | GET | 200 reservas propias; 401 sin sesión |
-| `api/mis_reservas.php` | POST JSON | 201 reserva creada; 400 entrada inválida; 401 sin sesión; 409 turno ocupado |
+| `api/mis_reservas.php` | POST JSON | 201 reserva creada; 400 JSON inválido/fecha fuera de rango; 401 sin sesión; 409 turno ocupado; 422 campos inválidos |
 | `api/mis_reservas.php` | DELETE JSON `{reserva_id}` | 200 cancelada; 400 ID inválido; 401 sin sesión; 403 CSRF; 409 no existe, no pertenece o faltan menos de 24 horas |
 | `api/admin.php` | GET | 200 precios y horarios independientes por tipo, y reservas de complejos asignados; 401 sin sesión; 403 sin asignación |
 | `api/admin.php` | PUT JSON | 200 ofertas por tipo guardadas; 400 datos inválidos; 401 sin sesión; 403 rol/asignación o CSRF |
