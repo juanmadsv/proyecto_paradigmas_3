@@ -33,6 +33,28 @@ CREATE TABLE IF NOT EXISTS reservas (
     KEY reservas_usuario (usuario_id, fecha)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS administradores_complejo (
+    usuario_id INT UNSIGNED NOT NULL,
+    complejo_codigo VARCHAR(40) NOT NULL,
+    asignado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (usuario_id, complejo_codigo),
+    KEY administradores_complejo_codigo (complejo_codigo),
+    CONSTRAINT fk_admin_complejo_usuario FOREIGN KEY (usuario_id)
+        REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS configuracion_complejos (
+    codigo VARCHAR(40) PRIMARY KEY,
+    tipos VARCHAR(20) NOT NULL,
+    precio DECIMAL(10,2) NOT NULL,
+    horarios_json TEXT NOT NULL,
+    ofertas_json TEXT DEFAULT NULL,
+    actualizado_por INT UNSIGNED NOT NULL,
+    actualizado_en TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_config_complejo_usuario FOREIGN KEY (actualizado_por)
+        REFERENCES usuarios(id)
+) ENGINE=InnoDB;
+
 -- Recuperación de contraseña (en instalaciones existentes importar 002_recuperacion.sql).
 USE canchaya;
 

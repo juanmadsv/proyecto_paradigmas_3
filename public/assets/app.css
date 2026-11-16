@@ -47,6 +47,12 @@ main { width: min(1160px, calc(100% - 2rem)); margin: 1.5rem auto 3rem; min-heig
   border-radius: .7rem; color: #fff; background: var(--green-dark);
   box-shadow: 0 8px 24px rgb(16 37 26 / 24%); font-weight: 700;
 }
+.login-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.toast-inline {
+  position: static; width: auto; max-width: 100%; padding: .65rem .8rem;
+  color: #7b1e26; background: #fff0f1; border: 1px solid #c84b56;
+  box-shadow: none; font-weight: 700;
+}
 .hero { padding: clamp(1.5rem, 5vw, 4rem); background: #0d2b1b; color: #fff; border-radius: 1.2rem; }
 .hero p { max-width: 65ch; }
 .hero h1 { max-width: 18ch; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.08; margin: .4rem 0 1rem; }
@@ -85,6 +91,16 @@ ul.clean { padding-left: 1.25rem; }
 .reservation { padding: 1rem 0; border-top: 1px solid var(--border); }
 .price-summary { padding: .8rem; background: #eff7ef; border-radius: .6rem; }
 .price-summary p { margin: .25rem 0; }
+.admin-offers { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: .8rem; }
+.admin-offer-edit { min-width: 0; margin: 0; padding: .9rem; border: 1px solid var(--border); border-radius: .7rem; background: #fff; }
+.admin-offer-edit > legend { padding: 0 .35rem; font-size: 1.1rem; }
+.admin-offer-edit > fieldset { min-width: 0; margin-top: .8rem; border: 1px solid var(--border); border-radius: .6rem; }
+.admin-schedule { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: .55rem; }
+.admin-time-row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; padding: .45rem .6rem; border: 1px solid var(--border); border-radius: .55rem; background: #fff; }
+.admin-time-row button { min-height: 40px; }
+.admin-reservation-list { display: grid; gap: .75rem; list-style: none; padding: 0; }
+.admin-reservation { padding: .85rem; border: 1px solid var(--border); border-radius: .65rem; background: #fff; }
+.admin-reservation h3, .admin-reservation p { margin: .15rem 0; }
 .site-footer { padding: 1.2rem; text-align: center; color: #e9f3eb; background: #0d2b1b; }
 @media (max-width: 760px) {
   .site-header { align-items: flex-start; flex-direction: column; }

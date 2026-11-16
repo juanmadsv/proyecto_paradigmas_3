@@ -30,21 +30,24 @@ final class ReservaModel {
 
         foreach ($this->listarOcupadasPorFecha($fecha) as $reserva) {
             $complejo = $reserva['complejo'];
-            if (!isset($turnos[$complejo])) continue;
-            foreach ($turnos[$complejo] as $indice => $turno) {
+            $tipo = (string) $reserva['tipo'];
+            if (!isset($turnos[$complejo][$tipo])) continue;
+            foreach ($turnos[$complejo][$tipo] as $indice => $turno) {
                 if (($turno['hora'] ?? null) === $reserva['hora']) {
-                    $turnos[$complejo][$indice]['libre'] = false;
+                    $turnos[$complejo][$tipo][$indice]['libre'] = false;
                 }
             }
         }
 
         $ahora = new DateTimeImmutable('now');
-        foreach ($turnos as $complejo => $horarios) {
-            foreach ($horarios as $indice => $turno) {
-                $hora = is_array($turno) ? ($turno['hora'] ?? '') : '';
-                $inicio = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $fecha . ' ' . $hora);
-                if (!$inicio || $inicio <= $ahora) {
-                    $turnos[$complejo][$indice]['libre'] = false;
+        foreach ($turnos as $complejo => $tipos) {
+            foreach ($tipos as $tipo => $horarios) {
+                foreach ($horarios as $indice => $turno) {
+                    $hora = is_array($turno) ? ($turno['hora'] ?? '') : '';
+                    $inicio = DateTimeImmutable::createFromFormat('!Y-m-d H:i', $fecha . ' ' . $hora);
+                    if (!$inicio || $inicio <= $ahora) {
+                        $turnos[$complejo][$tipo][$indice]['libre'] = false;
+                    }
                 }
             }
         }
@@ -87,7 +90,7 @@ final class ReservaModel {
         }
         $servicios = array_values(array_unique($servicios));
 
-        $disponibles = $plantillaTurnos['turnos'][$complejo] ?? [];
+        $disponibles = $plantillaTurnos['turnos'][$complejo][$tipo] ?? [];
         $libre = false;
         foreach ($disponibles as $turno) {
             if (($turno['hora'] ?? null) === $hora && ($turno['libre'] ?? false) === true) {
@@ -108,7 +111,8 @@ final class ReservaModel {
         }
 
         $preciosServicios = ['parrilla' => 3000, 'quincho' => 8000, 'vestuarios' => 0, 'estacionamiento' => 0];
-        $subtotal = (int) ($c['precio'] ?? 0);
+        $precioCancha = $c['ofertas'][$tipo]['precio'] ?? $c['precio'] ?? 0;
+        $subtotal = (int) $precioCancha;
         foreach ($servicios as $servicio) {
             $subtotal += $preciosServicios[$servicio] ?? 0;
         }
@@ -129,7 +133,7 @@ final class ReservaModel {
                 'cupon' => $cupon === '' ? null : $cupon,
                 'total' => $total,
                 'sena' => $sena,
-                'turno_activo' => $complejo . '|' . $fecha . '|' . $hora . ':00',
+                'turno_activo' => $complejo . '|' . $tipo . '|' . $fecha . '|' . $hora . ':00',
             ]);
         } catch (PDOException $error) {
             if (($error->errorInfo[1] ?? 0) === 1062) {
@@ -186,7 +190,7 @@ final class ReservaModel {
 
     private function listarOcupadasPorFecha(string $fecha): array {
         $consulta = $this->db->prepare(
-            "SELECT complejo, TIME_FORMAT(horario, '%H:%i') AS hora
+            "SELECT complejo, tipo, TIME_FORMAT(horario, '%H:%i') AS hora
              FROM reservas
              WHERE fecha = :fecha AND estado = 'confirmada'"
         );

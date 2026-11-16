@@ -15,6 +15,7 @@ try {
 
 // El controlador coordina el protocolo de sesión y la respuesta HTTP.
 session_regenerate_id(true);
+$usuario['es_admin'] = (new AdminModel(db()))->esAdministrador((int) $usuario['id']);
 $_SESSION = [
     'usuario_id' => (int) $usuario['id'],
     'version_sesion' => (int) $usuario['version_sesion'],

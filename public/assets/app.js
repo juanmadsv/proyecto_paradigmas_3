@@ -36,11 +36,11 @@ const announce = (message, error = false) => {
   globalStatus.textContent = message;
   globalStatus.dataset.error = String(error);
 };
-const showToast = message => {
-  const toast = node("div", message, "toast");
+const showToast = (message, options = {}) => {
+  const toast = node("div", message, options.inline ? "toast toast-inline" : "toast");
   toast.setAttribute("aria-hidden", "true");
-  document.body.appendChild(toast);
-  window.setTimeout(() => toast.remove(), 700);
+  (options.container || document.body).appendChild(toast);
+  window.setTimeout(() => toast.remove(), options.duration || 700);
 };
 const setPage = (title, content) => {
   document.title = title + " · CanchaYa";
@@ -121,17 +121,22 @@ const request = async (path, options = {}) => {
   let data;
   try { data = await response.json(); }
   catch { throw new Error("El servidor devolvió una respuesta que no es JSON."); }
-  if (!response.ok) throw new Error(data.error || "No se pudo completar la solicitud.");
+  if (!response.ok) {
+    const error = new Error(data.error || "No se pudo completar la solicitud.");
+    error.status = response.status;
+    throw error;
+  }
   if (data.csrf_token) csrfToken = data.csrf_token;
   return data;
 };
 const loadData = async () => {
   const [complexResponse, ratesResponse] = await Promise.all([
-    fetch(ROOT + "data/complejos.json"),
+    fetch(API + "catalogo.php"),
     fetch(ROOT + "tarifas.json")
   ]);
   if (!complexResponse.ok || !ratesResponse.ok) throw new Error("No se pudo cargar el catálogo o las tarifas.");
-  catalog = await complexResponse.json();
+  const complexData = await complexResponse.json();
+  catalog = complexData.complejos;
   tarifas = await ratesResponse.json();
 };
 const fallbackImage = () => {
@@ -308,10 +313,12 @@ async function renderReserve(id) {
   const updateSummary=()=>{
     const complex=catalog[complexSelect.value];
     const extra=serviceInputs.filter(input=>input.checked).reduce((sum,input)=>sum+Number(input.dataset.price),0);
-    const subtotal=Number(complex.precio)+extra;
+    const price=Number(complex.ofertas?.[typeSelect.value]?.precio??complex.precio);
+    const subtotal=price+extra;
     const discount=coupon.value.trim().toUpperCase()==="UCP10"?Math.round(subtotal*.10):0;
     const total=subtotal-discount,sena=Math.round(total*.20);
     summary.replaceChildren(
+      node("p","Precio por hora: "+pesos(price)),
       node("p","Total estimado: "+pesos(total)),
       node("p","Seña mínima (20%): "+pesos(sena)),
       node("p","Saldo estimado: "+pesos(total-sena))
@@ -326,7 +333,8 @@ async function renderReserve(id) {
     scheduleSelect.replaceChildren();
     try{
       const response=await request("turnos.php?fecha="+encodeURIComponent(dateControl.value));
-      const available=(response.turnos&&response.turnos[complexSelect.value]||[]).filter(slot=>slot.libre);
+      const byType=response.turnos&&response.turnos[complexSelect.value]||{};
+      const available=(byType[typeSelect.value]||[]).filter(slot=>slot.libre);
       if(available.length){
         scheduleSelect.replaceChildren(...available.map(slot=>{const option=node("option",slot.hora);option.value=slot.hora;return option;}));
       }else{
@@ -341,6 +349,7 @@ async function renderReserve(id) {
   };
   complexSelect.addEventListener("change",()=>{fillTypes(complexSelect.value);addServices(complexSelect.value);updateSummary();refreshAvailability();});
   dateControl.addEventListener("change",refreshAvailability);
+  typeSelect.addEventListener("change",()=>{updateSummary();refreshAvailability();});
   servicesWrap.addEventListener("change",updateSummary);
   coupon.addEventListener("input",updateSummary);
   updateSummary();
@@ -374,6 +383,7 @@ function renderAccount() {
     view.appendChild(node("p","Hola, "+currentUser.nombre));
     const actions=node("div",null,"actions");
     actions.append(link("Mis reservas","#mis-reservas","button"));
+    if(currentUser.es_admin)actions.append(link("Administración","#administracion","button secondary"));
     const logout=node("button","Cerrar sesión");
     logout.type="button";
     logout.addEventListener("click",async()=>{
@@ -387,13 +397,21 @@ function renderAccount() {
   login.appendChild(node("h2","Iniciar sesión","panel-heading"));
   login.append(textControl("login-email","Email","email",{name:"email",autocomplete:"username",required:true,maxLength:190}));
   login.append(textControl("login-password","Contraseña","password",{name:"password",autocomplete:"current-password",required:true,minLength:8}));
-  const loginButton=button("Iniciar sesión");login.appendChild(loginButton);
+  const loginButton=button("Iniciar sesión");
+  const loginActions=node("div",null,"login-actions");
+  loginActions.appendChild(loginButton);login.appendChild(loginActions);
   login.addEventListener("submit",async e=>{
     e.preventDefault();loginButton.disabled=true;status.textContent="Validando credenciales…";
     try{
       const result=await request("login.php",{method:"POST",body:{email:login.elements.email.value,password:login.elements.password.value}});
       currentUser=result.usuario;csrfToken=result.csrf_token||csrfToken;announce("Sesión iniciada.");await renderRoute();
-    }catch(error){status.textContent=error.message;loginButton.disabled=false;}
+    }catch(error){
+      const invalidCredentials=error.status===401;
+      const message=invalidCredentials?"El usuario o la contraseña son incorrectos.":error.message;
+      status.textContent=message;status.className="status-inline error";
+      if(invalidCredentials)showToast(message,{inline:true,container:loginActions,duration:1300});
+      loginButton.disabled=false;
+    }
   });
   const register=node("form",null,"panel");
   register.appendChild(node("h2","Crear cuenta","panel-heading"));
@@ -496,6 +514,144 @@ function renderQuote() {
   view.append(form,summary,link("Volver al inicio","#inicio","button secondary"));setPage("Cotizar",view);
 }
 
+async function renderAdmin() {
+  const view=panel("Administración del complejo","Gestioná los tipos de cancha, precios y horarios habituales. Consultá las reservas de los complejos que tenés asignados.");
+  if(!currentUser){
+    view.append(node("p","Iniciá sesión con una cuenta administradora para continuar.","status-inline"),link("Ir a Mi cuenta","#cuenta","button"));
+    setPage("Administración",view);return;
+  }
+  if(!currentUser.es_admin){
+    view.append(node("p","Esta cuenta no tiene permisos de administración.","error"),link("Volver al inicio","#inicio","button secondary"));
+    setPage("Administración",view);return;
+  }
+
+  const status=node("p","Cargando datos de administración…","status-inline");
+  status.setAttribute("role","status");status.setAttribute("aria-live","polite");
+  view.appendChild(status);
+  try{
+    const data=await request("admin.php");
+    if(!data.complejos.length){
+      status.textContent="Tu cuenta todavía no tiene complejos asignados.";
+      view.appendChild(link("Volver al inicio","#inicio","button secondary"));
+      setPage("Administración",view);return;
+    }
+
+    const select=document.createElement("select");select.id="admin-complex";
+    data.complejos.forEach(complex=>{const option=node("option",complex.nombre);option.value=complex.codigo;select.appendChild(option);});
+    view.appendChild(field("Complejo asignado",select));
+
+    const editor=node("form",null,"panel");
+    editor.appendChild(node("h2","Configuración por tipo de cancha","panel-heading"));
+    editor.appendChild(node("p","Marcá los tipos que ofrecés. Cada uno tiene su propio precio y sus propios horarios habituales."));
+    const typeFieldset=node("fieldset");typeFieldset.appendChild(node("legend","Tipos de cancha ofrecidos"));
+    const typeInputs=[];
+    const offerState=new Map();
+    const offerEditors=node("div",null,"admin-offers");
+    const typeLabels={"5":"Fútbol 5","7":"Fútbol 7","11":"Fútbol 11"};
+    const getOfferState=tipo=>{
+      if(!offerState.has(tipo)){
+        const complex=catalog[select.value];
+        const fallback=complex.ofertas?.[tipo]||{precio:complex.precio,horarios:[]};
+        offerState.set(tipo,{precio:String(fallback.precio),horarios:new Set(fallback.horarios||[])});
+      }
+      return offerState.get(tipo);
+    };
+    const drawOfferEditors=()=>{
+      offerEditors.replaceChildren();
+      typeInputs.filter(item=>item.input.checked).forEach(({tipo})=>{
+        const state=getOfferState(tipo);
+        const offer=node("fieldset",null,"admin-offer-edit");
+        offer.appendChild(node("legend",typeLabels[tipo]));
+        const price=textControl("admin-price-"+tipo,"Precio por hora (ARS)","number",{min:"1",max:"10000000",step:"1",required:true});
+        const priceInput=price.querySelector("input");priceInput.value=state.precio;
+        priceInput.addEventListener("input",()=>{state.precio=priceInput.value;});
+        offer.appendChild(price);
+
+        const schedule=node("fieldset");schedule.appendChild(node("legend","Horarios habituales (pasos de 30 minutos)"));
+        const scheduleList=node("ul",null,"admin-schedule clean");
+        const drawTimes=()=>{
+          scheduleList.replaceChildren();
+          [...state.horarios].sort().forEach(time=>{
+            const row=node("li",null,"admin-time-row");row.appendChild(node("span",time));
+            const remove=node("button","Quitar "+time,"button secondary");remove.type="button";
+            remove.addEventListener("click",()=>{state.horarios.delete(time);drawTimes();});
+            row.appendChild(remove);scheduleList.appendChild(row);
+          });
+          if(!state.horarios.size)scheduleList.appendChild(node("li","No hay horarios activos."));
+        };
+        const timeControl=document.createElement("input");timeControl.type="time";timeControl.id="admin-time-"+tipo;timeControl.step="1800";
+        const addTime=node("button","Agregar horario","button secondary");addTime.type="button";
+        addTime.addEventListener("click",()=>{
+          const value=timeControl.value;
+          if(!value||!/(?:00|30)$/.test(value)){status.textContent="Elegí un horario en un intervalo de 30 minutos.";return;}
+          if(!state.horarios.has(value)&&state.horarios.size>=48){status.textContent="Ese tipo ya tiene el máximo de 48 horarios.";return;}
+          state.horarios.add(value);timeControl.value="";status.textContent="Horario agregado a la configuración pendiente.";drawTimes();
+        });
+        const addTimeRow=node("div",null,"actions");addTimeRow.append(field("Nuevo horario",timeControl),addTime);
+        schedule.append(scheduleList,addTimeRow);offer.appendChild(schedule);offerEditors.appendChild(offer);drawTimes();
+      });
+    };
+    [["5","Fútbol 5"],["7","Fútbol 7"],["11","Fútbol 11"]].forEach(([tipo,labelText])=>{
+      const label=node("label",null,"check-row");
+      const input=document.createElement("input");input.type="checkbox";input.value=tipo;
+      input.addEventListener("change",drawOfferEditors);
+      label.append(input,node("span",labelText));typeFieldset.appendChild(label);typeInputs.push({tipo,input});
+    });
+    editor.append(typeFieldset,offerEditors);
+    const save=node("button","Guardar configuración");save.type="submit";editor.appendChild(save);
+    editor.addEventListener("submit",async event=>{
+      event.preventDefault();save.disabled=true;status.textContent="Guardando configuración…";
+      try{
+        const result=await request("admin.php",{method:"PUT",body:{
+          complejo:select.value,
+          ofertas:Object.fromEntries(typeInputs.filter(item=>item.input.checked).map(({tipo})=>{
+            const state=getOfferState(tipo);
+            return [tipo,{precio:state.precio,horarios:[...state.horarios].sort()}];
+          }))
+        }});
+        status.textContent=result.mensaje||"Configuración guardada.";status.className="status-inline success";
+        const response=await request("catalogo.php");catalog=response.complejos;
+        const refreshed=await request("admin.php");data.complejos=refreshed.complejos;data.reservas=refreshed.reservas;
+        populateEditor();drawReservations();
+      }catch(error){status.textContent=error.message;status.className="status-inline error";}
+      finally{save.disabled=false;}
+    });
+    view.appendChild(editor);
+
+    const reservationsSection=node("section",null,"panel");
+    reservationsSection.appendChild(node("h2","Reservas recibidas","panel-heading"));
+    const reservationsList=node("div",null,"admin-reservations");reservationsSection.appendChild(reservationsList);view.appendChild(reservationsSection);
+    const populateEditor=()=>{
+      const complex=data.complejos.find(item=>item.codigo===select.value);
+      if(!complex)return;
+      offerState.clear();
+      Object.entries(complex.ofertas).forEach(([tipo,oferta])=>offerState.set(tipo,{precio:String(oferta.precio),horarios:new Set(oferta.horarios)}));
+      typeInputs.forEach(item=>{item.input.checked=Object.hasOwn(complex.ofertas,item.tipo);});
+      drawOfferEditors();
+    };
+    const drawReservations=()=>{
+      const found=data.reservas.filter(item=>item.complejo===select.value);
+      if(!found.length){reservationsList.replaceChildren(node("p","No hay reservas para este complejo."));return;}
+      const list=node("ul",null,"admin-reservation-list clean");
+      found.forEach(reservation=>{
+        const item=node("li",null,"admin-reservation");
+        item.append(node("h3",reservation.cliente),node("p",reservation.fecha+" · "+reservation.horario+" · Fútbol "+reservation.tipo));
+        item.append(node("p","Teléfono: "+reservation.telefono));
+        item.append(node("p","Total: "+pesos(reservation.total)+" · Seña: "+pesos(reservation.sena)+" · Estado: "+(reservation.estado==="cancelada"?"Cancelada":"Confirmada")));
+        list.appendChild(item);
+      });
+      reservationsList.replaceChildren(list);
+    };
+    select.addEventListener("change",()=>{populateEditor();drawReservations();});
+    populateEditor();drawReservations();
+    view.appendChild(link("Volver al inicio","#inicio","button secondary"));
+  }catch(error){
+    status.textContent=error.message;status.className="status-inline error";
+    view.appendChild(link("Volver al inicio","#inicio","button secondary"));
+  }
+  setPage("Administración",view);
+}
+
 async function renderRoute() {
   app.setAttribute("aria-busy","true");
   const [route, query = ""] = location.hash.replace(/^#/, "").split("?");
@@ -506,6 +662,7 @@ async function renderRoute() {
     else if(route==="cuenta") renderAccount();
     else if(route==="mis-reservas") await renderMyReservations();
     else if(route==="cotizar") renderQuote();
+    else if(route==="administracion") await renderAdmin();
     else renderHome();
     main.focus({preventScroll:true});
   } catch(error) {

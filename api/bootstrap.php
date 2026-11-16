@@ -5,6 +5,7 @@ require_once __DIR__ . '/../models/DomainError.php';
 require_once __DIR__ . '/../models/CatalogoModel.php';
 require_once __DIR__ . '/../models/UsuarioModel.php';
 require_once __DIR__ . '/../models/ReservaModel.php';
+require_once __DIR__ . '/../models/AdminModel.php';
 require_once __DIR__ . '/../models/RecuperacionModel.php';
 
 header('Content-Type: application/json; charset=utf-8');
@@ -24,6 +25,7 @@ function responderErrorDominio(DomainError $error): void {
     $estados = [
         'bad_request' => 400,
         'unauthorized' => 401,
+        'forbidden' => 403,
         'conflict' => 409,
         'invalid_input' => 422,
     ];
@@ -138,5 +140,14 @@ function exigirUsuario(): array {
     }
     unset($usuario['version_sesion']);
     $usuario['id'] = (int) $usuario['id'];
+    $usuario['es_admin'] = (new AdminModel(db()))->esAdministrador((int) $usuario['id']);
+    return $usuario;
+}
+
+function exigirAdministrador(): array {
+    $usuario = exigirUsuario();
+    if (!$usuario['es_admin']) {
+        responder(403, ['error' => 'No tenés permisos para acceder al panel de administración.']);
+    }
     return $usuario;
 }
