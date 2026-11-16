@@ -121,7 +121,11 @@ const request = async (path, options = {}) => {
   let data;
   try { data = await response.json(); }
   catch { throw new Error("El servidor devolvió una respuesta que no es JSON."); }
-  if (!response.ok) throw new Error(data.error || "No se pudo completar la solicitud.");
+  if (!response.ok) {
+    const error = new Error(data.error || "No se pudo completar la solicitud.");
+    error.status = response.status;
+    throw error;
+  }
   if (data.csrf_token) csrfToken = data.csrf_token;
   return data;
 };
@@ -400,7 +404,7 @@ function renderAccount() {
       const result=await request("login.php",{method:"POST",body:{email:login.elements.email.value,password:login.elements.password.value}});
       currentUser=result.usuario;csrfToken=result.csrf_token||csrfToken;announce("Sesión iniciada.");await renderRoute();
     }catch(error){
-      const invalidCredentials=error.message==="Email o contraseña incorrectos.";
+      const invalidCredentials=error.status===401;
       const message=invalidCredentials?"El usuario o la contraseña son incorrectos.":error.message;
       status.textContent=message;status.className="status-inline error";
       if(invalidCredentials)showToast(message);
