@@ -102,7 +102,7 @@ python tests/api_smoke.py http://localhost/canchaYaFrontend
 
 El contrato de la API está en `docs/API.md` y las instrucciones de recuperación de cuenta en `docs/RECUPERACION.md`. Los informes académicos y evidencias se organizan en formato PDF dentro de `docs/`: AE1, las tres opciones documentadas de AE2 y el informe técnico AE4.
 
-El usuario informó 100/100 en Accesibilidad para las cinco vistas del recorrido previo. Se conservan las capturas existentes; el panel de administración y los nuevos controles de oferta por tipo deben auditarse manualmente con Lighthouse. `tests/api_smoke.py` no se reporta como ejecutado en esta entrega. Las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
+El usuario informa 100/100 en Accesibilidad para las cinco vistas del recorrido previo y para el panel de administración tras completar su recorrido. Se conservan las capturas existentes; no se incorporaron capturas nuevas. `tests/api_smoke.py` no se reporta como ejecutado en esta entrega. Las mediciones de rendimiento y la compatibilidad entre navegadores deben registrarse por separado.
 
 La versión actual cubre el flujo principal del jugador; no debe presentarse como implementación de todos los casos de uso de AE1. Para desplegar fuera de localhost, se requieren HTTPS, credenciales MySQL con permisos mínimos y controles de abuso como limitación de intentos de autenticación.
 
