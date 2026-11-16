@@ -535,7 +535,7 @@ async function renderAdmin() {
     });
     editor.appendChild(typeFieldset);
 
-    const price=textControl("admin-price","Precio por hora (ARS)","number",{min:"1",max:"10000000",step:"0.01",required:true,inputmode:"decimal"});
+    const price=textControl("admin-price","Precio por hora (ARS)","number",{min:"1",max:"10000000",step:"1",required:true});
     editor.appendChild(price);
     const schedule=node("fieldset");schedule.appendChild(node("legend","Horarios habituales (pasos de 30 minutos)"));
     const scheduleList=node("ul",null,"admin-schedule clean");

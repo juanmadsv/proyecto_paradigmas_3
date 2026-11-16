@@ -90,8 +90,8 @@ final class AdminModel {
             throw new DomainError('bad_request', 'Ingresá un precio por hora válido.');
         }
         $precio = (string) $precio;
-        if (!preg_match('/^[0-9]{1,8}(?:\.[0-9]{1,2})?$/D', $precio) || (float) $precio < 1 || (float) $precio > 10000000) {
-            throw new DomainError('bad_request', 'El precio debe estar entre $1 y $10.000.000.');
+        if (!preg_match('/^[0-9]{1,8}$/D', $precio) || (int) $precio < 1 || (int) $precio > 10000000) {
+            throw new DomainError('bad_request', 'El precio debe ser un importe entero entre $1 y $10.000.000.');
         }
 
         $horarios = $datos['horarios'] ?? null;
@@ -115,7 +115,7 @@ final class AdminModel {
         $consulta->execute([
             'codigo' => $codigo,
             'tipos' => implode(' ', $tipos),
-            'precio' => number_format((float) $precio, 2, '.', ''),
+            'precio' => number_format((int) $precio, 2, '.', ''),
             'horarios_json' => json_encode($horarios, JSON_THROW_ON_ERROR),
             'actualizado_por' => $usuarioId,
         ]);
