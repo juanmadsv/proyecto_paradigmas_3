@@ -36,11 +36,11 @@ const announce = (message, error = false) => {
   globalStatus.textContent = message;
   globalStatus.dataset.error = String(error);
 };
-const showToast = message => {
-  const toast = node("div", message, "toast");
+const showToast = (message, options = {}) => {
+  const toast = node("div", message, options.inline ? "toast toast-inline" : "toast");
   toast.setAttribute("aria-hidden", "true");
-  document.body.appendChild(toast);
-  window.setTimeout(() => toast.remove(), 700);
+  (options.container || document.body).appendChild(toast);
+  window.setTimeout(() => toast.remove(), options.duration || 700);
 };
 const setPage = (title, content) => {
   document.title = title + " · CanchaYa";
@@ -397,7 +397,9 @@ function renderAccount() {
   login.appendChild(node("h2","Iniciar sesión","panel-heading"));
   login.append(textControl("login-email","Email","email",{name:"email",autocomplete:"username",required:true,maxLength:190}));
   login.append(textControl("login-password","Contraseña","password",{name:"password",autocomplete:"current-password",required:true,minLength:8}));
-  const loginButton=button("Iniciar sesión");login.appendChild(loginButton);
+  const loginButton=button("Iniciar sesión");
+  const loginActions=node("div",null,"login-actions");
+  loginActions.appendChild(loginButton);login.appendChild(loginActions);
   login.addEventListener("submit",async e=>{
     e.preventDefault();loginButton.disabled=true;status.textContent="Validando credenciales…";
     try{
@@ -407,7 +409,7 @@ function renderAccount() {
       const invalidCredentials=error.status===401;
       const message=invalidCredentials?"El usuario o la contraseña son incorrectos.":error.message;
       status.textContent=message;status.className="status-inline error";
-      if(invalidCredentials)showToast(message);
+      if(invalidCredentials)showToast(message,{inline:true,container:loginActions,duration:1300});
       loginButton.disabled=false;
     }
   });
