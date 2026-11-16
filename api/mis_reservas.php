@@ -27,7 +27,7 @@ try {
 
     exigirCSRF();
     $datos = cuerpoJSON();
-    $catalogo = new CatalogoModel();
+    $catalogo = new CatalogoModel(null, db());
     $reserva = (new ReservaModel(db()))->crearDesdeSolicitud(
         (int) $usuario['id'],
         $datos,

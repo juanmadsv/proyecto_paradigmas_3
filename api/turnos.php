@@ -6,7 +6,7 @@ $fecha = isset($_GET['fecha']) && is_string($_GET['fecha']) ? $_GET['fecha'] : d
 try {
     $disponibilidad = (new ReservaModel(db()))->consultarDisponibilidad(
         $fecha,
-        (new CatalogoModel())->turnos()
+        (new CatalogoModel(null, db()))->turnos()
     );
 } catch (DomainError $error) {
     responderErrorDominio($error);

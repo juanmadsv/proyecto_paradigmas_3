@@ -127,11 +127,12 @@ const request = async (path, options = {}) => {
 };
 const loadData = async () => {
   const [complexResponse, ratesResponse] = await Promise.all([
-    fetch(ROOT + "data/complejos.json"),
+    fetch(API + "catalogo.php"),
     fetch(ROOT + "tarifas.json")
   ]);
   if (!complexResponse.ok || !ratesResponse.ok) throw new Error("No se pudo cargar el catálogo o las tarifas.");
-  catalog = await complexResponse.json();
+  const complexData = await complexResponse.json();
+  catalog = complexData.complejos;
   tarifas = await ratesResponse.json();
 };
 const fallbackImage = () => {
@@ -374,6 +375,7 @@ function renderAccount() {
     view.appendChild(node("p","Hola, "+currentUser.nombre));
     const actions=node("div",null,"actions");
     actions.append(link("Mis reservas","#mis-reservas","button"));
+    if(currentUser.es_admin)actions.append(link("Administración","#administracion","button secondary"));
     const logout=node("button","Cerrar sesión");
     logout.type="button";
     logout.addEventListener("click",async()=>{
@@ -496,6 +498,120 @@ function renderQuote() {
   view.append(form,summary,link("Volver al inicio","#inicio","button secondary"));setPage("Cotizar",view);
 }
 
+async function renderAdmin() {
+  const view=panel("Administración del complejo","Gestioná los tipos de cancha, precios y horarios habituales. Consultá las reservas de los complejos que tenés asignados.");
+  if(!currentUser){
+    view.append(node("p","Iniciá sesión con una cuenta administradora para continuar.","status-inline"),link("Ir a Mi cuenta","#cuenta","button"));
+    setPage("Administración",view);return;
+  }
+  if(!currentUser.es_admin){
+    view.append(node("p","Esta cuenta no tiene permisos de administración.","error"),link("Volver al inicio","#inicio","button secondary"));
+    setPage("Administración",view);return;
+  }
+
+  const status=node("p","Cargando datos de administración…","status-inline");
+  status.setAttribute("role","status");status.setAttribute("aria-live","polite");
+  view.appendChild(status);
+  try{
+    const data=await request("admin.php");
+    if(!data.complejos.length){
+      status.textContent="Tu cuenta todavía no tiene complejos asignados.";
+      view.appendChild(link("Volver al inicio","#inicio","button secondary"));
+      setPage("Administración",view);return;
+    }
+
+    const select=document.createElement("select");select.id="admin-complex";
+    data.complejos.forEach(complex=>{const option=node("option",complex.nombre);option.value=complex.codigo;select.appendChild(option);});
+    view.appendChild(field("Complejo asignado",select));
+
+    const editor=node("form",null,"panel");
+    editor.appendChild(node("h2","Canchas, precio y horarios","panel-heading"));
+    const typeFieldset=node("fieldset");typeFieldset.appendChild(node("legend","Tipos de cancha disponibles"));
+    const typeInputs=[];
+    [["5","Fútbol 5"],["7","Fútbol 7"],["11","Fútbol 11"]].forEach(([value,labelText])=>{
+      const label=node("label",null,"check-row");
+      const input=document.createElement("input");input.type="checkbox";input.value=value;
+      label.append(input,node("span",labelText));typeFieldset.appendChild(label);typeInputs.push(input);
+    });
+    editor.appendChild(typeFieldset);
+
+    const price=textControl("admin-price","Precio por hora (ARS)","number",{min:"1",max:"10000000",step:"0.01",required:true,inputmode:"decimal"});
+    editor.appendChild(price);
+    const schedule=node("fieldset");schedule.appendChild(node("legend","Horarios habituales (pasos de 30 minutos)"));
+    const scheduleList=node("ul",null,"admin-schedule clean");
+    const timeControl=document.createElement("input");timeControl.type="time";timeControl.id="admin-new-time";timeControl.step="1800";
+    const addTime=node("button","Agregar horario","button secondary");addTime.type="button";
+    const addTimeRow=node("div",null,"actions");addTimeRow.append(field("Nuevo horario",timeControl),addTime);
+    const times=new Set();
+    const drawTimes=()=>{
+      scheduleList.replaceChildren();
+      [...times].sort().forEach(time=>{
+        const row=node("li",null,"admin-time-row");
+        row.appendChild(node("span",time));
+        const remove=node("button","Quitar "+time,"button secondary");remove.type="button";
+        remove.addEventListener("click",()=>{times.delete(time);drawTimes();});
+        row.appendChild(remove);scheduleList.appendChild(row);
+      });
+      if(!times.size)scheduleList.appendChild(node("li","No hay horarios activos."));
+    };
+    addTime.addEventListener("click",()=>{
+      const value=timeControl.value;
+      if(!value||!/(?:00|30)$/.test(value)){status.textContent="Elegí un horario en un intervalo de 30 minutos.";return;}
+      times.add(value);timeControl.value="";status.textContent="Horario agregado a la configuración pendiente.";drawTimes();
+    });
+    schedule.append(scheduleList,addTimeRow);editor.appendChild(schedule);
+    const save=node("button","Guardar configuración");save.type="submit";editor.appendChild(save);
+    editor.addEventListener("submit",async event=>{
+      event.preventDefault();save.disabled=true;status.textContent="Guardando configuración…";
+      try{
+        const result=await request("admin.php",{method:"PUT",body:{
+          complejo:select.value,
+          tipos:typeInputs.filter(input=>input.checked).map(input=>input.value),
+          precio:price.querySelector("input").value,
+          horarios:[...times].sort()
+        }});
+        status.textContent=result.mensaje||"Configuración guardada.";status.className="status-inline success";
+        const response=await request("catalogo.php");catalog=response.complejos;
+        const refreshed=await request("admin.php");data.complejos=refreshed.complejos;data.reservas=refreshed.reservas;
+        populateEditor();drawReservations();
+      }catch(error){status.textContent=error.message;status.className="status-inline error";}
+      finally{save.disabled=false;}
+    });
+    view.appendChild(editor);
+
+    const reservationsSection=node("section",null,"panel");
+    reservationsSection.appendChild(node("h2","Reservas recibidas","panel-heading"));
+    const reservationsList=node("div",null,"admin-reservations");reservationsSection.appendChild(reservationsList);view.appendChild(reservationsSection);
+    const populateEditor=()=>{
+      const complex=data.complejos.find(item=>item.codigo===select.value);
+      if(!complex)return;
+      typeInputs.forEach(input=>{input.checked=complex.tipos.includes(input.value);});
+      price.querySelector("input").value=String(complex.precio);
+      times.clear();complex.horarios.forEach(time=>times.add(time));drawTimes();
+    };
+    const drawReservations=()=>{
+      const found=data.reservas.filter(item=>item.complejo===select.value);
+      if(!found.length){reservationsList.replaceChildren(node("p","No hay reservas para este complejo."));return;}
+      const list=node("ul",null,"admin-reservation-list clean");
+      found.forEach(reservation=>{
+        const item=node("li",null,"admin-reservation");
+        item.append(node("h3",reservation.cliente),node("p",reservation.fecha+" · "+reservation.horario+" · Fútbol "+reservation.tipo));
+        item.append(node("p","Teléfono: "+reservation.telefono));
+        item.append(node("p","Total: "+pesos(reservation.total)+" · Seña: "+pesos(reservation.sena)+" · Estado: "+(reservation.estado==="cancelada"?"Cancelada":"Confirmada")));
+        list.appendChild(item);
+      });
+      reservationsList.replaceChildren(list);
+    };
+    select.addEventListener("change",()=>{populateEditor();drawReservations();});
+    populateEditor();drawReservations();
+    view.appendChild(link("Volver al inicio","#inicio","button secondary"));
+  }catch(error){
+    status.textContent=error.message;status.className="status-inline error";
+    view.appendChild(link("Volver al inicio","#inicio","button secondary"));
+  }
+  setPage("Administración",view);
+}
+
 async function renderRoute() {
   app.setAttribute("aria-busy","true");
   const [route, query = ""] = location.hash.replace(/^#/, "").split("?");
@@ -506,6 +622,7 @@ async function renderRoute() {
     else if(route==="cuenta") renderAccount();
     else if(route==="mis-reservas") await renderMyReservations();
     else if(route==="cotizar") renderQuote();
+    else if(route==="administracion") await renderAdmin();
     else renderHome();
     main.focus({preventScroll:true});
   } catch(error) {
