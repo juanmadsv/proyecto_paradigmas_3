@@ -6,7 +6,7 @@ $fecha = isset($_GET['fecha']) && is_string($_GET['fecha']) ? $_GET['fecha'] : d
 try {
     $disponibilidad = (new ReservaModel(db()))->consultarDisponibilidad(
         $fecha,
-        datosDominio('turnos.json')
+        (new CatalogoModel())->turnos()
     );
 } catch (DomainError $error) {
     responderErrorDominio($error);

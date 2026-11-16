@@ -27,11 +27,12 @@ try {
 
     exigirCSRF();
     $datos = cuerpoJSON();
+    $catalogo = new CatalogoModel();
     $reserva = (new ReservaModel(db()))->crearDesdeSolicitud(
         (int) $usuario['id'],
         $datos,
-        datosDominio('complejos.json'),
-        datosDominio('turnos.json')
+        $catalogo->complejos(),
+        $catalogo->turnos()
     );
     responder(201, ['mensaje' => 'Reserva guardada.', 'reserva' => $reserva]);
 } catch (DomainError $error) {

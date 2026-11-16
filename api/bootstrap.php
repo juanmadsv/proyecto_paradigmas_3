@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../models/DomainError.php';
+require_once __DIR__ . '/../models/CatalogoModel.php';
 require_once __DIR__ . '/../models/UsuarioModel.php';
 require_once __DIR__ . '/../models/ReservaModel.php';
 require_once __DIR__ . '/../models/RecuperacionModel.php';
@@ -138,8 +139,4 @@ function exigirUsuario(): array {
     unset($usuario['version_sesion']);
     $usuario['id'] = (int) $usuario['id'];
     return $usuario;
-}
-
-function datosDominio(string $archivo): array {
-    return json_decode(file_get_contents(__DIR__ . '/../data/' . $archivo), true, 512, JSON_THROW_ON_ERROR);
 }
