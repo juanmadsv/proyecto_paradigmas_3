@@ -47,6 +47,12 @@ main { width: min(1160px, calc(100% - 2rem)); margin: 1.5rem auto 3rem; min-heig
   border-radius: .7rem; color: #fff; background: var(--green-dark);
   box-shadow: 0 8px 24px rgb(16 37 26 / 24%); font-weight: 700;
 }
+.login-actions { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+.toast-inline {
+  position: static; width: auto; max-width: 100%; padding: .65rem .8rem;
+  color: #7b1e26; background: #fff0f1; border: 1px solid #c84b56;
+  box-shadow: none; font-weight: 700;
+}
 .hero { padding: clamp(1.5rem, 5vw, 4rem); background: #0d2b1b; color: #fff; border-radius: 1.2rem; }
 .hero p { max-width: 65ch; }
 .hero h1 { max-width: 18ch; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.08; margin: .4rem 0 1rem; }
