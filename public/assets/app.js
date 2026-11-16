@@ -377,7 +377,7 @@ function renderAccount() {
       try{await request("logout.php",{method:"POST",body:{}});currentUser=null;announce("Sesión cerrada.");await renderRoute();}
       catch(error){announce(error.message,true);}
     });
-    actions.appendChild(logout);view.appendChild(actions);setPage("Mi cuenta",view);return;
+    actions.appendChild(logout);actions.appendChild(link("Volver al inicio","#inicio","button secondary"));view.appendChild(actions);setPage("Mi cuenta",view);return;
   }
   const status=node("p","", "status-inline");status.setAttribute("role","status");status.setAttribute("aria-live","polite");
   const login=node("form",null,"panel");
@@ -409,15 +409,18 @@ function renderAccount() {
     }catch(error){status.textContent=error.message;status.className="status-inline error";}
     finally{registerButton.disabled=false;}
   });
-  view.append(login,register,status);
+  const homeAction=node("div",null,"actions");
+  homeAction.appendChild(link("Volver al inicio","#inicio","button secondary"));
+  view.append(login,register,status,homeAction);
   setPage("Mi cuenta",view);
 }
 
 async function renderMyReservations() {
   const view = panel("Mis reservas", "Consultá y cancelá tus reservas con al menos 24 horas de anticipación.");
-  if(!currentUser){view.append(node("p","Iniciá sesión para ver tus reservas.","status-inline"),link("Ir a Mi cuenta","#cuenta","button"));setPage("Mis reservas",view);return;}
+  if(!currentUser){const guestActions=node("div",null,"actions");guestActions.append(link("Ir a Mi cuenta","#cuenta","button"),link("Volver al inicio","#inicio","button secondary"));view.append(node("p","Iniciá sesión para ver tus reservas.","status-inline"),guestActions);setPage("Mis reservas",view);return;}
   const reserveAction=node("div",null,"actions");
   reserveAction.appendChild(link("Realizar una reserva","#reservar","button"));
+  reserveAction.appendChild(link("Volver al inicio","#inicio","button secondary"));
   view.appendChild(reserveAction);
   try{
     const data=await request("mis_reservas.php");
@@ -487,7 +490,7 @@ function renderQuote() {
     summary.replaceChildren(...details);
   };
   form.addEventListener("change",calculate);calculate();
-  view.append(form,summary);setPage("Cotizar",view);
+  view.append(form,summary,link("Volver al inicio","#inicio","button secondary"));setPage("Cotizar",view);
 }
 
 async function renderRoute() {
