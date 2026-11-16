@@ -11,7 +11,7 @@ Los scripts de `api/` funcionan como controladores: validan el método y el form
 | Ruta y método | Entrada | Respuesta correcta | Errores principales |
 | --- | --- | --- | --- |
 | `GET csrf.php` | Ninguna | 200: `{ "csrf_token": "..." }` | 405 método no permitido; 500 error del servidor |
-| `POST registro.php` | `nombre`, `email`, `password` | 201: cuenta creada | 400 datos inválidos/JSON inválido; 403 CSRF; 409 email existente; 413 cuerpo mayor a 16 KB; 415 tipo de contenido; 500 error genérico |
+| `POST registro.php` | `nombre`, `email`, `password` | 201: cuenta creada | 400 JSON inválido; 403 CSRF; 409 email existente; 413 cuerpo mayor a 16 KB; 415 tipo de contenido; 422 campos inválidos; 500 error genérico |
 | `POST login.php` | `email`, `password` | 200: `usuario` y nuevo `csrf_token` | 401 credenciales inválidas; 403 CSRF; 400 JSON inválido; 413 cuerpo demasiado grande; 415 tipo de contenido; 500 error genérico |
 | `POST logout.php` | Objeto JSON vacío | 200: sesión cerrada | 403 CSRF; 405 método; 415 contenido; 500 error genérico |
 | `GET turnos.php?fecha=YYYY-MM-DD` | Fecha opcional; predeterminada hoy | 200: turnos por complejo y tipo (`turnos[codigo][tipo][]`), con marca `libre`; excluye reservas tomadas y horarios pasados | 400 fecha inválida o fuera de hoy–90 días; 405 método; 500 error genérico |
