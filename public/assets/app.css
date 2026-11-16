@@ -52,7 +52,12 @@ main { width: min(1160px, calc(100% - 2rem)); margin: 1.5rem auto 3rem; min-heig
 .hero h1 { max-width: 18ch; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.08; margin: .4rem 0 1rem; }
 .hero .accent { color: var(--lime); }
 .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.2rem; }
-.button.secondary { background: transparent; border: 2px solid #d9f2df; }
+.button.secondary {
+  color: var(--green-dark); background: var(--surface); border: 2px solid var(--green-dark);
+}
+.button.secondary:hover {
+  color: #fff; background: var(--green-dark); border-color: var(--green-dark);
+}
 .panel { margin: 1.25rem 0; padding: clamp(1rem, 3vw, 1.6rem); background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; }
 .panel h1, .panel h2 { line-height: 1.2; }
 .panel-heading { margin: 0 0 .3rem; font-size: clamp(1.45rem, 3vw, 2rem); }
